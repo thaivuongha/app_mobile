@@ -1,59 +1,109 @@
 import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useCartStore } from '@/src/stores/cartStore';
+import { Colors } from '@/constants/Colors';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+function BadgeDot({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>{count > 99 ? '99+' : String(count)}</Text>
+    </View>
+  );
+}
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+function ShopIcon({ color, focused }: { color: string; focused: boolean }) {
+  const cartCount = useCartStore((s) =>
+    s.items.reduce((sum, i) => sum + i.quantity, 0)
+  );
+  return (
+    <View>
+      <Ionicons
+        name={focused ? 'storefront' : 'storefront-outline'}
+        size={24}
+        color={color}
+      />
+      <BadgeDot count={cartCount} />
+    </View>
+  );
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerShown: false,
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarStyle: {
+          backgroundColor: Colors.card,
+          borderTopColor: Colors.border,
+          borderTopWidth: 1,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 4,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          title: 'Home',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="shop"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Shop',
+          tabBarIcon: ({ color, focused }) => (
+            <ShopIcon color={color} focused={focused} />
+          ),
         }}
       />
+      <Tabs.Screen
+        name="sales"
+        options={{
+          title: 'Doanh thu',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="account"
+        options={{
+          title: 'Me',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      {/* Hidden routes — vẫn navigable nhưng không hiện trên tab bar */}
+      <Tabs.Screen name="devices" options={{ href: null }} />
+      <Tabs.Screen name="orders" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    position: 'absolute',
+    right: -8,
+    top: -4,
+    backgroundColor: Colors.danger,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+});
