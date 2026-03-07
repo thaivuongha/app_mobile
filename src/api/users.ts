@@ -50,3 +50,26 @@ export function updateMyProfile(body: {
     body,
   });
 }
+
+// ─── Owner Unlock PIN ─────────────────────────────────────────────────────────
+
+export interface UnlockPinStatus {
+  isSet: boolean;
+}
+
+export function getUnlockPinStatus(): Promise<UnlockPinStatus> {
+  return apiRequest<UnlockPinStatus>('/api/v1/users/me/unlock-pin');
+}
+
+export function setUnlockPin(pin: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/api/v1/users/me/unlock-pin', {
+    method: 'PUT',
+    body: { pin },
+  });
+}
+
+export function removeUnlockPin(): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/api/v1/users/me/unlock-pin', {
+    method: 'DELETE',
+  });
+}

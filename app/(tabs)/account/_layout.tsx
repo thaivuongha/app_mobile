@@ -16,6 +16,7 @@ export default function MeLayout() {
       <Stack.Screen name="change-password" options={{ title: 'Đổi mật khẩu' }} />
       <Stack.Screen name="edit-profile" options={{ title: 'Chỉnh sửa hồ sơ' }} />
       <Stack.Screen name="devices" options={{ title: 'Danh sách thiết bị' }} />
+      <Stack.Screen name="unlock-pin" options={{ title: 'PIN mở khóa' }} />
     </Stack>
   );
 }

@@ -170,6 +170,12 @@ export default function MeScreen() {
             sublabel="Xem và xóa máy vending"
             onPress={() => router.push('/(tabs)/account/devices')}
           />
+          <MenuItem
+            icon="keypad-outline"
+            label="PIN mở khóa"
+            sublabel="Cài đặt PIN 6 số để mở khóa không thanh toán"
+            onPress={() => router.push('/(tabs)/account/unlock-pin')}
+          />
         </MenuSection>
 
         {/* Hỗ trợ */}
