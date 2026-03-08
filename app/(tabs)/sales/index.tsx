@@ -10,7 +10,6 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { getMyDevices } from '@/src/api/devices';
@@ -26,24 +25,6 @@ const GROUP_OPTIONS: { key: GroupBy; label: string }[] = [
   { key: 'week', label: 'Tuần' },
   { key: 'month', label: 'Tháng' },
   { key: 'year', label: 'Năm' },
-];
-
-const SETTINGS_ITEMS = [
-  {
-    icon: 'card-outline' as const,
-    label: 'Thông tin thanh toán',
-    href: '/(tabs)/settings/payment-methods' as const,
-  },
-  {
-    icon: 'document-text-outline' as const,
-    label: 'Xuất hóa đơn',
-    href: '/(tabs)/settings/invoice' as const,
-  },
-  {
-    icon: 'trending-up-outline' as const,
-    label: 'Phần trăm lợi nhuận',
-    href: '/(tabs)/settings/commission' as const,
-  },
 ];
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -263,11 +244,9 @@ function HistoryTab({ deviceId }: { deviceId: string | undefined }) {
 
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function SalesScreen() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveTab>('summary');
   const [groupBy, setGroupBy] = useState<GroupBy>('month');
   const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
-  const [showSettings, setShowSettings] = useState(false);
 
   const devicesQuery = useQuery({
     queryKey: ['my-devices'],
@@ -281,38 +260,8 @@ export default function SalesScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Doanh thu</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.settingsBtn}
-          onPress={() => setShowSettings((v) => !v)}
-        >
-          <Ionicons name="settings-outline" size={22} color={Colors.textSecondary} />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Doanh thu</Text>
       </View>
-
-      {/* Settings panel */}
-      {showSettings && (
-        <View style={styles.settingsPanel}>
-          {SETTINGS_ITEMS.map((item) => (
-            <TouchableOpacity
-              key={item.href}
-              style={styles.settingsRow}
-              onPress={() => {
-                setShowSettings(false);
-                router.push(item.href);
-              }}
-            >
-              <View style={styles.settingsIconBox}>
-                <Ionicons name={item.icon} size={18} color={Colors.primary} />
-              </View>
-              <Text style={styles.settingsRowText}>{item.label}</Text>
-              <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
 
       {/* Device filter */}
       <ScrollView
@@ -391,53 +340,11 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 8,
   },
   headerTitle: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
-  settingsBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Settings panel
-  settingsPanel: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    backgroundColor: Colors.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: 'hidden',
-  },
-  settingsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    gap: 12,
-  },
-  settingsIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  settingsRowText: { flex: 1, fontSize: 14, color: Colors.textPrimary, fontWeight: '500' },
 
   // Device filter
   deviceFilter: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },

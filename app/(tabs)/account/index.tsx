@@ -162,19 +162,31 @@ export default function MeScreen() {
           />
         </MenuSection>
 
-        {/* Đơn hàng */}
-        <MenuSection title="Mua sắm">
-          <MenuItem
-            icon="bag-outline"
-            label="Đơn hàng của tôi"
-            sublabel="Xem lịch sử và trạng thái đơn hàng"
-            onPress={() => router.push('/(tabs)/orders')}
-          />
+        {/* Cài đặt */}
+        <MenuSection title="Cài đặt">
           <MenuItem
             icon="location-outline"
             label="Địa chỉ giao hàng"
             sublabel="Quản lý địa chỉ nhận hàng"
-            onPress={() => router.push('/(tabs)/settings/delivery-address-form')}
+            onPress={() => router.push({ pathname: '/(tabs)/account/delivery-addresses', params: { from: 'account' } })}
+          />
+          <MenuItem
+            icon="card-outline"
+            label="Thông tin thanh toán"
+            sublabel="Tài khoản ngân hàng nhận tiền VietQR"
+            onPress={() => router.push({ pathname: '/(tabs)/account/payment-methods', params: { from: 'account' } })}
+          />
+          <MenuItem
+            icon="document-text-outline"
+            label="Cài đặt hóa đơn"
+            sublabel="Thông tin xuất hóa đơn VAT"
+            onPress={() => router.push('/(tabs)/account/invoice')}
+          />
+          <MenuItem
+            icon="trending-up-outline"
+            label="Lợi nhuận"
+            sublabel="Tỷ lệ phần trăm lợi nhuận mỗi giao dịch"
+            onPress={() => router.push('/(tabs)/account/commission')}
           />
         </MenuSection>
 

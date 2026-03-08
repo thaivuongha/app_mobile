@@ -1,12 +1,10 @@
 /**
  * EMBOX Brand Colors — Mobile App
  *
- * Đồng bộ với Web (web/app/globals.css + Tailwind):
- *   Primary  : purple-600  (#9333EA)
- *   Accent   : red-500     (#EF4444)
- *   Gradient : from-purple-600 to-red-500
- *
- * Logo EMBOX: gradient bg from #9333EA → #EF4444, chữ "E" trắng.
+ * Primary  : purple-600  (#9333EA)
+ * Orange   : orange-500  (#F97316) — highlight, giá, icon
+ * Accent   : red-500     (#EF4444) — danger, cancel
+ * Gradient : from-purple-600 via-orange-500 to-red-500
  */
 
 // ─── Brand palette ────────────────────────────────────────────────────────────
@@ -20,11 +18,17 @@ export const BRAND_PRIMARY_DARK = '#7E22CE';
 /** purple-50 — nền sáng, badge nhẹ */
 export const BRAND_PRIMARY_LIGHT = '#FAF5FF';
 
-/** red-500 — accent, gradient end, nguy hiểm / nổi bật */
+/** red-500 — accent, danger */
 export const BRAND_ACCENT = '#EF4444';
 
 /** red-50 — nền accent nhẹ */
 export const BRAND_ACCENT_LIGHT = '#FEF2F2';
+
+/** orange-500 — "đỏ cam", gradient mid, highlight nổi bật */
+export const BRAND_ORANGE = '#F97316';
+
+/** orange-50 — nền orange nhẹ */
+export const BRAND_ORANGE_LIGHT = '#FFF7ED';
 
 // ─── Semantic colors ──────────────────────────────────────────────────────────
 export const Colors = {
@@ -35,9 +39,14 @@ export const Colors = {
   accent: BRAND_ACCENT,
   accentLight: BRAND_ACCENT_LIGHT,
 
-  // Gradient (dùng cho LinearGradient nếu cần)
-  gradientStart: BRAND_PRIMARY,   // #9333EA
-  gradientEnd: BRAND_ACCENT,      // #EF4444
+  // Gradient purple → orange → red
+  gradientStart: BRAND_PRIMARY,   // #9333EA purple
+  gradientMid: BRAND_ORANGE,      // #F97316 orange
+  gradientEnd: BRAND_ACCENT,      // #EF4444 red
+
+  // Orange "đỏ cam"
+  orange: BRAND_ORANGE,
+  orangeLight: BRAND_ORANGE_LIGHT,
 
   // Backgrounds
   background: '#F9FAFB',   // gray-50

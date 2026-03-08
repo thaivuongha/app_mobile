@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   StyleSheet,
   View,
@@ -161,6 +161,10 @@ function EmptyState({ onSetup }: { onSetup: () => void }) {
 export default function PaymentMethodsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const formPath = from === 'account'
+    ? '/(tabs)/account/payment-method-form'
+    : '/(tabs)/settings/payment-method-form';
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['payment-methods'],
@@ -185,7 +189,7 @@ export default function PaymentMethodsScreen() {
   const handleEdit = () => {
     if (!method) return;
     router.push({
-      pathname: '/(tabs)/settings/payment-method-form',
+      pathname: formPath as any,
       params: {
         id: method.id,
         bankName: method.bankName,
@@ -198,7 +202,7 @@ export default function PaymentMethodsScreen() {
   };
 
   const handleSetup = () => {
-    router.push('/(tabs)/settings/payment-method-form');
+    router.push(formPath as any);
   };
 
   const handleDelete = () => {
