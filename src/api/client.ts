@@ -3,6 +3,7 @@ import {
   getAccessToken,
   getRefreshToken,
   setAccessToken,
+  setTokens,
   clearTokens,
 } from './tokenStorage';
 
@@ -47,8 +48,13 @@ async function refreshAccessToken(): Promise<string | null> {
     onSessionExpired?.();
     return null;
   }
-  const data = (await res.json()) as { accessToken: string };
-  await setAccessToken(data.accessToken);
+  const data = (await res.json()) as { accessToken: string; refreshToken?: string };
+  // Lưu cả refreshToken mới (rotating refresh token — nếu không lưu, lần refresh tiếp theo sẽ thất bại)
+  if (data.refreshToken) {
+    await setTokens(data.accessToken, data.refreshToken);
+  } else {
+    await setAccessToken(data.accessToken);
+  }
   return data.accessToken;
 }
 
