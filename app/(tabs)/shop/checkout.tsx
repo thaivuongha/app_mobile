@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   StatusBar,
   Switch,
+  Image,
 } from 'react-native';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -309,29 +310,64 @@ export default function CheckoutScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* ── Order summary ────────────────────────────────────────── */}
-        <Section icon="bag-outline" title="Tóm tắt đơn hàng">
+        <Section icon="bag-outline" title={`Tóm tắt đơn hàng (${items.length} loại)`}>
           <View style={styles.summaryBox}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Số lượng sản phẩm</Text>
-              <Text style={styles.summaryVal}>{itemCount} món</Text>
-            </View>
-            {items.slice(0, 3).map((item) => (
-              <View key={item.productId} style={styles.summaryItem}>
-                <Text style={styles.summaryItemName} numberOfLines={1}>
-                  {item.name}
-                </Text>
-                <Text style={styles.summaryItemPrice}>
-                  {item.quantity} × {Number(item.price).toLocaleString('vi-VN')}đ
-                </Text>
+            {/* Item list */}
+            {items.map((item, index) => {
+              const subtotal = Number(item.price) * item.quantity;
+              return (
+                <View
+                  key={item.productId}
+                  style={[
+                    styles.summaryItemCard,
+                    index < items.length - 1 && styles.summaryItemCardBorder,
+                  ]}
+                >
+                  {/* Ảnh sản phẩm */}
+                  {item.imageUrl ? (
+                    <Image
+                      source={{ uri: item.imageUrl }}
+                      style={styles.summaryItemImg}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.summaryItemImg, styles.summaryItemImgPlaceholder]}>
+                      <Ionicons name="cube-outline" size={20} color={Colors.primary} />
+                    </View>
+                  )}
+
+                  {/* Tên + đơn giá */}
+                  <View style={styles.summaryItemMid}>
+                    <Text style={styles.summaryItemName} numberOfLines={2}>
+                      {item.name}
+                    </Text>
+                    <View style={styles.summaryItemMeta}>
+                      <View style={styles.summaryQtyBadge}>
+                        <Text style={styles.summaryQtyText}>×{item.quantity}</Text>
+                      </View>
+                      <Text style={styles.summaryUnitPrice}>
+                        {Number(item.price).toLocaleString('vi-VN')}đ / cái
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Thành tiền */}
+                  <Text style={styles.summarySubtotal}>
+                    {subtotal.toLocaleString('vi-VN')}đ
+                  </Text>
+                </View>
+              );
+            })}
+
+            {/* Tổng cộng */}
+            <View style={styles.summaryTotalRow}>
+              <View style={styles.summaryTotalLeft}>
+                <Text style={styles.summaryTotalLabel}>Tổng cộng</Text>
+                <Text style={styles.summaryTotalCount}>{itemCount} sản phẩm</Text>
               </View>
-            ))}
-            {items.length > 3 && (
-              <Text style={styles.moreItems}>+ {items.length - 3} sản phẩm khác...</Text>
-            )}
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryRow}>
-              <Text style={styles.totalLabel}>Tổng cộng</Text>
-              <Text style={styles.totalValue}>{total.toLocaleString('vi-VN')}đ</Text>
+              <Text style={styles.summaryTotalValue}>
+                {total.toLocaleString('vi-VN')}đ
+              </Text>
             </View>
           </View>
         </Section>
@@ -584,25 +620,96 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
 
   // Order summary
-  summaryBox: { padding: 16, gap: 8 },
-  summaryRow: {
+  summaryBox: { gap: 0 },
+
+  summaryItemCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  summaryLabel: { fontSize: 13, color: Colors.textSecondary },
-  summaryVal: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary },
-  summaryItem: {
+  summaryItemCardBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+
+  summaryItemImg: {
+    width: 52,
+    height: 52,
+    borderRadius: 10,
+    backgroundColor: Colors.background,
+  },
+  summaryItemImgPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+
+  summaryItemMid: {
+    flex: 1,
+    gap: 6,
+  },
+  summaryItemName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    lineHeight: 20,
+  },
+  summaryItemMeta: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
   },
-  summaryItemName: { flex: 1, fontSize: 13, color: Colors.textSecondary, marginRight: 8 },
-  summaryItemPrice: { fontSize: 13, color: Colors.textPrimary, fontWeight: '500' },
-  moreItems: { fontSize: 12, color: Colors.textMuted, fontStyle: 'italic' },
-  summaryDivider: { height: 1, backgroundColor: Colors.border, marginVertical: 4 },
-  totalLabel: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
-  totalValue: { fontSize: 18, fontWeight: '800', color: Colors.primary },
+  summaryQtyBadge: {
+    backgroundColor: Colors.primary,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  summaryQtyText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  summaryUnitPrice: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  summarySubtotal: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.primary,
+    minWidth: 80,
+    textAlign: 'right',
+  },
+
+  summaryTotalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: Colors.primaryLight,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  summaryTotalLeft: { gap: 2 },
+  summaryTotalLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  summaryTotalCount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  summaryTotalValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: Colors.primary,
+  },
 
   // Tabs
   tabs: {

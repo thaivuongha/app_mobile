@@ -19,8 +19,11 @@ export interface ShippingAddress {
 
 export interface Order {
   id: string;
+  orderCode?: number;
   status: string;
   notes: string | null;
+  adminNotes?: string | null;
+  totalAmount?: number;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];

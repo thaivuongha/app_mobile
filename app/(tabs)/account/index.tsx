@@ -162,6 +162,22 @@ export default function MeScreen() {
           />
         </MenuSection>
 
+        {/* Đơn hàng */}
+        <MenuSection title="Mua sắm">
+          <MenuItem
+            icon="bag-outline"
+            label="Đơn hàng của tôi"
+            sublabel="Xem lịch sử và trạng thái đơn hàng"
+            onPress={() => router.push('/(tabs)/orders')}
+          />
+          <MenuItem
+            icon="location-outline"
+            label="Địa chỉ giao hàng"
+            sublabel="Quản lý địa chỉ nhận hàng"
+            onPress={() => router.push('/(tabs)/settings/delivery-address-form')}
+          />
+        </MenuSection>
+
         {/* Thiết bị */}
         <MenuSection title="Thiết bị">
           <MenuItem
