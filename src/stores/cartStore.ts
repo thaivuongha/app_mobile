@@ -4,13 +4,15 @@ export interface CartItem {
   productId: string;
   name: string;
   price: string;
+  imageUrl: string | null;
   quantity: number;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (productId: string, name: string, price: string, quantity: number) => void;
+  addItem: (productId: string, name: string, price: string, imageUrl: string | null, quantity: number) => void;
   updateQuantity: (productId: string, delta: number) => void;
+  setQuantity: (productId: string, quantity: number) => void;
   removeItem: (productId: string) => void;
   clearCart: () => void;
   getTotal: () => number;
@@ -18,7 +20,7 @@ interface CartState {
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
-  addItem: (productId, name, price, quantity) =>
+  addItem: (productId, name, price, imageUrl, quantity) =>
     set((state) => {
       const existing = state.items.find((i) => i.productId === productId);
       if (existing) {
@@ -30,7 +32,7 @@ export const useCartStore = create<CartState>((set, get) => ({
           ),
         };
       }
-      return { items: [...state.items, { productId, name, price, quantity }] };
+      return { items: [...state.items, { productId, name, price, imageUrl, quantity }] };
     }),
   updateQuantity: (productId, delta) =>
     set((state) => {
@@ -40,6 +42,17 @@ export const useCartStore = create<CartState>((set, get) => ({
         )
         .filter((i) => i.quantity > 0);
       return { items: next };
+    }),
+  setQuantity: (productId, quantity) =>
+    set((state) => {
+      if (quantity <= 0) {
+        return { items: state.items.filter((i) => i.productId !== productId) };
+      }
+      return {
+        items: state.items.map((i) =>
+          i.productId === productId ? { ...i, quantity } : i
+        ),
+      };
     }),
   removeItem: (productId) =>
     set((state) => ({ items: state.items.filter((i) => i.productId !== productId) })),
