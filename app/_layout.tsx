@@ -30,7 +30,10 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync();
+    if (loaded) {
+      // Ẩn native splash ngay khi fonts sẵn sàng → index.tsx (gradient EMBOX) hiện ra liền
+      SplashScreen.hideAsync();
+    }
   }, [loaded]);
 
   if (!loaded) return null;

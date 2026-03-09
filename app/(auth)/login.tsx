@@ -1,5 +1,7 @@
 import { useRouter, Link } from 'expo-router';
 import { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 import {
   StyleSheet,
   TextInput,
@@ -27,10 +29,17 @@ const { width } = Dimensions.get('window');
 function EmboxLogo() {
   return (
     <View style={styles.logoWrapper}>
-      <View style={styles.logoBadge}>
-        <Text style={styles.logoLetter}>E</Text>
-      </View>
-      <Text style={styles.logoName}>EMBOX</Text>
+      <MaskedView
+        maskElement={<Text style={styles.logoName}>EMBOX</Text>}
+      >
+        <LinearGradient
+          colors={['#9333EA', '#EF4444']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <Text style={[styles.logoName, { opacity: 0 }]}>EMBOX</Text>
+        </LinearGradient>
+      </MaskedView>
       <Text style={styles.logoTagline}>Quản lý khách sạn & thiết bị vending</Text>
     </View>
   );
@@ -125,7 +134,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -133,10 +142,6 @@ export default function LoginScreen() {
       >
         {/* ── Hero header ───────────────────────────────────── */}
         <View style={styles.hero}>
-          {/* Decorative circles */}
-          <View style={[styles.circle, styles.circleTopRight]} />
-          <View style={[styles.circle, styles.circleBottomLeft]} />
-
           <EmboxLogo />
         </View>
 
@@ -225,66 +230,28 @@ export default function LoginScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.primary },
+  safe: { flex: 1, backgroundColor: Colors.background },
   flex: { flex: 1 },
 
   // Hero
   hero: {
-    backgroundColor: Colors.primary,
-    paddingTop: 32,
-    paddingBottom: 48,
+    backgroundColor: Colors.background,
+    paddingTop: 48,
+    paddingBottom: 36,
     paddingHorizontal: 28,
     alignItems: 'center',
-    overflow: 'hidden',
-    position: 'relative',
-  },
-
-  // Decorative circles
-  circle: {
-    position: 'absolute',
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  circleTopRight: {
-    width: 180,
-    height: 180,
-    top: -60,
-    right: -50,
-  },
-  circleBottomLeft: {
-    width: 120,
-    height: 120,
-    bottom: -30,
-    left: -20,
   },
 
   // Logo
-  logoWrapper: { alignItems: 'center', gap: 10 },
-  logoBadge: {
-    width: 68,
-    height: 68,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoLetter: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#fff',
-    letterSpacing: -1,
-  },
+  logoWrapper: { alignItems: 'center', gap: 8 },
   logoName: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#fff',
-    letterSpacing: 4,
+    fontSize: 42,
+    fontWeight: '900',
+    letterSpacing: 6,
   },
   logoTagline: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.75)',
+    fontSize: 13,
+    color: Colors.textSecondary,
     textAlign: 'center',
     marginTop: 2,
   },
@@ -292,10 +259,11 @@ const styles = StyleSheet.create({
   // Card
   card: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.card,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    marginTop: -24,
+    borderTopWidth: 1,
+    borderColor: Colors.border,
   },
   cardContent: {
     paddingHorizontal: 28,
