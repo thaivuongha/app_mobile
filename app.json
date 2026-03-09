@@ -27,9 +27,9 @@
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT",
-        "android.permission.BLUETOOTH",
-        "android.permission.BLUETOOTH_ADMIN",
-        "android.permission.BLUETOOTH_CONNECT"
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
       ],
       "package": "com.hathaivuong.mobile"
     },
@@ -48,7 +48,7 @@
             "central"
           ],
           "bluetoothAlwaysPermission": "Ứng dụng cần Bluetooth để cấu hình WiFi cho máy bán hàng qua BLE (BluFi).",
-          "neverForLocation": true
+          "neverForLocation": false
         }
       ]
     ],

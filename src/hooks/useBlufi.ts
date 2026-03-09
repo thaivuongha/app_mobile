@@ -94,7 +94,11 @@ export function useBlufi(): UseBlufiReturn {
         if (!allGranted) {
           Alert.alert(
             'Cần quyền Bluetooth',
-            'Vui lòng cấp quyền Bluetooth và Vị trí trong Cài đặt để sử dụng tính năng này.',
+            'Vui lòng cấp quyền trong Cài đặt:\n\n' +
+              '• Cài đặt → Ứng dụng → [EMBOX/mobile] → Quyền\n' +
+              '• Bật "Thiết bị gần đây" (hoặc "Bluetooth")\n' +
+              '• Bật "Vị trí" (một số máy yêu cầu khi quét BLE)\n\n' +
+              'Trên Android 12+, quyền Bluetooth có thể nằm trong nhóm "Thiết bị gần đây".',
             [
               { text: 'Hủy', style: 'cancel' },
               { text: 'Mở Cài đặt', onPress: () => Linking.openSettings() },
