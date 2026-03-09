@@ -1,7 +1,11 @@
 /**
  * Base URL của Backend API (không có trailing slash).
- * Set EXPO_PUBLIC_API_URL trong .env hoặc khi chạy (expo start).
+ * - Dev (Metro): dùng EXPO_PUBLIC_API_URL từ .env, không có thì localhost.
+ * - Release (APK): env thường không nhúng → dùng luôn production URL.
  */
-export const API_BASE_URL =
-  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
-  'http://localhost:3000';
+const fromEnv =
+  typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL;
+const fallback = __DEV__
+  ? 'http://localhost:3000'
+  : 'https://api.embox.cloud';
+export const API_BASE_URL = fromEnv || fallback;

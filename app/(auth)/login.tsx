@@ -1,4 +1,4 @@
-import { useRouter, Link } from 'expo-router';
+﻿import { useRouter, Link } from 'expo-router';
 import { useState } from 'react';
 import {
   StyleSheet,
@@ -9,16 +9,17 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { login } from '@/src/api/auth';
 import { ApiClientError } from '@/src/api/client';
 import { useAuthStore } from '@/src/stores/authStore';
 import { Colors } from '@/constants/Colors';
+import { API_BASE_URL } from '@/src/config/env';
 
 const { width } = Dimensions.get('window');
 
@@ -215,6 +216,14 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </Link>
 
+          {/* [DEBUG] URL API đang dùng — xóa sau khi test xong */}
+          <View style={styles.debugUrlBox}>
+            <Text style={styles.debugUrlLabel}>API (test):</Text>
+            <Text style={styles.debugUrlText} numberOfLines={2} selectable>
+              {API_BASE_URL}
+            </Text>
+          </View>
+
           <View style={{ height: 16 }} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -406,5 +415,27 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: Colors.primary,
+  },
+
+  // Debug URL (xóa sau khi test)
+  debugUrlBox: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  debugUrlLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.textMuted,
+    marginBottom: 4,
+  },
+  debugUrlText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

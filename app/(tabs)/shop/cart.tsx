@@ -1,14 +1,14 @@
-import { useRouter } from 'expo-router';
+﻿import { useRouter } from 'expo-router';
 import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
   TextInput,
-  SafeAreaView,
   StatusBar,
   Alert,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCartStore, type CartItem } from '@/src/stores/cartStore';

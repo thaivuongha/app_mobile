@@ -1,4 +1,4 @@
-import { useRouter, useLocalSearchParams } from 'expo-router';
+﻿import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
   StyleSheet,
@@ -9,10 +9,10 @@ import {
   ActivityIndicator,
   View,
   Text,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { createPaymentMethod, updatePaymentMethod } from '@/src/api/paymentMethods';
 import { ApiClientError } from '@/src/api/client';

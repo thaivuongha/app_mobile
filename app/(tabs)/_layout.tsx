@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCartStore } from '@/src/stores/cartStore';
 import { Colors } from '@/constants/Colors';
 
@@ -47,6 +48,7 @@ export default function TabLayout() {
   const cartCount = useCartStore((s) =>
     s.items.reduce((sum, i) => sum + i.quantity, 0),
   );
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -54,7 +56,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { paddingBottom: insets.bottom + 8, height: 56 + insets.bottom }],
         tabBarLabelStyle: styles.tabLabel,
         tabBarItemStyle: styles.tabItem,
       }}
@@ -129,17 +131,12 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: Colors.card,
+    backgroundColor: '#F3F4F6',
     borderTopWidth: 0,
-    height: 68,
-    paddingBottom: 8,
+    borderTopColor: 'transparent',
     paddingTop: 6,
     paddingHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 24,
+    elevation: 0,
   },
   tabLabel: {
     fontSize: 11,

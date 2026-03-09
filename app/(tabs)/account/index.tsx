@@ -1,14 +1,14 @@
-import { useRouter } from 'expo-router';
+﻿import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   StyleSheet,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  SafeAreaView,
   ScrollView,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getMe, getMyProfile } from '@/src/api/users';
@@ -203,6 +203,12 @@ export default function MeScreen() {
             label="PIN mở khóa"
             sublabel="Cài đặt PIN 6 số để mở khóa không thanh toán"
             onPress={() => router.push('/(tabs)/account/unlock-pin')}
+          />
+          <MenuItem
+            icon="wifi-outline"
+            label="Cấu hình WiFi thiết bị"
+            sublabel="Gửi thông tin WiFi qua Bluetooth (BluFi)"
+            onPress={() => router.push('/(tabs)/account/wifi-config')}
           />
         </MenuSection>
 
