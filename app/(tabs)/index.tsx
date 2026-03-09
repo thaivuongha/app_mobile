@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -336,7 +336,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
 
       {/* ── Hero header ──────────────────────────────────────── */}
