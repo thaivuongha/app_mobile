@@ -192,6 +192,7 @@ export async function buildConnectWifiFrame(seq: number): Promise<Uint8Array> {
   return buildCtrlFrame(BluFiFrameType.CTRL_CONNECT_WIFI, seq);
 }
 
+
 /**
  * Parse frame nhận từ ESP32 (notification)
  */

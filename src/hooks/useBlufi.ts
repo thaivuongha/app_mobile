@@ -39,7 +39,7 @@ export interface UseBlufiReturn {
   stopScanning: () => void;
   /** Kết nối BLE + negotiate DH ngay khi chọn thiết bị. Step: connecting → negotiating → ready */
   connectAndPrepare: (device: BluFiDevice) => Promise<void>;
-  /** Gửi WiFi credentials sau khi đã ở bước 'ready'. Step: provisioning → waiting_wifi */
+  /** Gửi WiFi credentials sau khi đã ở bước 'ready'. Step: provisioning → done */
   sendCredentials: (credentials: BluFiWifiCredentials) => Promise<void>;
   disconnect: () => Promise<void>;
   reset: () => void;

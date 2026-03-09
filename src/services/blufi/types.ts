@@ -148,3 +148,9 @@ export interface BluFiWifiCredentials {
   password: string;
   opMode?: BluFiWifiOpMode; // mặc định STA
 }
+
+// AP tìm được khi scan WiFi (từ DATA_WIFI_LIST notification)
+export interface BluFiWifiAP {
+  ssid: string;
+  rssi: number; // dBm (âm, ví dụ -65)
+}

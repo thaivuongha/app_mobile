@@ -154,6 +154,12 @@ export class BluFiSession {
   /** MTU đã negotiate (bytes). Dùng làm maxByteSize cho writeWithoutResponse. */
   private mtu = 20;
 
+  // Fragment reassembly — ESP32 gửi WiFi list có thể bị fragment
+  private fragBuffer: Uint8Array | null = null;
+  private fragOffset = 0;
+  private fragSubtype = 0;
+  private fragClass: BluFiFrameClass = BluFiFrameClass.DATA;
+
   constructor(peripheralId: string) {
     this.peripheralId = peripheralId;
     this.dh = new BluFiDH();
@@ -330,25 +336,56 @@ export class BluFiSession {
       const frame = await parseFrame(raw, this.aesKey, this.seq);
       if (!frame) return;
 
-      if (
-        frame.frameClass === BluFiFrameClass.DATA &&
-        frame.subtype === BluFiFrameType.DATA_NEGO
-      ) {
-        await this.handleNegoData(frame.data);
-      } else if (
-        frame.frameClass === BluFiFrameClass.DATA &&
-        frame.subtype === BluFiFrameType.DATA_WIFI_STATUS_REPORT
-      ) {
-        this.handleWifiStatus(frame.data);
-      } else if (
-        frame.frameClass === BluFiFrameClass.DATA &&
-        frame.subtype === BluFiFrameType.DATA_ERROR
-      ) {
-        const errorCode = frame.data[0];
-        this.onError?.(`BluFi error: 0x${errorCode.toString(16)}`);
+      // Fragment reassembly — ESP32 có thể fragment frame lớn (ví dụ WiFi list nhiều AP)
+      if (frame.isFragment || this.fragBuffer !== null) {
+        if (this.fragBuffer === null) {
+          // First fragment: 2 byte đầu = tổng độ dài payload
+          const totalLen = (frame.data[0] << 8) | frame.data[1];
+          this.fragBuffer = new Uint8Array(totalLen);
+          this.fragOffset = 0;
+          this.fragSubtype = frame.subtype;
+          this.fragClass = frame.frameClass;
+          const chunk = frame.data.slice(2);
+          this.fragBuffer.set(chunk, 0);
+          this.fragOffset = chunk.length;
+        } else {
+          // Subsequent fragment: append chunk
+          const chunk = frame.data;
+          const available = this.fragBuffer.length - this.fragOffset;
+          this.fragBuffer.set(chunk.slice(0, available), this.fragOffset);
+          this.fragOffset += Math.min(chunk.length, available);
+        }
+
+        if (!frame.isFragment) {
+          // Last fragment — process complete reassembled payload
+          const completeData = this.fragBuffer.slice(0, this.fragOffset);
+          const subtype = this.fragSubtype;
+          const frameClass = this.fragClass;
+          this.fragBuffer = null;
+          this.fragOffset = 0;
+          await this.processFrame(frameClass, subtype, completeData);
+        }
+        return;
       }
+
+      await this.processFrame(frame.frameClass, frame.subtype, frame.data);
     } catch {
       // ignore parse errors
+    }
+  }
+
+  private async processFrame(
+    frameClass: BluFiFrameClass,
+    subtype: number,
+    data: Uint8Array
+  ): Promise<void> {
+    if (frameClass === BluFiFrameClass.DATA && subtype === BluFiFrameType.DATA_NEGO) {
+      await this.handleNegoData(data);
+    } else if (frameClass === BluFiFrameClass.DATA && subtype === BluFiFrameType.DATA_WIFI_STATUS_REPORT) {
+      this.handleWifiStatus(data);
+    } else if (frameClass === BluFiFrameClass.DATA && subtype === BluFiFrameType.DATA_ERROR) {
+      const errorCode = data[0];
+      this.onError?.(`BluFi error: 0x${errorCode.toString(16)}`);
     }
   }
 

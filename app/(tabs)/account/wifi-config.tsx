@@ -16,12 +16,19 @@ import {
   ActivityIndicator,
   ScrollView,
   Alert,
+  Modal,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { useBlufi } from '@/src/hooks/useBlufi';
 import type { BluFiDevice } from '@/src/services/blufi/types';
+
+interface WifiAP {
+  ssid: string;
+  rssi: number;
+}
 
 type Screen = 'intro' | 'scan' | 'preparing' | 'credentials' | 'provisioning' | 'result';
 
@@ -34,6 +41,37 @@ export default function WifiConfigScreen() {
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showWifiPicker, setShowWifiPicker] = useState(false);
+  const [wifiList, setWifiList] = useState<WifiAP[]>([]);
+  const [wifiListLoading, setWifiListLoading] = useState(false);
+
+  const scanPhoneWifi = async () => {
+    if (Platform.OS !== 'android') return; // iOS không hỗ trợ scan WiFi list
+    setWifiListLoading(true);
+    setWifiList([]);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const WifiManager = require('react-native-wifi-reborn').default;
+      const list = await WifiManager.reScanAndLoadWifiList();
+      // Deduplicate theo SSID, giữ tín hiệu mạnh nhất; sort giảm dần
+      const deduped = new Map<string, WifiAP>();
+      for (const ap of list as Array<{ SSID: string; level: number }>) {
+        if (!ap.SSID?.trim()) continue;
+        const existing = deduped.get(ap.SSID);
+        if (!existing || ap.level > existing.rssi) {
+          deduped.set(ap.SSID, { ssid: ap.SSID, rssi: ap.level });
+        }
+      }
+      setWifiList([...deduped.values()].sort((a, b) => b.rssi - a.rssi));
+    } catch {
+      Alert.alert(
+        'Không thể quét WiFi',
+        'Đảm bảo WiFi và Vị trí đang bật trên điện thoại.'
+      );
+    } finally {
+      setWifiListLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (blufi.step === 'connecting' || blufi.step === 'negotiating') {
@@ -126,13 +164,104 @@ export default function WifiConfigScreen() {
           ssid={ssid}
           password={password}
           showPassword={showPassword}
+          wifiList={wifiList}
+          wifiListLoading={wifiListLoading}
           onSsidChange={setSsid}
           onPasswordChange={setPassword}
           onTogglePassword={() => setShowPassword((p) => !p)}
           onSend={handleSendCredentials}
           onBack={handleReset}
+          onOpenWifiPicker={() => {
+            setShowWifiPicker(true);
+            if (wifiList.length === 0) scanPhoneWifi();
+          }}
+          onRefreshWifiList={scanPhoneWifi}
         />
       )}
+
+      {/* WiFi Picker Modal */}
+      <Modal
+        visible={showWifiPicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowWifiPicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Chọn mạng WiFi</Text>
+              <TouchableOpacity onPress={() => setShowWifiPicker(false)} hitSlop={8}>
+                <Ionicons name="close" size={24} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            {wifiListLoading ? (
+              <View style={styles.modalLoading}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+                <Text style={styles.modalLoadingText}>Đang quét mạng WiFi...</Text>
+                <Text style={styles.modalLoadingHint}>Có thể mất vài giây</Text>
+              </View>
+            ) : wifiList.length === 0 ? (
+              <View style={styles.modalLoading}>
+                <Ionicons name="wifi-outline" size={48} color={Colors.textMuted} />
+                <Text style={styles.modalLoadingText}>Không tìm thấy mạng WiFi</Text>
+                <TouchableOpacity
+                  style={[styles.primaryBtn, { marginTop: 16 }]}
+                  onPress={scanPhoneWifi}
+                >
+                  <Ionicons name="refresh" size={16} color="#fff" style={{ marginRight: 6 }} />
+                  <Text style={styles.primaryBtnText}>Quét lại</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <View style={styles.modalListHeader}>
+                  <Text style={styles.modalListCount}>{wifiList.length} mạng tìm thấy</Text>
+                  <TouchableOpacity onPress={scanPhoneWifi} style={styles.rescanBtn}>
+                    <Ionicons name="refresh" size={15} color={Colors.primary} />
+                    <Text style={styles.rescanText}>Quét lại</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={wifiList}
+                  keyExtractor={(ap) => ap.ssid}
+                  contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 8 }}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={[
+                        styles.wifiApRow,
+                        item.ssid === ssid && styles.wifiApRowSelected,
+                      ]}
+                      onPress={() => {
+                        setSsid(item.ssid);
+                        setShowWifiPicker(false);
+                      }}
+                      activeOpacity={0.75}
+                    >
+                      <WifiSignalIcon rssi={item.rssi} selected={item.ssid === ssid} />
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={[
+                            styles.wifiApName,
+                            item.ssid === ssid && { color: Colors.primary },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {item.ssid}
+                        </Text>
+                        <Text style={styles.wifiApRssi}>{item.rssi} dBm</Text>
+                      </View>
+                      {item.ssid === ssid && (
+                        <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
+                      )}
+                    </TouchableOpacity>
+                  )}
+                />
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
 
       {screen === 'provisioning' && (
         <ProvisioningScreen device={selectedDevice} />
@@ -286,21 +415,29 @@ function CredentialsScreen({
   ssid,
   password,
   showPassword,
+  wifiList,
+  wifiListLoading,
   onSsidChange,
   onPasswordChange,
   onTogglePassword,
   onSend,
   onBack,
+  onOpenWifiPicker,
+  onRefreshWifiList,
 }: {
   device: BluFiDevice;
   ssid: string;
   password: string;
   showPassword: boolean;
+  wifiList: WifiAP[];
+  wifiListLoading: boolean;
   onSsidChange: (v: string) => void;
   onPasswordChange: (v: string) => void;
   onTogglePassword: () => void;
   onSend: () => void;
   onBack: () => void;
+  onOpenWifiPicker: () => void;
+  onRefreshWifiList: () => void;
 }) {
   return (
     <ScrollView contentContainerStyle={styles.centeredContent} keyboardShouldPersistTaps="handled">
@@ -321,14 +458,46 @@ function CredentialsScreen({
       <Text style={styles.sectionLabel}>Thông tin WiFi</Text>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Tên mạng WiFi (SSID)</Text>
-        <View style={styles.inputRow}>
+        <View style={styles.inputLabelRow}>
+          <Text style={styles.inputLabel}>Tên mạng WiFi (SSID)</Text>
+          <TouchableOpacity
+            style={styles.scanWifiBtn}
+            onPress={onOpenWifiPicker}
+            activeOpacity={0.75}
+          >
+            {wifiListLoading ? (
+              <ActivityIndicator size="small" color={Colors.primary} style={{ marginRight: 4 }} />
+            ) : (
+              <Ionicons name="search" size={14} color={Colors.primary} style={{ marginRight: 4 }} />
+            )}
+            <Text style={styles.scanWifiBtnText}>
+              {wifiListLoading ? 'Đang quét...' : 'Tìm WiFi'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.inputRow} onPress={onOpenWifiPicker} activeOpacity={0.8}>
           <Ionicons name="wifi" size={18} color={Colors.textMuted} style={{ marginRight: 8 }} />
+          <Text
+            style={[styles.textInput, { flex: 1, color: ssid ? Colors.textPrimary : Colors.textMuted }]}
+            numberOfLines={1}
+          >
+            {ssid || 'Chọn hoặc nhập tên WiFi...'}
+          </Text>
+          <Ionicons name="chevron-down" size={16} color={Colors.textMuted} />
+        </TouchableOpacity>
+        {/* Ô nhập tay bên dưới */}
+        <View style={[styles.inputRow, { marginTop: 8 }]}>
+          <Ionicons
+            name="create-outline"
+            size={16}
+            color={Colors.textMuted}
+            style={{ marginRight: 8 }}
+          />
           <TextInput
             style={styles.textInput}
             value={ssid}
             onChangeText={onSsidChange}
-            placeholder="Nhập tên WiFi..."
+            placeholder="Hoặc nhập thủ công..."
             placeholderTextColor={Colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
@@ -498,6 +667,18 @@ function ResultScreen({
   );
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function WifiSignalIcon({ rssi, selected }: { rssi: number; selected: boolean; }) {
+  const color = selected ? Colors.primary : rssi > -65 ? Colors.success : rssi > -80 ? Colors.warning : Colors.danger;
+  const icon = rssi > -65 ? 'wifi' : rssi > -80 ? 'wifi-outline' : 'cellular-outline';
+  return (
+    <View style={styles.wifiApIcon}>
+      <Ionicons name={icon} size={20} color={color} />
+    </View>
+  );
+}
+
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
@@ -648,7 +829,22 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   inputGroup: { width: '100%', marginBottom: 16 },
-  inputLabel: { fontSize: 13, color: Colors.textSecondary, marginBottom: 6, fontWeight: '500' },
+  inputLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  inputLabel: { fontSize: 13, color: Colors.textSecondary, fontWeight: '500' },
+  scanWifiBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  scanWifiBtnText: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -665,4 +861,71 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     padding: 0,
   },
+
+  // WiFi Picker Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '75%',
+    paddingTop: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  modalTitle: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
+  modalLoading: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 12,
+  },
+  modalLoadingText: { fontSize: 15, fontWeight: '600', color: Colors.textSecondary },
+  modalLoadingHint: { fontSize: 13, color: Colors.textMuted },
+  modalListHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  modalListCount: { fontSize: 13, color: Colors.textMuted },
+  rescanBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  rescanText: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
+  wifiApRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  wifiApRowSelected: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryLight,
+  },
+  wifiApIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wifiApName: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
+  wifiApRssi: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
 });
