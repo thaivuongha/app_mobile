@@ -1,4 +1,4 @@
-import { useRouter, Link } from 'expo-router';
+﻿import { useRouter, Link } from 'expo-router';
 import { useState } from 'react';
 import {
   StyleSheet,
@@ -9,9 +9,9 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { forgotPassword } from '@/src/api/auth';

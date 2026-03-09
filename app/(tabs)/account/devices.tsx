@@ -1,14 +1,14 @@
-import React, { useCallback } from 'react';
+﻿import React, { useCallback } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  SafeAreaView,
   ScrollView,
   RefreshControl,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

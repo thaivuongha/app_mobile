@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+﻿import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -7,7 +7,6 @@ import {
   Image,
   ActivityIndicator,
   TextInput,
-  SafeAreaView,
   StatusBar,
   RefreshControl,
   Modal,
@@ -16,6 +15,7 @@ import {
   Pressable,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getProducts } from '@/src/api/products';

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Màn hình Địa chỉ giao hàng — truy cập từ Tab Shop
  * Re-use toàn bộ API và logic từ settings/delivery-addresses.tsx
  */
@@ -10,8 +10,8 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
