@@ -17,6 +17,7 @@ export default function MeLayout() {
       <Stack.Screen name="edit-profile" options={{ title: 'Chỉnh sửa hồ sơ' }} />
       <Stack.Screen name="devices" options={{ title: 'Danh sách thiết bị' }} />
       <Stack.Screen name="unlock-pin" options={{ title: 'PIN mở khóa' }} />
+      <Stack.Screen name="wifi-config" options={{ title: 'Cấu hình WiFi thiết bị' }} />
       {/* Settings screens — mở trong account stack để back về đúng trang Cá Nhân */}
       <Stack.Screen name="commission" options={{ title: 'Lợi nhuận' }} />
       <Stack.Screen name="invoice" options={{ title: 'Cài đặt hóa đơn' }} />

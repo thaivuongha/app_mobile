@@ -204,6 +204,12 @@ export default function MeScreen() {
             sublabel="Cài đặt PIN 6 số để mở khóa không thanh toán"
             onPress={() => router.push('/(tabs)/account/unlock-pin')}
           />
+          <MenuItem
+            icon="wifi-outline"
+            label="Cấu hình WiFi thiết bị"
+            sublabel="Gửi thông tin WiFi qua Bluetooth (BluFi)"
+            onPress={() => router.push('/(tabs)/account/wifi-config')}
+          />
         </MenuSection>
 
         {/* Hỗ trợ */}
