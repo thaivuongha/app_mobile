@@ -1,4 +1,4 @@
-﻿import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -250,8 +250,15 @@ export default function ShopScreen() {
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ['products'],
     queryFn: () => getProducts({ limit: 100 }),
-    retry: 1,
+    retry: 2,
   });
+
+  // Refetch danh sách sản phẩm mỗi khi user mở tab Shop (để thấy sản phẩm admin vừa tạo)
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const ordersQuery = useOrdersBadge({
     queryKey: ['my-orders', 'pending-count'],
@@ -262,8 +269,8 @@ export default function ShopScreen() {
   const products = (data?.data ?? []).filter(
     (p) =>
       search.length === 0 ||
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.brandName.toLowerCase().includes(search.toLowerCase())
+      (p.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (p.brandName ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   const renderItem = useCallback(
@@ -389,8 +396,9 @@ export default function ShopScreen() {
         />
       )}
 
-      {/* Add-to-cart popup */}
+      {/* Add-to-cart popup — key theo product.id giúp reset state (qty) khi đổi sản phẩm */}
       <AddToCartModal
+        key={selectedProduct?.id ?? 'none'}
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
       />
