@@ -80,7 +80,7 @@ async function buildFrame(options: {
 
   let frame: Uint8Array;
   if (useChecksum) {
-    // CRC bao gồm seq + data_len + data
+    // CRC input = [seq, data_len, data]. Seed luôn là 0 (init=0xFFFF) — không phụ thuộc seq.
     const crcInput = new Uint8Array(1 + 1 + data.length);
     crcInput[0] = seq & 0xff;
     crcInput[1] = data.length & 0xff;

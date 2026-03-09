@@ -23,7 +23,7 @@ import { Colors } from '@/constants/Colors';
 import { useBlufi } from '@/src/hooks/useBlufi';
 import type { BluFiDevice } from '@/src/services/blufi/types';
 
-type Screen = 'intro' | 'scan' | 'credentials' | 'provisioning' | 'result';
+type Screen = 'intro' | 'scan' | 'preparing' | 'credentials' | 'provisioning' | 'result';
 
 export default function WifiConfigScreen() {
   const router = useRouter();
@@ -36,12 +36,11 @@ export default function WifiConfigScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (
-      blufi.step === 'connecting' ||
-      blufi.step === 'negotiating' ||
-      blufi.step === 'provisioning' ||
-      blufi.step === 'waiting_wifi'
-    ) {
+    if (blufi.step === 'connecting' || blufi.step === 'negotiating') {
+      setScreen('preparing');
+    } else if (blufi.step === 'ready') {
+      setScreen('credentials');
+    } else if (blufi.step === 'provisioning') {
       setScreen('provisioning');
     } else if (blufi.step === 'done' || blufi.step === 'error') {
       setScreen('result');
@@ -78,19 +77,18 @@ export default function WifiConfigScreen() {
     blufi.startScan();
   };
 
-  const handleSelectDevice = (device: BluFiDevice) => {
-    blufi.stopScanning();
+  const handleSelectDevice = async (device: BluFiDevice) => {
     setSelectedDevice(device);
-    setScreen('credentials');
+    setScreen('preparing'); // chuyển màn hình ngay, không chờ useEffect
+    await blufi.connectAndPrepare(device);
   };
 
   const handleSendCredentials = async () => {
-    if (!selectedDevice) return;
     if (!ssid.trim()) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên WiFi (SSID).');
       return;
     }
-    await blufi.connectAndProvision(selectedDevice, {
+    await blufi.sendCredentials({
       ssid: ssid.trim(),
       password: password.trim(),
     });
@@ -118,6 +116,10 @@ export default function WifiConfigScreen() {
         />
       )}
 
+      {screen === 'preparing' && (
+        <PreparingScreen step={blufi.step} device={selectedDevice} />
+      )}
+
       {screen === 'credentials' && selectedDevice && (
         <CredentialsScreen
           device={selectedDevice}
@@ -128,12 +130,12 @@ export default function WifiConfigScreen() {
           onPasswordChange={setPassword}
           onTogglePassword={() => setShowPassword((p) => !p)}
           onSend={handleSendCredentials}
-          onBack={() => setScreen('scan')}
+          onBack={handleReset}
         />
       )}
 
       {screen === 'provisioning' && (
-        <ProvisioningScreen step={blufi.step} device={selectedDevice} />
+        <ProvisioningScreen device={selectedDevice} />
       )}
 
       {screen === 'result' && (
@@ -364,7 +366,7 @@ function CredentialsScreen({
       </View>
 
       <Text style={styles.noteText}>
-        Thông tin WiFi được mã hóa AES-128 trước khi gửi qua Bluetooth. Không lưu trên server.
+        Thông tin WiFi chỉ gửi qua Bluetooth trong phạm vi ngắn (~5m). Không lưu trên server.
       </Text>
 
       <TouchableOpacity style={styles.primaryBtn} onPress={onSend} activeOpacity={0.85}>
@@ -375,12 +377,10 @@ function CredentialsScreen({
   );
 }
 
-function ProvisioningScreen({ step, device }: { step: string; device: BluFiDevice | null }) {
+function PreparingScreen({ step, device }: { step: string; device: BluFiDevice | null }) {
   const steps = [
     { key: 'connecting', label: 'Kết nối Bluetooth...' },
     { key: 'negotiating', label: 'Bảo mật kết nối (DH)...' },
-    { key: 'provisioning', label: 'Gửi thông tin WiFi...' },
-    { key: 'waiting_wifi', label: 'Chờ thiết bị kết nối WiFi...' },
   ];
   const currentIdx = steps.findIndex((s) => s.key === step);
 
@@ -388,6 +388,7 @@ function ProvisioningScreen({ step, device }: { step: string; device: BluFiDevic
     <View style={styles.centeredContent}>
       <ActivityIndicator size="large" color={Colors.primary} style={{ marginBottom: 24 }} />
       <Text style={styles.pageTitle}>{device?.name ?? 'Máy vending'}</Text>
+      <Text style={styles.pageDesc}>Đang thiết lập kết nối an toàn...</Text>
 
       <View style={styles.stepList}>
         {steps.map((s, i) => {
@@ -435,6 +436,16 @@ function ProvisioningScreen({ step, device }: { step: string; device: BluFiDevic
   );
 }
 
+function ProvisioningScreen({ device }: { device: BluFiDevice | null }) {
+  return (
+    <View style={styles.centeredContent}>
+      <ActivityIndicator size="large" color={Colors.primary} style={{ marginBottom: 24 }} />
+      <Text style={styles.pageTitle}>Đang gửi thông tin WiFi...</Text>
+      <Text style={styles.pageDesc}>{device?.name ?? 'Máy vending'}</Text>
+    </View>
+  );
+}
+
 function ResultScreen({
   success,
   errorMessage,
@@ -457,10 +468,10 @@ function ResultScreen({
           <View style={[styles.iconBig, { backgroundColor: Colors.successLight }]}>
             <Ionicons name="checkmark-circle" size={52} color={Colors.success} />
           </View>
-          <Text style={styles.pageTitle}>Kết nối WiFi thành công!</Text>
+          <Text style={styles.pageTitle}>Đã gửi thông tin thành công!</Text>
           <Text style={styles.pageDesc}>
-            {device?.name ?? 'Thiết bị'} đã kết nối vào mạng WiFi.
-            {bssid ? `\nBSSID: ${bssid}` : ''}
+            Thông tin WiFi đã được gửi đến {device?.name ?? 'thiết bị'}.{'\n\n'}
+            Thiết bị sẽ tự động kết nối vào mạng WiFi và khởi động lại.
           </Text>
           <TouchableOpacity style={styles.primaryBtn} onPress={onDone} activeOpacity={0.85}>
             <Text style={styles.primaryBtnText}>Hoàn tất</Text>

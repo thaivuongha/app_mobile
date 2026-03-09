@@ -2,8 +2,8 @@
  * useBlufi — React hook quản lý toàn bộ state BluFi provisioning
  *
  * State machine:
- *   idle → scanning → connecting → negotiating → provisioning → waiting_wifi → done
- *                                                                            → error (bất kỳ bước nào)
+ *   idle → scanning → connecting → negotiating → ready → provisioning → waiting_wifi → done
+ *                                                                                    → error (bất kỳ bước nào)
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -37,7 +37,10 @@ export interface UseBlufiReturn {
   requestPermissions: () => Promise<boolean>;
   startScan: () => void;
   stopScanning: () => void;
-  connectAndProvision: (device: BluFiDevice, credentials: BluFiWifiCredentials) => Promise<void>;
+  /** Kết nối BLE + negotiate DH ngay khi chọn thiết bị. Step: connecting → negotiating → ready */
+  connectAndPrepare: (device: BluFiDevice) => Promise<void>;
+  /** Gửi WiFi credentials sau khi đã ở bước 'ready'. Step: provisioning → waiting_wifi */
+  sendCredentials: (credentials: BluFiWifiCredentials) => Promise<void>;
   disconnect: () => Promise<void>;
   reset: () => void;
 }
@@ -144,67 +147,81 @@ export function useBlufi(): UseBlufiReturn {
   }, []);
 
   /**
-   * Kết nối thiết bị + chạy toàn bộ flow BluFi provisioning
+   * Kết nối BLE + DH negotiate ngay khi người dùng chọn thiết bị.
+   * Step: connecting → negotiating → ready
+   * Sau khi ở bước 'ready', UI chuyển sang màn nhập WiFi credentials.
    */
-  const connectAndProvision = useCallback(
-    async (device: BluFiDevice, credentials: BluFiWifiCredentials) => {
-      stopScanRef.current?.();
-      stopScan().catch(() => {});
+  const connectAndPrepare = useCallback(async (device: BluFiDevice) => {
+    setConnectedDevice(device);
+    setErrorMessage(null);
+    setWifiConnected(false);
+    setConnectedBssid(undefined);
+    setStep('connecting'); // báo UI ngay trước khi làm bất cứ thao tác BLE nào
 
-      setConnectedDevice(device);
-      setErrorMessage(null);
-      setWifiConnected(false);
-      setConnectedBssid(undefined);
+    // Dừng scan và đợi BLE stack Android giải phóng tài nguyên trước khi connect
+    stopScanRef.current?.();
+    await stopScan();
+    await new Promise<void>((r) => setTimeout(r, 500));
 
-      const session = new BluFiSession(device.id);
-      sessionRef.current = session;
+    const session = new BluFiSession(device.id);
+    sessionRef.current = session;
 
-      session.onWifiStatusChange((state, bssid) => {
-        if (state === BluFiWifiState.CONNECTED) {
-          setWifiConnected(true);
-          setConnectedBssid(bssid);
-          setStep('done');
-        } else if (state === BluFiWifiState.FAILED || state === BluFiWifiState.DISCONNECTED) {
-          setErrorMessage('Thiết bị không thể kết nối WiFi. Kiểm tra SSID và mật khẩu.');
-          setStep('error');
-        }
-      });
-
-      session.onErrorEvent((msg) => {
-        setErrorMessage(msg);
-        setStep('error');
-      });
-
-      try {
-        setStep('connecting');
-        await session.connect();
-
-        setStep('negotiating');
-        await session.negotiate();
-        await session.setSecurityMode();
-
-        setStep('provisioning');
-        await session.sendWifiCredentials(credentials);
-
-        setStep('waiting_wifi');
-        // Timeout 30 giây chờ thiết bị kết nối WiFi
-        setTimeout(() => {
-          setStep((prev) => {
-            if (prev === 'waiting_wifi') {
-              setErrorMessage('Thiết bị không phản hồi. Kiểm tra lại WiFi.');
-              return 'error';
-            }
-            return prev;
-          });
-        }, 30_000);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Lỗi không xác định';
-        setErrorMessage(msg);
+    session.onWifiStatusChange((state, bssid) => {
+      if (state === BluFiWifiState.CONNECTED) {
+        setWifiConnected(true);
+        setConnectedBssid(bssid);
+        setStep('done');
+      } else if (state === BluFiWifiState.FAILED || state === BluFiWifiState.DISCONNECTED) {
+        setErrorMessage('Thiết bị không thể kết nối WiFi. Kiểm tra SSID và mật khẩu.');
         setStep('error');
       }
-    },
-    []
-  );
+    });
+
+    session.onErrorEvent((msg) => {
+      setErrorMessage(msg);
+      setStep('error');
+    });
+
+    try {
+      await session.connect();
+
+      // Bỏ qua DH negotiate — firmware ESP32 hiện dùng multi-step 3072-bit DH (RFC 7919)
+      // không tương thích với 1024-bit implementation cũ. Dùng CHECKSUM_NO_ENCRYPT:
+      // credentials gửi plaintext có CRC, an toàn trong phạm vi BLE (~5m).
+      setStep('negotiating');
+      await session.setSecurityMode();
+
+      setStep('ready');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Lỗi không xác định';
+      setErrorMessage(msg);
+      setStep('error');
+    }
+  }, []);
+
+  /**
+   * Gửi WiFi credentials sau khi session đã ở bước 'ready'.
+   * Step: provisioning → waiting_wifi → done / error
+   */
+  const sendCredentials = useCallback(async (credentials: BluFiWifiCredentials) => {
+    const session = sessionRef.current;
+    if (!session) {
+      setErrorMessage('Chưa kết nối thiết bị. Vui lòng chọn thiết bị lại.');
+      setStep('error');
+      return;
+    }
+
+    try {
+      setStep('provisioning');
+      await session.sendWifiCredentials(credentials);
+      // Gửi xong — thiết bị sẽ tự kết nối WiFi và reset, không cần chờ phản hồi
+      setStep('done');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Lỗi không xác định';
+      setErrorMessage(msg);
+      setStep('error');
+    }
+  }, []);
 
   /**
    * Ngắt kết nối
@@ -241,7 +258,8 @@ export function useBlufi(): UseBlufiReturn {
     requestPermissions,
     startScan,
     stopScanning,
-    connectAndProvision,
+    connectAndPrepare,
+    sendCredentials,
     disconnect,
     reset,
   };

@@ -79,11 +79,13 @@ export enum BluFiWifiOpMode {
 }
 
 // WiFi connect status từ thiết bị
+// Khớp với esp_blufi_sta_conn_state_t trong ESP-IDF:
+//   ESP_BLUFI_STA_CONN_SUCCESS = 0x00
+//   ESP_BLUFI_STA_CONN_FAIL   = 0x01
 export enum BluFiWifiState {
-  CONNECTING = 0x00,
-  CONNECTED = 0x01,
-  FAILED = 0x02,
-  DISCONNECTED = 0x03,
+  CONNECTED = 0x00,
+  FAILED = 0x01,
+  DISCONNECTED = 0x02,
 }
 
 // Error codes từ thiết bị
@@ -108,6 +110,7 @@ export type BluFiStep =
   | 'scanning'
   | 'connecting'
   | 'negotiating'
+  | 'ready'         // connected + negotiated, chờ nhập WiFi credentials
   | 'provisioning'
   | 'waiting_wifi'
   | 'done'

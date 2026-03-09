@@ -88,14 +88,26 @@ export function scanBluFiDevices(
 
   const ble = getBleManager();
 
+  // primaryScan = true khi dùng filter UUID; false khi dùng fallback scan-all
+  let primaryScan = true;
+
   const sub = ble.onDiscoverPeripheral((peripheral) => {
-    const name =
-      peripheral.name ??
-      peripheral.advertising?.localName ??
-      'BLUFI_DEVICE';
+    const name = peripheral.name ?? peripheral.advertising?.localName ?? '';
+
+    // Trong fallback scan-all: chỉ giữ thiết bị có service UUID khớp trong
+    // advertising data, hoặc tên chứa 'BLUFI' (case-insensitive)
+    if (!primaryScan) {
+      const advServices: string[] = peripheral.advertising?.serviceUUIDs ?? [];
+      const hasServiceUUID = advServices.some(
+        (uuid) => uuid.toUpperCase() === BLUFI_SERVICE_UUID.toUpperCase()
+      );
+      const hasBlufiName = name.toUpperCase().includes('BLUFI');
+      if (!hasServiceUUID && !hasBlufiName) return;
+    }
+
     const device: BluFiDevice = {
       id: peripheral.id,
-      name,
+      name: name || 'BLUFI_DEVICE',
       rssi: peripheral.rssi ?? -99,
     };
     found.set(peripheral.id, device);
@@ -107,7 +119,8 @@ export function scanBluFiDevices(
     seconds: timeoutSecs,
     allowDuplicates: false,
   }).catch(() => {
-    // Fallback: scan all nếu filter UUID không hỗ trợ
+    // Fallback: scan all nếu filter UUID không được hỗ trợ
+    primaryScan = false;
     ble.scan({ seconds: timeoutSecs, allowDuplicates: false }).catch(() => {});
   });
 
@@ -118,7 +131,11 @@ export function scanBluFiDevices(
 }
 
 export async function stopScan(): Promise<void> {
-  getBleManager().stopScan().catch(() => {});
+  try {
+    await getBleManager().stopScan();
+  } catch {
+    // ignore
+  }
 }
 
 /**
@@ -134,6 +151,8 @@ export class BluFiSession {
   private onError?: ErrorCallback;
   private _negoResolve?: () => void;
   private _negoReject?: (err: Error) => void;
+  /** MTU đã negotiate (bytes). Dùng làm maxByteSize cho writeWithoutResponse. */
+  private mtu = 20;
 
   constructor(peripheralId: string) {
     this.peripheralId = peripheralId;
@@ -147,7 +166,8 @@ export class BluFiSession {
   }
 
   /**
-   * Ghi dữ liệu lên WRITE characteristic
+   * Ghi dữ liệu lên WRITE characteristic.
+   * maxByteSize = this.mtu để toàn bộ frame được gửi trong 1 BLE write duy nhất.
    */
   private async write(data: Uint8Array): Promise<void> {
     const ble = getBleManager();
@@ -155,21 +175,68 @@ export class BluFiSession {
       this.peripheralId,
       BLUFI_SERVICE_UUID,
       BLUFI_WRITE_UUID,
-      Array.from(data)
+      Array.from(data),
+      this.mtu
     );
   }
 
   /**
    * Kết nối BLE + lấy services + bật notifications
+   * Mỗi bước đều có timeout riêng để tránh treo vô thời hạn.
    */
   async connect(): Promise<void> {
     const ble = getBleManager();
-    await ble.connect(this.peripheralId);
-    await ble.retrieveServices(this.peripheralId);
-    await ble.startNotification(
-      this.peripheralId,
-      BLUFI_SERVICE_UUID,
-      BLUFI_NOTIFY_UUID
+
+    const withTimeout = <T>(promise: Promise<T>, ms: number, msg: string): Promise<T> =>
+      Promise.race([
+        promise,
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error(msg)), ms)),
+      ]);
+
+    // Disconnect trước để xóa GATT state cũ (ignore lỗi nếu chưa kết nối)
+    try {
+      await ble.disconnect(this.peripheralId);
+    } catch {
+      // bình thường nếu thiết bị chưa bao giờ kết nối
+    }
+
+    // Kết nối BLE
+    await withTimeout(
+      ble.connect(this.peripheralId),
+      10_000,
+      'Kết nối Bluetooth timeout. Đảm bảo thiết bị đang ở chế độ cấu hình WiFi và trong phạm vi ~5m.'
+    );
+
+    // Android cần delay nhỏ sau khi connect để GATT stack ổn định
+    await new Promise<void>((r) => setTimeout(r, 600));
+
+    // Discover services
+    await withTimeout(
+      ble.retrieveServices(this.peripheralId),
+      10_000,
+      'Không thể đọc GATT services. Thử lại hoặc khởi động lại thiết bị.'
+    );
+
+    // Negotiate MTU lớn hơn để tránh bị cắt frame thành nhiều BLE packet
+    // ESP32 BluFi frame negotiate có thể lên đến ~135 bytes, cần MTU >= 138
+    try {
+      const negotiatedMtu = await withTimeout(
+        ble.requestMTU(this.peripheralId, 512),
+        5_000,
+        'MTU negotiation timeout'
+      );
+      // ATT Write Without Response overhead: 1 byte opcode + 2 bytes handle = 3 bytes
+      this.mtu = Math.max(20, negotiatedMtu - 3);
+    } catch {
+      // Fallback: dùng 20 bytes — sẽ cần BluFi fragmentation cho frame lớn
+      this.mtu = 20;
+    }
+
+    // Bật notification
+    await withTimeout(
+      ble.startNotification(this.peripheralId, BLUFI_SERVICE_UUID, BLUFI_NOTIFY_UUID),
+      8_000,
+      'Không thể bật notification. UUID không khớp hoặc thiết bị chưa sẵn sàng.'
     );
 
     this.notifySub = ble.onDidUpdateValueForCharacteristic(
@@ -212,33 +279,39 @@ export class BluFiSession {
   }
 
   /**
-   * Đặt security mode: checksum + encrypt
+   * Đặt security mode: checksum only, không encrypt.
+   * Delay 300ms sau write để GATT stack ESP32 xử lý xong
+   * trước khi credential frames đến.
    */
   async setSecurityMode(): Promise<void> {
     const frame = await buildSecModeFrame(
       this.nextSeq(),
-      BluFiSecurityMode.CHECKSUM_ENCRYPT
+      BluFiSecurityMode.CHECKSUM_NO_ENCRYPT
     );
     await this.write(frame);
+    await delay(300);
   }
 
   /**
-   * Gửi thông tin WiFi và lệnh kết nối
+   * Gửi thông tin WiFi và lệnh kết nối.
+   * Delay 200ms giữa mỗi frame để ESP32 GATT stack có thời gian
+   * gửi Write Response trước khi nhận frame tiếp theo.
+   * (100ms quá nhanh → GATTS_SendRsp waiting for op_code = 00)
    */
   async sendWifiCredentials(creds: BluFiWifiCredentials): Promise<void> {
     const { ssid, password, opMode = BluFiWifiOpMode.STA } = creds;
 
     const modeFrame = await buildWifiOpModeFrame(this.nextSeq(), opMode);
     await this.write(modeFrame);
-    await delay(100);
+    await delay(200);
 
     const ssidFrame = await buildSsidFrame(this.nextSeq(), ssid, this.aesKey);
     await this.write(ssidFrame);
-    await delay(100);
+    await delay(200);
 
     const passFrame = await buildPasswordFrame(this.nextSeq(), password, this.aesKey);
     await this.write(passFrame);
-    await delay(100);
+    await delay(200);
 
     const connectFrame = await buildConnectWifiFrame(this.nextSeq());
     await this.write(connectFrame);
@@ -286,7 +359,7 @@ export class BluFiSession {
       if (negoType !== 0x01) return;
 
       const espPublicKey = data.slice(1);
-      this.aesKey = await this.dh.computeAesKey(espPublicKey);
+      this.aesKey = this.dh.computeAesKey(espPublicKey);
       this._negoResolve?.();
     } catch (err) {
       this._negoReject?.(err instanceof Error ? err : new Error(String(err)));
@@ -295,13 +368,27 @@ export class BluFiSession {
 
   private handleWifiStatus(data: Uint8Array): void {
     if (data.length < 2) return;
-    const staState: BluFiWifiState = data[1];
+    // data[0] = opmode (1=STA), data[1] = sta conn state
+    // ESP_BLUFI_STA_CONN_SUCCESS=0x00, ESP_BLUFI_STA_CONN_FAIL=0x01
+    const staState: BluFiWifiState = data[1] as BluFiWifiState;
 
     let bssid: string | undefined;
-    if (staState === BluFiWifiState.CONNECTED && data.length >= 8) {
-      bssid = Array.from(data.slice(2, 8))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join(':');
+    if (staState === BluFiWifiState.CONNECTED) {
+      // Tìm BSSID trong extra_info (TLV format sau byte 2)
+      // Type 0x03 = STA_BSSID (length=6, value=6 bytes MAC)
+      let pos = 2;
+      while (pos + 1 < data.length) {
+        const tlvType = data[pos];
+        const tlvLen = data[pos + 1];
+        if (pos + 2 + tlvLen > data.length) break;
+        if (tlvType === 0x03 && tlvLen === 6) {
+          bssid = Array.from(data.slice(pos + 2, pos + 2 + 6))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join(':');
+          break;
+        }
+        pos += 2 + tlvLen;
+      }
     }
 
     this.onWifiStatus?.(staState, bssid);
