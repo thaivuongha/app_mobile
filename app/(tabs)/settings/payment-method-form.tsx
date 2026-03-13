@@ -1,4 +1,4 @@
-﻿import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
   StyleSheet,
@@ -20,26 +20,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '@/constants/Colors';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const PAYMENT_TYPES = [
-  { key: 'BANK_TRANSFER', label: 'Ngân hàng', icon: 'card-outline' as const },
-  { key: 'MOMO', label: 'MoMo', icon: 'phone-portrait-outline' as const },
-  { key: 'ZALOPAY', label: 'ZaloPay', icon: 'phone-portrait-outline' as const },
-  { key: 'VNPAY', label: 'VNPay', icon: 'phone-portrait-outline' as const },
-];
-
-const POPULAR_BANKS = [
-  { code: 'VCB', name: 'Vietcombank', color: '#007B40' },
-  { code: 'MB', name: 'MB Bank', color: '#00508F' },
-  { code: 'TCB', name: 'Techcombank', color: '#D71920' },
+// Hiện tại chỉ hỗ trợ 3 ngân hàng: BIDV, MB, TP Bank
+const SUPPORTED_BANKS = [
   { code: 'BIDV', name: 'BIDV', color: '#00488A' },
-  { code: 'CTG', name: 'VietinBank', color: '#1E5AA8' },
-  { code: 'ACB', name: 'ACB', color: '#1C419B' },
-  { code: 'VPB', name: 'VPBank', color: '#FF6600' },
-  { code: 'TPB', name: 'TPBank', color: '#E30613' },
-  { code: 'STB', name: 'Sacombank', color: '#063A81' },
-  { code: 'LPB', name: 'LienVietPost', color: '#004A97' },
-  { code: 'OCB', name: 'OCB', color: '#F7941D' },
-  { code: 'MSB', name: 'MSB', color: '#E11931' },
+  { code: 'MB', name: 'MB Bank', color: '#00508F' },
+  { code: 'TPB', name: 'TP Bank', color: '#E30613' },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -86,7 +71,8 @@ export default function PaymentMethodFormScreen() {
   const isEdit = !!params.id;
 
   // ─── State ──────────────────────────────────────────────────────────────────
-  const [paymentType, setPaymentType] = useState(params.paymentType ?? 'BANK_TRANSFER');
+  // Chỉ hỗ trợ BANK_TRANSFER — không cần lựa chọn loại thanh toán
+  const paymentType = 'BANK_TRANSFER';
   const [selectedBankCode, setSelectedBankCode] = useState(params.bankCode ?? '');
   const [bankName, setBankName] = useState(params.bankName ?? '');
   const [accountNumber, setAccountNumber] = useState('');
@@ -97,7 +83,6 @@ export default function PaymentMethodFormScreen() {
   const [isPrimary] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const isBankTransfer = paymentType === 'BANK_TRANSFER';
 
   // ─── Bank selection ──────────────────────────────────────────────────────────
   const handleBankSelect = (code: string, name: string) => {
@@ -115,7 +100,7 @@ export default function PaymentMethodFormScreen() {
     const resolvedBankName = bankName.trim();
     const resolvedAccountNumber = accountNumber.trim();
 
-    if (isBankTransfer && !resolvedAccountNumber && !isEdit) {
+    if (!resolvedAccountNumber && !isEdit) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập số tài khoản');
       return;
     }
@@ -173,92 +158,58 @@ export default function PaymentMethodFormScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* ── Loại thanh toán ── */}
-          <SectionTitle>Loại thanh toán</SectionTitle>
-          <View style={styles.typeRow}>
-            {PAYMENT_TYPES.map((t) => (
-              <TouchableOpacity
-                key={t.key}
-                style={[styles.typeChip, paymentType === t.key && styles.typeChipActive]}
-                onPress={() => setPaymentType(t.key)}
-              >
-                <Ionicons
-                  name={t.icon}
-                  size={18}
-                  color={paymentType === t.key ? Colors.primary : Colors.textMuted}
-                />
-                <Text
+          {/* ── Chọn ngân hàng ── */}
+          <SectionTitle>Ngân hàng hỗ trợ</SectionTitle>
+          <View style={styles.bankGrid}>
+            {SUPPORTED_BANKS.map((b) => {
+              const isSelected = selectedBankCode === b.code;
+              return (
+                <TouchableOpacity
+                  key={b.code}
                   style={[
-                    styles.typeChipText,
-                    paymentType === t.key && styles.typeChipTextActive,
+                    styles.bankChip,
+                    isSelected && { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
                   ]}
+                  onPress={() => handleBankSelect(b.code, b.name)}
                 >
-                  {t.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <View style={[styles.bankChipDot, { backgroundColor: b.color }]}>
+                    <Text style={styles.bankChipDotText}>{b.code.slice(0, 2)}</Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.bankChipLabel,
+                      isSelected && { color: Colors.primary, fontWeight: '600' },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {b.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
-          {/* ── Chọn ngân hàng (chỉ khi BANK_TRANSFER) ── */}
-          {isBankTransfer && (
-            <>
-              <SectionTitle>Ngân hàng</SectionTitle>
-              <View style={styles.bankGrid}>
-                {POPULAR_BANKS.map((b) => {
-                  const isSelected = selectedBankCode === b.code;
-                  return (
-                    <TouchableOpacity
-                      key={b.code}
-                      style={[
-                        styles.bankChip,
-                        isSelected && { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-                      ]}
-                      onPress={() => handleBankSelect(b.code, b.name)}
-                    >
-                      <View style={[styles.bankChipDot, { backgroundColor: b.color }]}>
-                        <Text style={styles.bankChipDotText}>{b.code.slice(0, 2)}</Text>
-                      </View>
-                      <Text
-                        style={[
-                          styles.bankChipLabel,
-                          isSelected && { color: Colors.primary, fontWeight: '600' },
-                        ]}
-                        numberOfLines={1}
-                      >
-                        {b.code}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </>
-          )}
-
-          {/* ── Tên ngân hàng (custom hoặc auto-filled) ── */}
+          {/* ── Tên ngân hàng (auto-filled khi chọn, hoặc nhập tay) ── */}
           <FormField
-            label={isBankTransfer ? 'Tên đầy đủ ngân hàng' : 'Tên ví / dịch vụ'}
+            label="Tên đầy đủ ngân hàng"
             required
-            hint={
-              isBankTransfer
-                ? 'Chọn ngân hàng ở trên hoặc nhập tay nếu không có trong danh sách'
-                : undefined
-            }
+            hint="Chọn ngân hàng ở trên — tự động điền tên"
           >
             <TextInput
               style={styles.input}
               value={bankName}
               onChangeText={(v) => {
                 setBankName(v);
-                if (isBankTransfer) setSelectedBankCode('');
+                setSelectedBankCode('');
               }}
-              placeholder={isBankTransfer ? 'Ví dụ: Vietcombank' : 'Ví dụ: MoMo'}
+              placeholder="BIDV / MB Bank / TP Bank"
               placeholderTextColor={Colors.textMuted}
             />
           </FormField>
 
           {/* ── Số tài khoản ── */}
           <FormField
-            label={isBankTransfer ? 'Số tài khoản (STK)' : 'Số điện thoại / tài khoản'}
+            label="Số tài khoản (STK)"
             required={!isEdit}
             hint={
               isEdit
@@ -334,26 +285,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // Payment type chips
-  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  typeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: Colors.card,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-  },
-  typeChipActive: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
-  },
-  typeChipText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
-  typeChipTextActive: { color: Colors.primary, fontWeight: '600' },
-
   // Bank grid
   bankGrid: {
     flexDirection: 'row',
@@ -398,34 +329,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     backgroundColor: Colors.card,
   },
-
-  // Toggle
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: Colors.card,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    marginBottom: 24,
-    gap: 12,
-  },
-  toggleRowActive: { borderColor: Colors.primary, backgroundColor: Colors.primaryLight },
-  toggleInfo: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, flex: 1 },
-  toggleLabel: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
-  toggleSubLabel: { fontSize: 12, color: Colors.textSecondary, marginTop: 1 },
-  checkBox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkBoxActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
 
   // Submit
   submitBtn: {
