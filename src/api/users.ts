@@ -8,6 +8,10 @@ export interface User {
   isActive: boolean;
   isVerified: boolean;
   createdAt: string;
+  /** STANDARD (hoa hồng cố định) hoặc PREMIUM (theo % profitRate) */
+  partnerLevel?: 'STANDARD' | 'PREMIUM';
+  /** Tỷ lệ hoa hồng PREMIUM — dạng thập phân, VD: 0.2 = 20% */
+  profitRate?: number | null;
 }
 
 export interface UserProfile {

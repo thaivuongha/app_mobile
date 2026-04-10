@@ -1,4 +1,4 @@
-﻿import { useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
@@ -135,7 +135,7 @@ function Field({
 export default function CheckoutScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { items, getTotal, clearCart } = useCartStore();
+  const { items, getTotalCost: getTotal, getTotalCommission, clearCart } = useCartStore();
 
   // Address tabs: 'saved' | 'new'
   const [addrTab, setAddrTab] = useState<'saved' | 'new'>('saved');
@@ -362,12 +362,17 @@ export default function CheckoutScreen() {
             {/* Tổng cộng */}
             <View style={styles.summaryTotalRow}>
               <View style={styles.summaryTotalLeft}>
-                <Text style={styles.summaryTotalLabel}>Tổng cộng</Text>
+                <Text style={styles.summaryTotalLabel}>Vốn giữ</Text>
                 <Text style={styles.summaryTotalCount}>{itemCount} sản phẩm</Text>
               </View>
-              <Text style={styles.summaryTotalValue}>
-                {total.toLocaleString('vi-VN')}đ
-              </Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.summaryTotalValue}>
+                  {total.toLocaleString('vi-VN')}đ
+                </Text>
+                <Text style={styles.summaryCommission}>
+                  +{getTotalCommission().toLocaleString('vi-VN')}đ hoa hồng
+                </Text>
+              </View>
             </View>
           </View>
         </Section>
@@ -709,6 +714,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     color: Colors.primary,
+  },
+  summaryCommission: {
+    fontSize: 12,
+    color: Colors.success,
+    marginTop: 2,
   },
 
   // Tabs

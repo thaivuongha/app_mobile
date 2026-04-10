@@ -1,4 +1,4 @@
-﻿import { useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -14,8 +14,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { getMe, getMyProfile } from '@/src/api/users';
 import { logout } from '@/src/api/auth';
 import { useAuthStore } from '@/src/stores/authStore';
-import { ApiClientError } from '@/src/api/client';
+import { getWalletBalance } from '@/src/api/wallet';
 import { Colors } from '@/constants/Colors';
+
+function formatVND(amount: number): string {
+  return amount.toLocaleString('vi-VN') + 'đ';
+}
 
 interface MenuItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -68,6 +72,7 @@ export default function MeScreen() {
 
   const userQuery = useQuery({ queryKey: ['users', 'me'], queryFn: getMe });
   const profileQuery = useQuery({ queryKey: ['user-profiles', 'me'], queryFn: getMyProfile });
+  const walletQuery = useQuery({ queryKey: ['wallet'], queryFn: getWalletBalance });
 
   const handleLogout = () => {
     Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
@@ -90,6 +95,7 @@ export default function MeScreen() {
 
   const user = userQuery.data;
   const profile = profileQuery.data;
+  const wallet = walletQuery.data;
 
   const displayName = profile
     ? [profile.firstName, profile.lastName].filter(Boolean).join(' ') || user?.phoneNumber
@@ -139,13 +145,56 @@ export default function MeScreen() {
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{displayName || '—'}</Text>
             <Text style={styles.profilePhone}>{user?.phoneNumber}</Text>
-            {user?.role && (
-              <View style={styles.roleBadge}>
-                <Text style={styles.roleBadgeText}>{user.role}</Text>
-              </View>
-            )}
+            <View style={styles.profileBadgeRow}>
+              {user?.partnerLevel && (
+                <View style={[
+                  styles.roleBadge,
+                  user.partnerLevel === 'PREMIUM' && styles.roleBadgePremium,
+                ]}>
+                  <Text style={[
+                    styles.roleBadgeText,
+                    user.partnerLevel === 'PREMIUM' && styles.roleBadgeTextPremium,
+                  ]}>
+                    {user.partnerLevel === 'PREMIUM' ? '⭐ PREMIUM' : 'STANDARD'}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
+
+        {/* Ví đối tác — mini card */}
+        <TouchableOpacity
+          style={styles.walletCard}
+          onPress={() => router.push('/(tabs)/account/wallet' as never)}
+          activeOpacity={0.85}
+        >
+          <View style={styles.walletCardLeft}>
+            <View style={styles.walletIcon}>
+              <Ionicons name="wallet-outline" size={20} color="#fff" />
+            </View>
+            <View>
+              <Text style={styles.walletCardTitle}>Ví đối tác</Text>
+              <Text style={styles.walletCardSub}>Vận hành & Hoa hồng</Text>
+            </View>
+          </View>
+          <View style={styles.walletCardRight}>
+            {wallet ? (
+              <View style={styles.walletBalanceCol}>
+                <Text style={styles.walletBalanceLabel}>Khả dụng</Text>
+                <Text style={styles.walletBalanceValue}>
+                  {formatVND(wallet.depositBalance)}
+                </Text>
+                <Text style={styles.walletCommissionLabel}>
+                  HH: {formatVND(wallet.commissionBalance)}
+                </Text>
+              </View>
+            ) : (
+              <ActivityIndicator size="small" color="rgba(255,255,255,0.7)" />
+            )}
+            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
+          </View>
+        </TouchableOpacity>
 
         {/* Tài khoản */}
         <MenuSection title="Tài khoản">
@@ -259,6 +308,43 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   headerTitle: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
+
+  profileBadgeRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
+  roleBadgePremium: { backgroundColor: '#FEF3C7' },
+  roleBadgeTextPremium: { color: '#92400E' },
+
+  // Wallet mini card
+  walletCard: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 16,
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  walletCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  walletIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  walletCardTitle: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  walletCardSub: { fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 1 },
+  walletCardRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  walletBalanceCol: { alignItems: 'flex-end' },
+  walletBalanceLabel: { fontSize: 10, color: 'rgba(255,255,255,0.7)' },
+  walletBalanceValue: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  walletCommissionLabel: { fontSize: 10, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
 
   // Profile card
   profileCard: {

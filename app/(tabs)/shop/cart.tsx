@@ -1,4 +1,4 @@
-﻿import { useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -140,9 +140,9 @@ function CartRow({ item }: { item: CartItem }) {
 
 export default function CartScreen() {
   const router = useRouter();
-  const { items, getTotal, clearCart } = useCartStore();
+  const { items, getTotalCost, getTotalCommission, clearCart } = useCartStore();
 
-  const total = getTotal();
+  const total = getTotalCost();
   const itemCount = items.reduce((s, i) => s + i.quantity, 0);
 
   const handleClear = () => {
@@ -211,9 +211,15 @@ export default function CartScreen() {
             <Text style={styles.summaryLabel}>Số lượng</Text>
             <Text style={styles.summaryValue}>{itemCount} sản phẩm</Text>
           </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Hoa hồng ước tính</Text>
+            <Text style={[styles.summaryValue, { color: Colors.success }]}>
+              +{getTotalCommission().toLocaleString('vi-VN')}đ
+            </Text>
+          </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Tổng cộng</Text>
+            <Text style={styles.totalLabel}>Vốn giữ</Text>
             <Text style={styles.totalValue}>{total.toLocaleString('vi-VN')}đ</Text>
           </View>
         </View>

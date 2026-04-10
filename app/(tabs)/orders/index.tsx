@@ -1,4 +1,4 @@
-﻿import { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   StyleSheet,
   FlatList,
@@ -260,7 +260,8 @@ function OrderDetailModal({
             <View style={styles.detailCard}>
               <Text style={styles.detailCardTitle}>Sản phẩm đã đặt</Text>
               {(order.items ?? []).map((item, idx) => {
-                const subtotal = Number(item.priceAtOrder) * item.quantity;
+                const costSubtotal = Number(item.priceAtOrder) * item.quantity;
+                const commissionSubtotal = Number(item.commissionAtOrder ?? 0) * item.quantity;
                 return (
                   <View
                     key={idx}
@@ -279,18 +280,23 @@ function OrderDetailModal({
                           <Text style={styles.qtyBadgeText}>×{item.quantity}</Text>
                         </View>
                         <Text style={styles.itemUnitPrice}>
-                          {Number(item.priceAtOrder).toLocaleString('vi-VN')}đ / cái
+                          {Number(item.priceAtOrder).toLocaleString('vi-VN')}đ
                         </Text>
                       </View>
+                      {Number(item.commissionAtOrder ?? 0) > 0 && (
+                        <Text style={styles.itemCommission}>
+                          +{commissionSubtotal.toLocaleString('vi-VN')}đ HH
+                        </Text>
+                      )}
                     </View>
-                    <Text style={styles.itemSubtotal}>{subtotal.toLocaleString('vi-VN')}đ</Text>
+                    <Text style={styles.itemSubtotal}>{costSubtotal.toLocaleString('vi-VN')}đ</Text>
                   </View>
                 );
               })}
 
               {/* Total */}
               <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Tổng cộng</Text>
+                <Text style={styles.totalLabel}>Vốn giữ</Text>
                 <Text style={styles.totalValue}>{total.toLocaleString('vi-VN')}đ</Text>
               </View>
             </View>
@@ -670,6 +676,7 @@ const styles = StyleSheet.create({
   },
   qtyBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   itemUnitPrice: { fontSize: 12, color: Colors.textSecondary },
+  itemCommission: { fontSize: 11, color: Colors.success, marginTop: 2 },
   itemSubtotal: {
     fontSize: 15,
     fontWeight: '700',

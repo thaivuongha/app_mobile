@@ -4,7 +4,12 @@ export interface Product {
   id: string;
   name: string;
   brandName: string;
+  /** Giá gốc (vốn) — số tiền ký quỹ bị giam khi đặt hàng B2B */
   price: string;
+  /** Hoa hồng tính sẵn theo partnerLevel của user (backend tính) */
+  commissionAmount: string;
+  /** Giá bán = price + commissionAmount — giá khách thanh toán tại máy */
+  sellingPrice: string;
   imageUrl: string | null;
   description: string | null;
   categoryId: string | null;

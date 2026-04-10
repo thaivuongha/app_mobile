@@ -25,6 +25,13 @@ export default function MeLayout() {
       <Stack.Screen name="payment-method-form" options={{ title: 'Thông tin thanh toán' }} />
       <Stack.Screen name="delivery-addresses" options={{ title: 'Địa chỉ giao hàng' }} />
       <Stack.Screen name="delivery-address-form" options={{ title: 'Thêm / Sửa địa chỉ' }} />
+      {/* Wallet screens */}
+      <Stack.Screen name="wallet" options={{ title: 'Ví đối tác' }} />
+      <Stack.Screen name="wallet-topup" options={{ title: 'Nạp cọc' }} />
+      <Stack.Screen name="wallet-transfer" options={{ title: 'Chuyển vốn' }} />
+      <Stack.Screen name="wallet-ledger" options={{ title: 'Lịch sử biến động' }} />
+      <Stack.Screen name="wallet-payout-accounts" options={{ title: 'Tài khoản nhận hoa hồng' }} />
+      <Stack.Screen name="wallet-payouts" options={{ title: 'Lịch sử chi trả' }} />
     </Stack>
   );
 }
