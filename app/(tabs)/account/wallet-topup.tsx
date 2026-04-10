@@ -9,11 +9,11 @@ import {
   ActivityIndicator,
   Alert,
   StatusBar,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import QRCode from 'react-native-qrcode-svg';
 import { initTopup, getTopupStatus } from '@/src/api/wallet';
 import type { TopupInitResponse } from '@/src/api/wallet';
 import { Colors } from '@/constants/Colors';
@@ -123,42 +123,25 @@ function QRView({
         <Text style={styles.amountBannerValue}>{formatVND(session.amount)}</Text>
       </View>
 
-      {/* QR Code image */}
+      {/* QR Code */}
       <View style={styles.qrWrapper}>
-        {(() => {
-          // Ưu tiên qrLink (URL ảnh trực tiếp từ VietQR)
-          if (session.qrLink) {
-            return (
-              <Image
-                source={{ uri: session.qrLink }}
-                style={styles.qrImage}
-                resizeMode="contain"
-              />
-            );
-          }
-          // Fallback: qrCode base64
-          if (session.qrCode) {
-            const uri = session.qrCode.startsWith('data:')
-              ? session.qrCode
-              : `data:image/png;base64,${session.qrCode}`;
-            return (
-              <Image
-                source={{ uri }}
-                style={styles.qrImage}
-                resizeMode="contain"
-              />
-            );
-          }
-          // Không có QR — hiện placeholder + thông báo
-          return (
-            <View style={styles.qrPlaceholder}>
-              <Ionicons name="qr-code-outline" size={80} color={Colors.textMuted} />
-              <Text style={styles.qrPlaceholderText}>
-                Chưa tạo được mã QR.{'\n'}Vui lòng thử lại.
-              </Text>
-            </View>
-          );
-        })()}
+        {session.qrCode ? (
+          <View style={styles.qrBox}>
+            <QRCode
+              value={session.qrCode}
+              size={200}
+              color="#000"
+              backgroundColor="#fff"
+            />
+          </View>
+        ) : (
+          <View style={styles.qrPlaceholder}>
+            <Ionicons name="qr-code-outline" size={80} color={Colors.textMuted} />
+            <Text style={styles.qrPlaceholderText}>
+              Chưa tạo được mã QR.{'\n'}Vui lòng thử lại.
+            </Text>
+          </View>
+        )}
         {/* Polling spinner */}
         <View style={styles.pollBadge}>
           <ActivityIndicator size="small" color={Colors.primary} />
@@ -438,7 +421,13 @@ const styles = StyleSheet.create({
   amountBannerValue: { fontSize: 24, fontWeight: '800', color: Colors.primary },
 
   qrWrapper: { position: 'relative', alignItems: 'center' },
-  qrImage: { width: 220, height: 220, borderRadius: 8 },
+  qrBox: {
+    padding: 12,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
   qrPlaceholder: {
     width: 220,
     height: 220,
