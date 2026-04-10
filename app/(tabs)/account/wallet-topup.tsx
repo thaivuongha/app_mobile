@@ -206,7 +206,8 @@ export default function WalletTopupScreen() {
   };
 
   const handleSuccess = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['wallet'] });
+    // Force immediate refetch thay vì chỉ mark stale
+    queryClient.refetchQueries({ queryKey: ['wallet'] });
     Alert.alert(
       'Nạp cọc thành công',
       `+${formatVND(session!.amount)} đã được cộng vào ví vận hành.`,

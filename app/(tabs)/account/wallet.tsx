@@ -1,5 +1,7 @@
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   StyleSheet,
   ScrollView,
@@ -75,9 +77,17 @@ function QuickLink({
 
 export default function WalletScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const balanceQuery = useQuery({ queryKey: ['wallet'], queryFn: getWalletBalance });
   const accountsQuery = useQuery({ queryKey: ['payout-accounts'], queryFn: getPayoutAccounts });
+
+  // Luôn refetch số dư khi screen được focus (navigate back từ topup/transfer/...)
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+    }, [queryClient]),
+  );
 
   const w = balanceQuery.data;
   const accounts = accountsQuery.data ?? [];
