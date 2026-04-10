@@ -42,8 +42,8 @@ export type TopupStatus = 'PENDING' | 'COMPLETED' | 'EXPIRED';
 
 export interface TopupInitResponse {
   referenceCode: string;
-  qrCode: string;
-  qrLink: string;
+  qrCode: string | null;
+  qrLink: string | null;
   amount: number;
   expiredAt: string;
 }

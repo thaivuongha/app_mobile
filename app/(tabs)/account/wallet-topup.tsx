@@ -125,18 +125,41 @@ function QRView({
 
       {/* QR Code image */}
       <View style={styles.qrWrapper}>
-        {session.qrCode ? (
-          <Image
-            source={{ uri: session.qrCode.startsWith('data:') ? session.qrCode : `data:image/png;base64,${session.qrCode}` }}
-            style={styles.qrImage}
-            resizeMode="contain"
-          />
-        ) : (
-          <View style={styles.qrPlaceholder}>
-            <Ionicons name="qr-code-outline" size={80} color={Colors.textMuted} />
-          </View>
-        )}
-        {/* Polling spinner overlay */}
+        {(() => {
+          // Ưu tiên qrLink (URL ảnh trực tiếp từ VietQR)
+          if (session.qrLink) {
+            return (
+              <Image
+                source={{ uri: session.qrLink }}
+                style={styles.qrImage}
+                resizeMode="contain"
+              />
+            );
+          }
+          // Fallback: qrCode base64
+          if (session.qrCode) {
+            const uri = session.qrCode.startsWith('data:')
+              ? session.qrCode
+              : `data:image/png;base64,${session.qrCode}`;
+            return (
+              <Image
+                source={{ uri }}
+                style={styles.qrImage}
+                resizeMode="contain"
+              />
+            );
+          }
+          // Không có QR — hiện placeholder + thông báo
+          return (
+            <View style={styles.qrPlaceholder}>
+              <Ionicons name="qr-code-outline" size={80} color={Colors.textMuted} />
+              <Text style={styles.qrPlaceholderText}>
+                Chưa tạo được mã QR.{'\n'}Vui lòng thử lại.
+              </Text>
+            </View>
+          );
+        })()}
+        {/* Polling spinner */}
         <View style={styles.pollBadge}>
           <ActivityIndicator size="small" color={Colors.primary} />
           <Text style={styles.pollText}>Đang chờ thanh toán...</Text>
@@ -423,8 +446,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  qrPlaceholderText: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: 12,
   },
   pollBadge: {
     flexDirection: 'row',
