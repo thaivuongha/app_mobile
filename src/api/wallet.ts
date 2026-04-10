@@ -93,7 +93,7 @@ export interface PayoutsResponse {
 // ── API functions ─────────────────────────────────────────────────────────────
 
 export function getWalletBalance(): Promise<WalletBalance> {
-  return apiRequest<WalletBalance>('/api/v1/wallet');
+  return apiRequest<WalletBalance>('/api/v1/wallet/balance');
 }
 
 export function getWalletLedger(params?: {
