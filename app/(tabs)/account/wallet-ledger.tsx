@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -85,7 +86,9 @@ function EntryRow({ entry }: { entry: LedgerEntry }) {
 // ─── Main screen ───────────────────────────────────────────────────────────────
 
 export default function WalletLedgerScreen() {
-  const [filter, setFilter] = useState<WalletFilter>('ALL');
+  const params = useLocalSearchParams<{ walletType?: string }>();
+  const initialFilter = (params.walletType as WalletFilter) ?? 'ALL';
+  const [filter, setFilter] = useState<WalletFilter>(initialFilter);
 
   const {
     data,

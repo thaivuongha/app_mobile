@@ -12,9 +12,9 @@
       "backgroundColor": "#FFFFFF"
     },
     "androidStatusBar": {
-      "backgroundColor": "transparent",
+      "backgroundColor": "#FFFFFF",
       "barStyle": "dark-content",
-      "translucent": true
+      "translucent": false
     },
     "ios": {
       "supportsTablet": true
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/embox-icon-cube.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#FF815C"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,

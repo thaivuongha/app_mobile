@@ -163,38 +163,29 @@ export default function MeScreen() {
           </View>
         </View>
 
-        {/* Ví đối tác — mini card */}
-        <TouchableOpacity
-          style={styles.walletCard}
-          onPress={() => router.push('/(tabs)/account/wallet' as never)}
-          activeOpacity={0.85}
-        >
-          <View style={styles.walletCardLeft}>
-            <View style={styles.walletIcon}>
-              <Ionicons name="wallet-outline" size={20} color="#fff" />
-            </View>
-            <View>
-              <Text style={styles.walletCardTitle}>Ví đối tác</Text>
-              <Text style={styles.walletCardSub}>Vận hành & Hoa hồng</Text>
-            </View>
-          </View>
-          <View style={styles.walletCardRight}>
-            {wallet ? (
-              <View style={styles.walletBalanceCol}>
-                <Text style={styles.walletBalanceLabel}>Khả dụng</Text>
-                <Text style={styles.walletBalanceValue}>
-                  {formatVND(wallet.depositBalance)}
-                </Text>
-                <Text style={styles.walletCommissionLabel}>
-                  HH: {formatVND(wallet.commissionBalance)}
-                </Text>
-              </View>
-            ) : (
-              <ActivityIndicator size="small" color="rgba(255,255,255,0.7)" />
-            )}
-            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
-          </View>
-        </TouchableOpacity>
+        {/* Ví đối tác */}
+        <MenuSection title="Ví đối tác">
+          <MenuItem
+            icon="wallet-outline"
+            label="Ví vận hành"
+            sublabel={
+              wallet
+                ? `Khả dụng: ${formatVND(wallet.depositBalance)}`
+                : 'Đang tải...'
+            }
+            onPress={() => router.push('/(tabs)/account/wallet' as never)}
+          />
+          <MenuItem
+            icon="gift-outline"
+            label="Ví hoa hồng"
+            sublabel={
+              wallet
+                ? `Số dư: ${formatVND(wallet.commissionBalance)}`
+                : 'Đang tải...'
+            }
+            onPress={() => router.push('/(tabs)/account/wallet-commission' as never)}
+          />
+        </MenuSection>
 
         {/* Tài khoản */}
         <MenuSection title="Tài khoản">
@@ -209,33 +200,11 @@ export default function MeScreen() {
             label="Đổi mật khẩu"
             onPress={() => router.push('/(tabs)/account/change-password')}
           />
-        </MenuSection>
-
-        {/* Cài đặt */}
-        <MenuSection title="Cài đặt">
           <MenuItem
             icon="location-outline"
             label="Địa chỉ giao hàng"
             sublabel="Quản lý địa chỉ nhận hàng"
             onPress={() => router.push({ pathname: '/(tabs)/account/delivery-addresses', params: { from: 'account' } })}
-          />
-          <MenuItem
-            icon="card-outline"
-            label="Thông tin thanh toán"
-            sublabel="Tài khoản ngân hàng nhận tiền VietQR"
-            onPress={() => router.push({ pathname: '/(tabs)/account/payment-methods', params: { from: 'account' } })}
-          />
-          <MenuItem
-            icon="document-text-outline"
-            label="Cài đặt hóa đơn"
-            sublabel="Thông tin xuất hóa đơn VAT"
-            onPress={() => router.push('/(tabs)/account/invoice')}
-          />
-          <MenuItem
-            icon="trending-up-outline"
-            label="Lợi nhuận"
-            sublabel="Tỷ lệ phần trăm lợi nhuận mỗi giao dịch"
-            onPress={() => router.push('/(tabs)/account/commission')}
           />
         </MenuSection>
 
@@ -312,39 +281,6 @@ const styles = StyleSheet.create({
   profileBadgeRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
   roleBadgePremium: { backgroundColor: '#FEF3C7' },
   roleBadgeTextPremium: { color: '#92400E' },
-
-  // Wallet mini card
-  walletCard: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 16,
-    backgroundColor: Colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  walletCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  walletIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  walletCardTitle: { fontSize: 15, fontWeight: '700', color: '#fff' },
-  walletCardSub: { fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 1 },
-  walletCardRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  walletBalanceCol: { alignItems: 'flex-end' },
-  walletBalanceLabel: { fontSize: 10, color: 'rgba(255,255,255,0.7)' },
-  walletBalanceValue: { fontSize: 16, fontWeight: '800', color: '#fff' },
-  walletCommissionLabel: { fontSize: 10, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
 
   // Profile card
   profileCard: {

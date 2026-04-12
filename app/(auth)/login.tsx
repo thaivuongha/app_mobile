@@ -33,7 +33,7 @@ function EmboxLogo() {
         maskElement={<Text style={styles.logoName}>EMBOX</Text>}
       >
         <LinearGradient
-          colors={['#9333EA', '#EF4444']}
+          colors={[Colors.primary, Colors.primaryDark]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >

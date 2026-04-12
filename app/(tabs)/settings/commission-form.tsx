@@ -12,6 +12,7 @@ import { Text, View } from '@/components/Themed';
 import { createCommissionSetting } from '@/src/api/commissionSettings';
 import { ApiClientError } from '@/src/api/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { Colors } from '@/constants/Colors';
 
 export default function CommissionFormScreen() {
   const router = useRouter();
@@ -79,22 +80,22 @@ export default function CommissionFormScreen() {
         <Text>{isDefault ? '✓' : ''}</Text>
       </TouchableOpacity>
       <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleSubmit} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Lưu</Text>}
+        {loading ? <ActivityIndicator color={Colors.textPrimary} /> : <Text style={styles.buttonText}>Lưu</Text>}
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  label: { marginBottom: 6, fontSize: 14, fontWeight: '500' },
+  container: { flex: 1, padding: 16, backgroundColor: Colors.background },
+  label: { marginBottom: 6, fontSize: 14, fontWeight: '500', color: Colors.textSecondary },
   row: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  chip: { flex: 1, padding: 12, borderRadius: 8, backgroundColor: '#eee', alignItems: 'center' },
-  chipActive: { backgroundColor: '#2f95dc' },
-  chipTextActive: { color: '#fff' },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 16 },
+  chip: { flex: 1, padding: 12, borderRadius: 8, backgroundColor: Colors.surface, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
+  chipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  chipTextActive: { color: Colors.textPrimary, fontWeight: '600' },
+  input: { borderWidth: 1, borderColor: Colors.border, borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 16, backgroundColor: Colors.surface, color: Colors.textPrimary },
   checkRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, marginBottom: 16 },
-  button: { backgroundColor: '#2f95dc', padding: 14, borderRadius: 8, alignItems: 'center' },
+  button: { backgroundColor: Colors.primary, padding: 14, borderRadius: 8, alignItems: 'center', shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
   buttonDisabled: { opacity: 0.7 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: Colors.textPrimary, fontSize: 16, fontWeight: '600' },
 });

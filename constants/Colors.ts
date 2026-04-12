@@ -1,34 +1,21 @@
 /**
- * EMBOX Brand Colors — Mobile App
+ * Brand Colors — Mobile App
  *
- * Primary  : purple-600  (#9333EA)
- * Orange   : orange-500  (#F97316) — highlight, giá, icon
- * Accent   : red-500     (#EF4444) — danger, cancel
- * Gradient : from-purple-600 via-orange-500 to-red-500
+ * Primary  : #FF815C (cam)
+ * Background: #FFFFFF (trắng) — light-first
+ * Text     : #0a0a0a (đen)
  */
 
 // ─── Brand palette ────────────────────────────────────────────────────────────
 
-/** purple-600 — màu chủ đạo */
-export const BRAND_PRIMARY = '#9333EA';
+/** Cam — màu chủ đạo */
+export const BRAND_PRIMARY = '#FF815C';
 
-/** purple-700 — hover / pressed state */
-export const BRAND_PRIMARY_DARK = '#7E22CE';
+/** Cam đậm hơn — pressed / hover state */
+export const BRAND_PRIMARY_DARK = '#E06540';
 
-/** purple-50 — nền sáng, badge nhẹ */
-export const BRAND_PRIMARY_LIGHT = '#FAF5FF';
-
-/** red-500 — accent, danger */
-export const BRAND_ACCENT = '#EF4444';
-
-/** red-50 — nền accent nhẹ */
-export const BRAND_ACCENT_LIGHT = '#FEF2F2';
-
-/** orange-500 — "đỏ cam", gradient mid, highlight nổi bật */
-export const BRAND_ORANGE = '#F97316';
-
-/** orange-50 — nền orange nhẹ */
-export const BRAND_ORANGE_LIGHT = '#FFF7ED';
+/** Cam mờ — badge nền, tint nhẹ trên nền sáng */
+export const BRAND_PRIMARY_LIGHT = 'rgba(255,129,92,0.12)';
 
 // ─── Semantic colors ──────────────────────────────────────────────────────────
 export const Colors = {
@@ -36,38 +23,29 @@ export const Colors = {
   primary: BRAND_PRIMARY,
   primaryDark: BRAND_PRIMARY_DARK,
   primaryLight: BRAND_PRIMARY_LIGHT,
-  accent: BRAND_ACCENT,
-  accentLight: BRAND_ACCENT_LIGHT,
 
-  // Gradient purple → orange → red
-  gradientStart: BRAND_PRIMARY,   // #9333EA purple
-  gradientMid: BRAND_ORANGE,      // #F97316 orange
-  gradientEnd: BRAND_ACCENT,      // #EF4444 red
-
-  // Orange "đỏ cam"
-  orange: BRAND_ORANGE,
-  orangeLight: BRAND_ORANGE_LIGHT,
-
-  // Backgrounds
-  background: '#F9FAFB',   // gray-50
+  // Backgrounds (light-first)
+  background: '#FFFFFF',
+  surface: '#F9FAFB',      // gray-50 — nền section / tab bar
   card: '#FFFFFF',
+  surfaceElevated: '#F3F4F6', // gray-100 — modal, input nổi
+
+  // Border & shadow
+  border: '#E5E7EB',       // gray-200
+  shadow: 'rgba(0,0,0,0.08)',
 
   // Text
-  textPrimary: '#111827',    // gray-900
+  textPrimary: '#0a0a0a',    // gần đen — mạnh mẽ
   textSecondary: '#4B5563',  // gray-600
   textMuted: '#9CA3AF',      // gray-400
 
-  // Utility
-  success: '#10B981',        // emerald-500
+  // Semantic utility (không đổi — dùng cho trạng thái UI)
+  success: '#10B981',
   successLight: '#D1FAE5',
-  warning: '#F59E0B',        // amber-500
+  warning: '#F59E0B',
   warningLight: '#FEF3C7',
-  danger: BRAND_ACCENT,      // red-500 — dùng brand accent cho danger
-  dangerLight: BRAND_ACCENT_LIGHT,
-
-  // Border & shadow
-  border: '#E5E7EB',         // gray-200
-  shadow: 'rgba(0, 0, 0, 0.07)',
+  danger: '#EF4444',
+  dangerLight: '#FEE2E2',
 };
 
 // ─── Legacy compat (useColorScheme hook) ─────────────────────────────────────
@@ -80,10 +58,10 @@ export default {
     tabIconSelected: Colors.primary,
   },
   dark: {
-    text: '#F9FAFB',
-    background: '#111827',
+    text: Colors.textPrimary,
+    background: Colors.background,
     tint: Colors.primary,
-    tabIconDefault: '#6B7280',
+    tabIconDefault: Colors.textMuted,
     tabIconSelected: Colors.primary,
   },
 };

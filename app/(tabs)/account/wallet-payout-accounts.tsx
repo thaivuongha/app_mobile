@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -25,6 +25,202 @@ import {
 import type { PayoutAccount } from '@/src/api/wallet';
 import { Colors } from '@/constants/Colors';
 
+// ─── Danh sách ngân hàng Việt Nam ─────────────────────────────────────────────
+
+const VIETNAMESE_BANKS = [
+  { code: 'VCB',   name: 'Vietcombank',               fullName: 'Ngân hàng TMCP Ngoại thương Việt Nam' },
+  { code: 'BIDV',  name: 'BIDV',                       fullName: 'Ngân hàng TMCP Đầu tư và Phát triển Việt Nam' },
+  { code: 'CTG',   name: 'VietinBank',                 fullName: 'Ngân hàng TMCP Công Thương Việt Nam' },
+  { code: 'AGR',   name: 'Agribank',                   fullName: 'Ngân hàng Nông nghiệp và PTNT Việt Nam' },
+  { code: 'TCB',   name: 'Techcombank',                fullName: 'Ngân hàng TMCP Kỹ thương Việt Nam' },
+  { code: 'MB',    name: 'MB Bank',                    fullName: 'Ngân hàng TMCP Quân đội' },
+  { code: 'ACB',   name: 'ACB',                        fullName: 'Ngân hàng TMCP Á Châu' },
+  { code: 'VPB',   name: 'VPBank',                     fullName: 'Ngân hàng TMCP Việt Nam Thịnh Vượng' },
+  { code: 'TPB',   name: 'TPBank',                     fullName: 'Ngân hàng TMCP Tiên Phong' },
+  { code: 'STB',   name: 'Sacombank',                  fullName: 'Ngân hàng TMCP Sài Gòn Thương Tín' },
+  { code: 'HDB',   name: 'HDBank',                     fullName: 'Ngân hàng TMCP Phát triển TP. HCM' },
+  { code: 'VIB',   name: 'VIB',                        fullName: 'Ngân hàng TMCP Quốc tế Việt Nam' },
+  { code: 'SHB',   name: 'SHB',                        fullName: 'Ngân hàng TMCP Sài Gòn - Hà Nội' },
+  { code: 'EIB',   name: 'Eximbank',                   fullName: 'Ngân hàng TMCP Xuất Nhập khẩu Việt Nam' },
+  { code: 'MSB',   name: 'MSB',                        fullName: 'Ngân hàng TMCP Hàng Hải Việt Nam' },
+  { code: 'OCB',   name: 'OCB',                        fullName: 'Ngân hàng TMCP Phương Đông' },
+  { code: 'LPB',   name: 'LienVietPostBank',           fullName: 'Ngân hàng TMCP Bưu điện Liên Việt' },
+  { code: 'KLB',   name: 'KienLongBank',               fullName: 'Ngân hàng TMCP Kiên Long' },
+  { code: 'NAB',   name: 'Nam A Bank',                 fullName: 'Ngân hàng TMCP Nam Á' },
+  { code: 'PGB',   name: 'PGBank',                     fullName: 'Ngân hàng TMCP Xăng dầu Petrolimex' },
+  { code: 'VAB',   name: 'VietABank',                  fullName: 'Ngân hàng TMCP Việt Á' },
+  { code: 'BAB',   name: 'BacABank',                   fullName: 'Ngân hàng TMCP Bắc Á' },
+  { code: 'SEAB',  name: 'SeABank',                    fullName: 'Ngân hàng TMCP Đông Nam Á' },
+  { code: 'CAKE',  name: 'CAKE',                       fullName: 'Ngân hàng số CAKE by VPBank' },
+  { code: 'UBANK', name: 'Ubank',                      fullName: 'Ngân hàng số Ubank by VPBank' },
+  { code: 'TIMO',  name: 'Timo',                       fullName: 'Timo Plus' },
+  { code: 'VCCB',  name: 'BVBank',                     fullName: 'Ngân hàng TMCP Bản Việt' },
+  { code: 'PBVN',  name: 'PublicBank',                 fullName: 'Ngân hàng TNHH MTV Public Việt Nam' },
+  { code: 'HSBC',  name: 'HSBC Việt Nam',              fullName: 'Ngân hàng TNHH MTV HSBC Việt Nam' },
+  { code: 'SCB',   name: 'Standard Chartered',         fullName: 'Ngân hàng TNHH MTV Standard Chartered Việt Nam' },
+  { code: 'SHBVN', name: 'Shinhan Bank',               fullName: 'Ngân hàng TNHH MTV Shinhan Việt Nam' },
+  { code: 'KBHCM', name: 'KookminBank HCM',            fullName: 'Ngân hàng Kookmin - Chi nhánh TP. HCM' },
+  { code: 'KBHN',  name: 'KookminBank HN',             fullName: 'Ngân hàng Kookmin - Chi nhánh Hà Nội' },
+  { code: 'IBK',   name: 'IBK',                        fullName: 'Ngân hàng IBK - Chi nhánh TP. HCM' },
+  { code: 'MOMO',  name: 'Ví MoMo',                   fullName: 'Ví điện tử MoMo' },
+  { code: 'ZALOPAY', name: 'ZaloPay',                  fullName: 'Ví điện tử ZaloPay' },
+] as const;
+
+type BankInfo = typeof VIETNAMESE_BANKS[number];
+
+// ─── Bank picker modal ─────────────────────────────────────────────────────────
+
+function BankPickerModal({
+  visible,
+  selected,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  selected: string;
+  onSelect: (bank: BankInfo) => void;
+  onClose: () => void;
+}) {
+  const [search, setSearch] = useState('');
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return VIETNAMESE_BANKS;
+    return VIETNAMESE_BANKS.filter(
+      (b) =>
+        b.name.toLowerCase().includes(q) ||
+        b.code.toLowerCase().includes(q) ||
+        b.fullName.toLowerCase().includes(q),
+    );
+  }, [search]);
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={pickerStyles.overlay}>
+        <TouchableOpacity style={pickerStyles.backdrop} activeOpacity={1} onPress={onClose} />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={pickerStyles.sheet}
+        >
+          <View style={pickerStyles.handle} />
+          <Text style={pickerStyles.title}>Chọn ngân hàng</Text>
+
+          {/* Search */}
+          <View style={pickerStyles.searchRow}>
+            <Ionicons name="search-outline" size={16} color={Colors.textMuted} />
+            <TextInput
+              style={pickerStyles.searchInput}
+              placeholder="Tìm tên hoặc mã ngân hàng..."
+              placeholderTextColor={Colors.textMuted}
+              value={search}
+              onChangeText={setSearch}
+              autoCorrect={false}
+            />
+            {search.length > 0 && (
+              <TouchableOpacity onPress={() => setSearch('')}>
+                <Ionicons name="close-circle" size={16} color={Colors.textMuted} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <FlatList
+            data={filtered}
+            keyExtractor={(b) => b.code}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            style={pickerStyles.list}
+            renderItem={({ item }) => {
+              const isSelected = selected === item.name;
+              return (
+                <TouchableOpacity
+                  style={[pickerStyles.bankRow, isSelected && pickerStyles.bankRowSelected]}
+                  onPress={() => { onSelect(item); onClose(); }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[pickerStyles.bankCode, isSelected && pickerStyles.bankCodeSelected]}>
+                    <Text style={[pickerStyles.bankCodeText, isSelected && pickerStyles.bankCodeTextSelected]}>
+                      {item.code.slice(0, 4)}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[pickerStyles.bankName, isSelected && pickerStyles.bankNameSelected]}>
+                      {item.name}
+                    </Text>
+                    <Text style={pickerStyles.bankFullName} numberOfLines={1}>
+                      {item.fullName}
+                    </Text>
+                  </View>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
+                  )}
+                </TouchableOpacity>
+              );
+            }}
+            ListEmptyComponent={
+              <View style={pickerStyles.empty}>
+                <Text style={pickerStyles.emptyText}>Không tìm thấy ngân hàng</Text>
+              </View>
+            }
+          />
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
+  );
+}
+
+const pickerStyles = StyleSheet.create({
+  overlay: { flex: 1, justifyContent: 'flex-end' },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
+  sheet: {
+    backgroundColor: Colors.card,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 12,
+    maxHeight: '80%',
+  },
+  handle: {
+    width: 36, height: 4, borderRadius: 2,
+    backgroundColor: Colors.border,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 17, fontWeight: '700', color: Colors.textPrimary,
+    paddingHorizontal: 20, marginBottom: 12,
+  },
+  searchRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginHorizontal: 16, marginBottom: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 12, borderWidth: 1, borderColor: Colors.border,
+    paddingHorizontal: 12, height: 44,
+  },
+  searchInput: {
+    flex: 1, fontSize: 14, color: Colors.textPrimary,
+  },
+  list: { paddingHorizontal: 12, paddingBottom: 32 },
+  bankRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 12, paddingHorizontal: 8,
+    borderRadius: 12, marginBottom: 2,
+  },
+  bankRowSelected: { backgroundColor: Colors.primaryLight },
+  bankCode: {
+    width: 52, height: 36, borderRadius: 9,
+    backgroundColor: Colors.surface,
+    borderWidth: 1, borderColor: Colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  bankCodeSelected: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  bankCodeText: { fontSize: 11, fontWeight: '700', color: Colors.textSecondary },
+  bankCodeTextSelected: { color: '#fff' },
+  bankName: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
+  bankNameSelected: { color: Colors.primary },
+  bankFullName: { fontSize: 11, color: Colors.textMuted, marginTop: 1 },
+  empty: { alignItems: 'center', paddingVertical: 32 },
+  emptyText: { fontSize: 14, color: Colors.textMuted },
+});
+
 // ─── Form modal ───────────────────────────────────────────────────────────────
 
 interface FormValues {
@@ -50,10 +246,11 @@ function AccountFormModal({
   const [accountNumber, setAccountNumber] = useState(initial.accountNumber ?? '');
   const [accountHolder, setAccountHolder] = useState(initial.accountHolder ?? '');
   const [errors, setErrors] = useState<Partial<FormValues>>({});
+  const [showBankPicker, setShowBankPicker] = useState(false);
 
   const validate = (): boolean => {
     const e: Partial<FormValues> = {};
-    if (!bankName.trim()) e.bankName = 'Tên ngân hàng không được để trống';
+    if (!bankName.trim()) e.bankName = 'Vui lòng chọn ngân hàng';
     if (!accountNumber.trim()) e.accountNumber = 'Số tài khoản không được để trống';
     if (!accountHolder.trim()) e.accountHolder = 'Tên chủ tài khoản không được để trống';
     setErrors(e);
@@ -66,78 +263,93 @@ function AccountFormModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.modalWrapper}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose} />
-        <View style={styles.formSheet}>
-          <View style={styles.formHandle} />
-          <Text style={styles.formTitle}>
-            {initial.bankName ? 'Sửa tài khoản' : 'Thêm tài khoản nhận hoa hồng'}
-          </Text>
+    <>
+      <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+        <KeyboardAvoidingView
+          style={styles.modalWrapper}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose} />
+          <View style={styles.formSheet}>
+            <View style={styles.formHandle} />
+            <Text style={styles.formTitle}>
+              {initial.bankName ? 'Sửa tài khoản' : 'Thêm tài khoản nhận hoa hồng'}
+            </Text>
 
-          <View style={styles.field}>
-            <Text style={styles.fieldLabel}>Tên ngân hàng</Text>
-            <TextInput
-              style={[styles.fieldInput, errors.bankName ? styles.fieldInputError : undefined]}
-              value={bankName}
-              onChangeText={(t) => { setBankName(t); setErrors((e) => ({ ...e, bankName: undefined })); }}
-              placeholder="VD: Vietcombank, BIDV, MB..."
-              placeholderTextColor={Colors.textMuted}
-              returnKeyType="next"
-            />
-            {errors.bankName ? <Text style={styles.fieldError}>{errors.bankName}</Text> : null}
-          </View>
+            {/* Ngân hàng — dropdown */}
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Ngân hàng</Text>
+              <TouchableOpacity
+                style={[styles.fieldInput, styles.selectRow, errors.bankName ? styles.fieldInputError : undefined]}
+                onPress={() => setShowBankPicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={bankName ? styles.selectText : styles.selectPlaceholder} numberOfLines={1}>
+                  {bankName || 'Chọn ngân hàng...'}
+                </Text>
+                <Ionicons name="chevron-down" size={16} color={Colors.textMuted} />
+              </TouchableOpacity>
+              {errors.bankName ? <Text style={styles.fieldError}>{errors.bankName}</Text> : null}
+            </View>
 
-          <View style={styles.field}>
-            <Text style={styles.fieldLabel}>Số tài khoản</Text>
-            <TextInput
-              style={[styles.fieldInput, errors.accountNumber ? styles.fieldInputError : undefined]}
-              value={accountNumber}
-              onChangeText={(t) => { setAccountNumber(t); setErrors((e) => ({ ...e, accountNumber: undefined })); }}
-              placeholder="Số tài khoản ngân hàng"
-              placeholderTextColor={Colors.textMuted}
-              keyboardType="number-pad"
-              returnKeyType="next"
-            />
-            {errors.accountNumber ? <Text style={styles.fieldError}>{errors.accountNumber}</Text> : null}
-          </View>
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Số tài khoản</Text>
+              <TextInput
+                style={[styles.fieldInput, errors.accountNumber ? styles.fieldInputError : undefined]}
+                value={accountNumber}
+                onChangeText={(t) => { setAccountNumber(t); setErrors((e) => ({ ...e, accountNumber: undefined })); }}
+                placeholder="Số tài khoản ngân hàng"
+                placeholderTextColor={Colors.textMuted}
+                keyboardType="number-pad"
+                returnKeyType="next"
+              />
+              {errors.accountNumber ? <Text style={styles.fieldError}>{errors.accountNumber}</Text> : null}
+            </View>
 
-          <View style={styles.field}>
-            <Text style={styles.fieldLabel}>Tên chủ tài khoản</Text>
-            <TextInput
-              style={[styles.fieldInput, errors.accountHolder ? styles.fieldInputError : undefined]}
-              value={accountHolder}
-              onChangeText={(t) => { setAccountHolder(t); setErrors((e) => ({ ...e, accountHolder: undefined })); }}
-              placeholder="Tên in hoa trên thẻ ngân hàng"
-              placeholderTextColor={Colors.textMuted}
-              autoCapitalize="characters"
-              returnKeyType="done"
-            />
-            {errors.accountHolder ? <Text style={styles.fieldError}>{errors.accountHolder}</Text> : null}
-          </View>
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Tên chủ tài khoản</Text>
+              <TextInput
+                style={[styles.fieldInput, errors.accountHolder ? styles.fieldInputError : undefined]}
+                value={accountHolder}
+                onChangeText={(t) => { setAccountHolder(t); setErrors((e) => ({ ...e, accountHolder: undefined })); }}
+                placeholder="Tên in hoa trên thẻ ngân hàng"
+                placeholderTextColor={Colors.textMuted}
+                autoCapitalize="characters"
+                returnKeyType="done"
+              />
+              {errors.accountHolder ? <Text style={styles.fieldError}>{errors.accountHolder}</Text> : null}
+            </View>
 
-          <View style={styles.formBtnRow}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose} disabled={loading}>
-              <Text style={styles.cancelBtnText}>Huỷ</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.saveBtn, loading && styles.btnDisabled]}
-              onPress={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.saveBtnText}>Lưu</Text>
-              )}
-            </TouchableOpacity>
+            <View style={styles.formBtnRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={onClose} disabled={loading}>
+                <Text style={styles.cancelBtnText}>Huỷ</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtn, loading && styles.btnDisabled]}
+                onPress={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.saveBtnText}>Lưu</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <BankPickerModal
+        visible={showBankPicker}
+        selected={bankName}
+        onSelect={(bank) => {
+          setBankName(bank.name);
+          setErrors((e) => ({ ...e, bankName: undefined }));
+        }}
+        onClose={() => setShowBankPicker(false)}
+      />
+    </>
   );
 }
 
@@ -452,6 +664,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   fieldInputError: { borderColor: Colors.danger },
+  selectRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+  },
+  selectText: { fontSize: 15, color: Colors.textPrimary, flex: 1 },
+  selectPlaceholder: { fontSize: 15, color: Colors.textMuted, flex: 1 },
   fieldError: { fontSize: 11, color: Colors.danger, marginTop: 4 },
 
   formBtnRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
