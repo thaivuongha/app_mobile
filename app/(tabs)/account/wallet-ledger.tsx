@@ -39,6 +39,11 @@ const FILTERS: { label: string; value: WalletFilter }[] = [
   { label: 'Hoa hồng', value: 'COMMISSION' },
 ];
 
+function parseWalletFilterParam(raw?: string): WalletFilter {
+  if (raw === 'DEPOSIT' || raw === 'COMMISSION' || raw === 'ALL') return raw;
+  return 'ALL';
+}
+
 // ─── Entry row ────────────────────────────────────────────────────────────────
 
 function EntryRow({ entry }: { entry: LedgerEntry }) {
@@ -86,8 +91,11 @@ function EntryRow({ entry }: { entry: LedgerEntry }) {
 // ─── Main screen ───────────────────────────────────────────────────────────────
 
 export default function WalletLedgerScreen() {
-  const params = useLocalSearchParams<{ walletType?: string }>();
-  const initialFilter = (params.walletType as WalletFilter) ?? 'ALL';
+  const params = useLocalSearchParams<{ walletType?: string | string[] }>();
+  const rawType = params.walletType;
+  const walletTypeStr =
+    typeof rawType === 'string' ? rawType : Array.isArray(rawType) ? rawType[0] : undefined;
+  const initialFilter = parseWalletFilterParam(walletTypeStr);
   const [filter, setFilter] = useState<WalletFilter>(initialFilter);
 
   const {

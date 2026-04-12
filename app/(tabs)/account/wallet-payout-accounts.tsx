@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -247,6 +247,15 @@ function AccountFormModal({
   const [accountHolder, setAccountHolder] = useState(initial.accountHolder ?? '');
   const [errors, setErrors] = useState<Partial<FormValues>>({});
   const [showBankPicker, setShowBankPicker] = useState(false);
+
+  useEffect(() => {
+    if (!visible) return;
+    setBankName(initial.bankName ?? '');
+    setAccountNumber(initial.accountNumber ?? '');
+    setAccountHolder(initial.accountHolder ?? '');
+    setErrors({});
+    setShowBankPicker(false);
+  }, [visible, initial.bankName, initial.accountNumber, initial.accountHolder]);
 
   const validate = (): boolean => {
     const e: Partial<FormValues> = {};
