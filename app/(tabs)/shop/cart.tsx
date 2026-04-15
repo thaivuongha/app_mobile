@@ -1,4 +1,4 @@
-﻿import { useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -7,6 +7,8 @@ import {
   StatusBar,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
@@ -40,7 +42,7 @@ function CartRow({ item }: { item: CartItem }) {
   };
 
   const handlePlus = () => {
-    if (item.quantity >= 99) return;
+    if (item.quantity >= 999) return;
     const next = item.quantity + 1;
     updateQuantity(item.productId, 1);
     setInputVal(String(next));
@@ -49,7 +51,7 @@ function CartRow({ item }: { item: CartItem }) {
   const handleInputChange = (text: string) => {
     setInputVal(text);
     const parsed = parseInt(text, 10);
-    if (!isNaN(parsed) && parsed >= 1 && parsed <= 99) {
+    if (!isNaN(parsed) && parsed >= 1 && parsed <= 999) {
       setQuantity(item.productId, parsed);
     }
   };
@@ -115,18 +117,18 @@ function CartRow({ item }: { item: CartItem }) {
               onBlur={handleInputBlur}
               keyboardType="number-pad"
               selectTextOnFocus
-              maxLength={2}
+              maxLength={3}
             />
 
             <TouchableOpacity
-              style={[styles.qtyBtn, item.quantity >= 99 && styles.qtyBtnDisabled]}
+              style={[styles.qtyBtn, item.quantity >= 999 && styles.qtyBtnDisabled]}
               onPress={handlePlus}
-              disabled={item.quantity >= 99}
+              disabled={item.quantity >= 999}
             >
               <Ionicons
                 name="add"
                 size={15}
-                color={item.quantity >= 99 ? Colors.textMuted : Colors.primary}
+                color={item.quantity >= 999 ? Colors.textMuted : Colors.primary}
               />
             </TouchableOpacity>
           </View>
@@ -140,9 +142,9 @@ function CartRow({ item }: { item: CartItem }) {
 
 export default function CartScreen() {
   const router = useRouter();
-  const { items, getTotal, clearCart } = useCartStore();
+  const { items, getTotalCost, getTotalCommission, clearCart } = useCartStore();
 
-  const total = getTotal();
+  const total = getTotalCost();
   const itemCount = items.reduce((s, i) => s + i.quantity, 0);
 
   const handleClear = () => {
@@ -194,13 +196,15 @@ export default function CartScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Items */}
+      {/* Items + Footer — wrapped để keyboard không che quantity input */}
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FlatList
         data={items}
         keyExtractor={(item) => item.productId}
         renderItem={({ item }) => <CartRow item={item} />}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 
@@ -211,9 +215,15 @@ export default function CartScreen() {
             <Text style={styles.summaryLabel}>Số lượng</Text>
             <Text style={styles.summaryValue}>{itemCount} sản phẩm</Text>
           </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Hoa hồng ước tính</Text>
+            <Text style={[styles.summaryValue, { color: Colors.success }]}>
+              +{getTotalCommission().toLocaleString('vi-VN')}đ
+            </Text>
+          </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Tổng cộng</Text>
+            <Text style={styles.totalLabel}>Vốn giữ</Text>
             <Text style={styles.totalValue}>{total.toLocaleString('vi-VN')}đ</Text>
           </View>
         </View>
@@ -231,12 +241,14 @@ export default function CartScreen() {
           <Text style={styles.checkoutTotal}>{total.toLocaleString('vi-VN')}đ</Text>
         </TouchableOpacity>
       </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
+  flex: { flex: 1 },
 
   // Header
   header: {
@@ -364,7 +376,7 @@ const styles = StyleSheet.create({
   },
   qtyBtnDisabled: { opacity: 0.4 },
   qtyInput: {
-    width: 36,
+    width: 48,
     height: 28,
     textAlign: 'center',
     fontSize: 15,

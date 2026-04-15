@@ -37,7 +37,7 @@ function TabIcon({
       <Ionicons
         name={focused ? activeName : name}
         size={22}
-        color={focused ? '#fff' : Colors.textMuted}
+        color={focused ? Colors.textPrimary : Colors.textMuted}
       />
       {cartCount != null && <BadgeDot count={cartCount} />}
     </View>
@@ -131,9 +131,9 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#F3F4F6',
-    borderTopWidth: 0,
-    borderTopColor: 'transparent',
+    backgroundColor: Colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
     paddingTop: 6,
     paddingHorizontal: 4,
     elevation: 0,
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -2,
     top: -3,
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.primary,
     borderRadius: 10,
     minWidth: 16,
     height: 16,
@@ -181,5 +181,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.card,
   },
-  badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
+  badgeText: { color: Colors.textPrimary, fontSize: 9, fontWeight: '800' },
 });

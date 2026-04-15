@@ -1,8 +1,7 @@
-﻿import { useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   Alert,
@@ -11,6 +10,7 @@ import {
   Switch,
   Image,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -135,7 +135,7 @@ function Field({
 export default function CheckoutScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { items, getTotal, clearCart } = useCartStore();
+  const { items, getTotalCost: getTotal, getTotalCommission, clearCart } = useCartStore();
 
   // Address tabs: 'saved' | 'new'
   const [addrTab, setAddrTab] = useState<'saved' | 'new'>('saved');
@@ -303,11 +303,14 @@ export default function CheckoutScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={16}
+        enableResetScrollToCoords={false}
       >
         {/* ── Order summary ────────────────────────────────────────── */}
         <Section icon="bag-outline" title={`Tóm tắt đơn hàng (${items.length} loại)`}>
@@ -362,12 +365,17 @@ export default function CheckoutScreen() {
             {/* Tổng cộng */}
             <View style={styles.summaryTotalRow}>
               <View style={styles.summaryTotalLeft}>
-                <Text style={styles.summaryTotalLabel}>Tổng cộng</Text>
+                <Text style={styles.summaryTotalLabel}>Vốn giữ</Text>
                 <Text style={styles.summaryTotalCount}>{itemCount} sản phẩm</Text>
               </View>
-              <Text style={styles.summaryTotalValue}>
-                {total.toLocaleString('vi-VN')}đ
-              </Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.summaryTotalValue}>
+                  {total.toLocaleString('vi-VN')}đ
+                </Text>
+                <Text style={styles.summaryCommission}>
+                  +{getTotalCommission().toLocaleString('vi-VN')}đ hoa hồng
+                </Text>
+              </View>
             </View>
           </View>
         </Section>
@@ -538,7 +546,7 @@ export default function CheckoutScreen() {
         </Section>
 
         <View style={{ height: 120 }} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* ── Footer ─────────────────────────────────────────────────── */}
       <View style={styles.footer}>
@@ -567,6 +575,7 @@ export default function CheckoutScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
+  flex: { flex: 1 },
 
   // Header
   header: {
@@ -709,6 +718,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     color: Colors.primary,
+  },
+  summaryCommission: {
+    fontSize: 12,
+    color: Colors.success,
+    marginTop: 2,
   },
 
   // Tabs

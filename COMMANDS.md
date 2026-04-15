@@ -31,15 +31,58 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 
 ## Cấu trúc chính
 
-- `app/` — Expo Router: `(auth)`, `(tabs)`, `index` (gate), `modal`
-- `app/(auth)/` — Login, Register, Forgot/Reset password
-- `app/(tabs)/` — Dashboard, Devices, Shop, Orders, Sales, Settings, Account
-- `src/api/` — API client, token storage, auth, resources
-- `src/stores/` — Zustand (auth, cart)
-- `src/config/` — env (API_BASE_URL)
+```
+app/
+├── (auth)/                  # Login, Register, Forgot/Reset password
+├── (tabs)/
+│   ├── index.tsx            # Dashboard — tổng doanh thu, ví, máy hoạt động
+│   ├── devices.tsx          # Thiết bị — claim, danh sách máy, 4 khe
+│   ├── shop.tsx             # Shop — catalog sản phẩm (giá nhập + hoa hồng + giá bán)
+│   ├── orders.tsx           # Đơn hàng B2B — đặt hàng, theo dõi, xác nhận nhận hàng
+│   ├── wallet.tsx           # Ví đối tác — 3 số dư, sổ cái, nạp cọc, chuyển vốn
+│   └── account.tsx          # Tài khoản — profile, PIN, STK hoa hồng, đăng xuất
+├── wallet/
+│   ├── topup.tsx            # Màn hình nạp cọc (nhập số tiền → QR VietQR → poll)
+│   └── transfer.tsx         # Màn hình chuyển vốn (ví vận hành → ví hoa hồng, 1 chiều)
+├── index.tsx                # Gate — redirect auth/main
+└── modal.tsx                # Modal chung
+
+src/
+├── api/                     # API client, token storage, interceptor 401
+│   ├── auth.ts
+│   ├── products.ts          # GET /products (có commissionAmount, sellingPrice)
+│   ├── orders.ts            # POST/GET/PATCH orders
+│   ├── wallet.ts            # GET balance, ledger, topup init/status, transfer, payout accounts
+│   └── transactions.ts
+├── stores/                  # Zustand
+│   ├── auth.ts              # token, user (partnerLevel, profitRate)
+│   └── cart.ts              # giỏ hàng B2B
+├── hooks/
+│   ├── useWallet.ts         # số dư + sổ cái
+│   ├── useTopup.ts          # khởi tạo + poll nạp cọc
+│   └── useWalletTransfer.ts # chuyển vốn (POST /wallet/transfer)
+└── config/
+    └── env.ts               # EXPO_PUBLIC_API_URL
+```
+
+## Màn hình Ví đối tác (wallet.tsx)
+
+- **Card ví vận hành**: `depositBalance` (khả dụng) + `reservedBalance` (đang giam)
+  - Nút **"Nạp cọc"** → `wallet/topup.tsx`
+  - Nút **"Chuyển vốn"** → `wallet/transfer.tsx`
+- **Card ví hoa hồng**: `commissionBalance`
+  - Thông tin STK nhận hoa hồng đã liên kết
+- **Sổ cái**: danh sách `wallet_ledger_entries` (loại, chiều, số tiền, số dư sau)
+
+## Màn hình Catalog Shop (shop.tsx)
+
+Mỗi sản phẩm hiển thị **3 mức giá** (tính server-side theo `partnerLevel` người dùng):
+- **Giá nhập**: `originalPrice` = `products.price`
+- **Hoa hồng**: `commissionAmount`
+- **Giá bán**: `sellingPrice` = `originalPrice + commissionAmount`
 
 ## Auth
 
 - Đăng nhập bằng **số điện thoại** + mật khẩu.
-- JWT lưu trong SecureStore; refresh token khi 401.
-- Sau đăng nhập chuyển vào tab Trang chủ.
+- JWT lưu trong SecureStore; tự refresh khi 401.
+- `users/me` trả về `partnerLevel` + `profitRate` — lưu vào auth store, dùng để hiển thị level trên Account tab.

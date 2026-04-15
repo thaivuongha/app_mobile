@@ -4,7 +4,7 @@
     "slug": "embox",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/embox-icon-cube.png",
+    "icon": "./assets/images/Logo IOS.png",
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -12,17 +12,17 @@
       "backgroundColor": "#FFFFFF"
     },
     "androidStatusBar": {
-      "backgroundColor": "transparent",
+      "backgroundColor": "#FFFFFF",
       "barStyle": "dark-content",
-      "translucent": true
+      "translucent": false
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/embox-icon-cube.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/images/Logo Android.png",
+        "backgroundColor": "#FF815C"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -47,11 +47,12 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#FFFFFF",
-          "image": null,
+          "image": "./assets/images/Logo IOS.png",
+          "imageWidth": 120,
           "dark": {
-            "backgroundColor": "#FFFFFF"
-          },
-          "imageWidth": 0
+            "backgroundColor": "#FFFFFF",
+            "image": "./assets/images/Logo IOS.png"
+          }
         }
       ],
       [

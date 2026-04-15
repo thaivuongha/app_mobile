@@ -1,4 +1,4 @@
-﻿import { useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -14,8 +14,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { getMe, getMyProfile } from '@/src/api/users';
 import { logout } from '@/src/api/auth';
 import { useAuthStore } from '@/src/stores/authStore';
-import { ApiClientError } from '@/src/api/client';
+import { getWalletBalance } from '@/src/api/wallet';
 import { Colors } from '@/constants/Colors';
+
+function formatVND(amount: number): string {
+  return amount.toLocaleString('vi-VN') + 'đ';
+}
 
 interface MenuItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -68,6 +72,7 @@ export default function MeScreen() {
 
   const userQuery = useQuery({ queryKey: ['users', 'me'], queryFn: getMe });
   const profileQuery = useQuery({ queryKey: ['user-profiles', 'me'], queryFn: getMyProfile });
+  const walletQuery = useQuery({ queryKey: ['wallet'], queryFn: getWalletBalance });
 
   const handleLogout = () => {
     Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
@@ -90,6 +95,7 @@ export default function MeScreen() {
 
   const user = userQuery.data;
   const profile = profileQuery.data;
+  const wallet = walletQuery.data;
 
   const displayName = profile
     ? [profile.firstName, profile.lastName].filter(Boolean).join(' ') || user?.phoneNumber
@@ -139,13 +145,47 @@ export default function MeScreen() {
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{displayName || '—'}</Text>
             <Text style={styles.profilePhone}>{user?.phoneNumber}</Text>
-            {user?.role && (
-              <View style={styles.roleBadge}>
-                <Text style={styles.roleBadgeText}>{user.role}</Text>
-              </View>
-            )}
+            <View style={styles.profileBadgeRow}>
+              {user?.partnerLevel && (
+                <View style={[
+                  styles.roleBadge,
+                  user.partnerLevel === 'PREMIUM' && styles.roleBadgePremium,
+                ]}>
+                  <Text style={[
+                    styles.roleBadgeText,
+                    user.partnerLevel === 'PREMIUM' && styles.roleBadgeTextPremium,
+                  ]}>
+                    {user.partnerLevel === 'PREMIUM' ? '⭐ PREMIUM' : 'STANDARD'}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
+
+        {/* Ví đối tác */}
+        <MenuSection title="Ví đối tác">
+          <MenuItem
+            icon="wallet-outline"
+            label="Ví vận hành"
+            sublabel={
+              wallet
+                ? `Khả dụng: ${formatVND(wallet.depositBalance)}`
+                : 'Đang tải...'
+            }
+            onPress={() => router.push('/(tabs)/account/wallet' as never)}
+          />
+          <MenuItem
+            icon="gift-outline"
+            label="Ví hoa hồng"
+            sublabel={
+              wallet
+                ? `Số dư: ${formatVND(wallet.commissionBalance)}`
+                : 'Đang tải...'
+            }
+            onPress={() => router.push('/(tabs)/account/wallet-commission' as never)}
+          />
+        </MenuSection>
 
         {/* Tài khoản */}
         <MenuSection title="Tài khoản">
@@ -160,33 +200,11 @@ export default function MeScreen() {
             label="Đổi mật khẩu"
             onPress={() => router.push('/(tabs)/account/change-password')}
           />
-        </MenuSection>
-
-        {/* Cài đặt */}
-        <MenuSection title="Cài đặt">
           <MenuItem
             icon="location-outline"
             label="Địa chỉ giao hàng"
             sublabel="Quản lý địa chỉ nhận hàng"
             onPress={() => router.push({ pathname: '/(tabs)/account/delivery-addresses', params: { from: 'account' } })}
-          />
-          <MenuItem
-            icon="card-outline"
-            label="Thông tin thanh toán"
-            sublabel="Tài khoản ngân hàng nhận tiền VietQR"
-            onPress={() => router.push({ pathname: '/(tabs)/account/payment-methods', params: { from: 'account' } })}
-          />
-          <MenuItem
-            icon="document-text-outline"
-            label="Cài đặt hóa đơn"
-            sublabel="Thông tin xuất hóa đơn VAT"
-            onPress={() => router.push('/(tabs)/account/invoice')}
-          />
-          <MenuItem
-            icon="trending-up-outline"
-            label="Lợi nhuận"
-            sublabel="Tỷ lệ phần trăm lợi nhuận mỗi giao dịch"
-            onPress={() => router.push('/(tabs)/account/commission')}
           />
         </MenuSection>
 
@@ -259,6 +277,10 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   headerTitle: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
+
+  profileBadgeRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
+  roleBadgePremium: { backgroundColor: '#FEF3C7' },
+  roleBadgeTextPremium: { color: '#92400E' },
 
   // Profile card
   profileCard: {

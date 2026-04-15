@@ -23,6 +23,7 @@ import {
   SafeAreaView,
   StatusBar,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
@@ -123,6 +124,7 @@ export function LocationPicker({
             </TouchableOpacity>
           </View>
 
+          <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           {/* Search */}
           <View style={styles.searchBox}>
             <Ionicons name="search-outline" size={16} color={Colors.textMuted} />
@@ -177,6 +179,7 @@ export function LocationPicker({
               );
             }}
           />
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
     </>
@@ -256,6 +259,7 @@ const styles = StyleSheet.create({
   },
 
   // Modal
+  flex: { flex: 1 },
   modalContainer: {
     flex: 1,
     backgroundColor: Colors.background,

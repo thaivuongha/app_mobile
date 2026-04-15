@@ -45,7 +45,7 @@ function AddToCartModal({
     : 0;
 
   const changeQty = useCallback((next: number) => {
-    const clamped = Math.max(1, Math.min(99, next));
+    const clamped = Math.max(1, Math.min(999, next));
     setQty(clamped);
     setInputVal(String(clamped));
   }, []);
@@ -66,7 +66,15 @@ function AddToCartModal({
 
   const handleAdd = () => {
     if (!product) return;
-    addItem(product.id, product.name, product.price, product.imageUrl ?? null, qty);
+    addItem(
+      product.id,
+      product.name,
+      product.price,
+      product.commissionAmount,
+      product.sellingPrice,
+      product.imageUrl ?? null,
+      qty
+    );
     onClose();
   };
 
@@ -107,9 +115,26 @@ function AddToCartModal({
                 {product.name}
               </Text>
               <Text style={styles.modalBrand}>{product.brandName}</Text>
-              <Text style={styles.modalPrice}>
-                {Number(product.price).toLocaleString('vi-VN')}đ
-              </Text>
+              <View style={styles.modalPriceBlock}>
+                <View style={styles.modalPriceRow}>
+                  <Text style={styles.modalPriceLabel}>Giá nhập</Text>
+                  <Text style={styles.modalPriceValue}>
+                    {Number(product.price).toLocaleString('vi-VN')}đ
+                  </Text>
+                </View>
+                <View style={styles.modalPriceRow}>
+                  <Text style={styles.modalPriceLabel}>Hoa hồng</Text>
+                  <Text style={styles.modalCommissionValue}>
+                    +{Number(product.commissionAmount).toLocaleString('vi-VN')}đ
+                  </Text>
+                </View>
+                <View style={[styles.modalPriceRow, styles.modalPriceRowFinal]}>
+                  <Text style={styles.modalPriceFinalLabel}>Giá bán</Text>
+                  <Text style={styles.modalPriceFinalValue}>
+                    {Number(product.sellingPrice).toLocaleString('vi-VN')}đ
+                  </Text>
+                </View>
+              </View>
               {cartQty > 0 && (
                 <Text style={styles.modalCartNote}>
                   Đang có {cartQty} trong giỏ
@@ -149,25 +174,30 @@ function AddToCartModal({
               onBlur={handleInputBlur}
               keyboardType="number-pad"
               selectTextOnFocus
-              maxLength={2}
+              maxLength={3}
             />
 
             <TouchableOpacity
-              style={[styles.qtyCircle, qty >= 99 && styles.qtyCircleDisabled]}
+              style={[styles.qtyCircle, qty >= 999 && styles.qtyCircleDisabled]}
               onPress={() => changeQty(qty + 1)}
-              disabled={qty >= 99}
+              disabled={qty >= 999}
             >
               <Ionicons
                 name="add"
                 size={20}
-                color={qty >= 99 ? Colors.textMuted : Colors.primary}
+                color={qty >= 999 ? Colors.textMuted : Colors.primary}
               />
             </TouchableOpacity>
           </View>
 
           {/* Total */}
           <View style={styles.modalTotalRow}>
-            <Text style={styles.modalTotalLabel}>Tổng cộng</Text>
+            <View>
+              <Text style={styles.modalTotalLabel}>Vốn giữ</Text>
+              <Text style={styles.modalTotalSub}>
+                +{(Number(product.commissionAmount) * qty).toLocaleString('vi-VN')}đ hoa hồng
+              </Text>
+            </View>
             <Text style={styles.modalTotalValue}>
               {(Number(product.price) * qty).toLocaleString('vi-VN')}đ
             </Text>
@@ -224,10 +254,30 @@ function ProductCard({
         <Text style={styles.brand} numberOfLines={1}>
           {product.brandName}
         </Text>
+        {/* 3-tier pricing */}
+        <View style={styles.priceBlock}>
+          <View style={styles.priceRow}>
+            <Text style={styles.priceRowLabel}>Nhập</Text>
+            <Text style={styles.priceRowValue}>
+              {Number(product.price).toLocaleString('vi-VN')}đ
+            </Text>
+          </View>
+          <View style={styles.priceRow}>
+            <View style={styles.commissionBadge}>
+              <Text style={styles.commissionBadgeText}>HH</Text>
+            </View>
+            <Text style={styles.commissionValue}>
+              +{Number(product.commissionAmount).toLocaleString('vi-VN')}đ
+            </Text>
+          </View>
+        </View>
         <View style={styles.cardFooter}>
-          <Text style={styles.price}>
-            {Number(product.price).toLocaleString('vi-VN')}đ
-          </Text>
+          <View>
+            <Text style={styles.priceSellLabel}>Giá bán</Text>
+            <Text style={styles.priceSell}>
+              {Number(product.sellingPrice).toLocaleString('vi-VN')}đ
+            </Text>
+          </View>
           <View style={styles.addBtn}>
             <Ionicons name="add" size={18} color="#fff" />
           </View>
@@ -519,7 +569,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  price: { fontSize: 14, fontWeight: '700', color: Colors.primary },
+  // 3-tier pricing on card
+  priceBlock: { marginTop: 6, gap: 3 },
+  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  priceRowLabel: { fontSize: 10, color: Colors.textMuted, width: 28 },
+  priceRowValue: { fontSize: 11, color: Colors.textSecondary, fontWeight: '500' },
+  commissionBadge: {
+    width: 18,
+    height: 14,
+    borderRadius: 3,
+    backgroundColor: Colors.successLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  commissionBadgeText: { fontSize: 8, fontWeight: '800', color: Colors.success },
+  commissionValue: { fontSize: 11, color: Colors.success, fontWeight: '600' },
+  priceSellLabel: { fontSize: 10, color: Colors.textMuted },
+  priceSell: { fontSize: 14, fontWeight: '700', color: Colors.primary },
   addBtn: {
     width: 30,
     height: 30,
@@ -601,7 +667,20 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   modalBrand: { fontSize: 13, color: Colors.textSecondary },
-  modalPrice: { fontSize: 20, fontWeight: '700', color: Colors.primary, marginTop: 4 },
+  // 3-tier pricing in modal
+  modalPriceBlock: { marginTop: 6, gap: 4 },
+  modalPriceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  modalPriceRowFinal: {
+    marginTop: 4,
+    paddingTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  modalPriceLabel: { fontSize: 12, color: Colors.textMuted },
+  modalPriceValue: { fontSize: 13, fontWeight: '500', color: Colors.textSecondary },
+  modalCommissionValue: { fontSize: 13, fontWeight: '600', color: Colors.success },
+  modalPriceFinalLabel: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
+  modalPriceFinalValue: { fontSize: 16, fontWeight: '700', color: Colors.primary },
   modalCartNote: { fontSize: 12, color: Colors.primary, marginTop: 2 },
   modalDesc: { fontSize: 13, color: Colors.textSecondary, lineHeight: 20, marginBottom: 4 },
   divider: { height: 1, backgroundColor: Colors.border, marginVertical: 16 },
@@ -652,6 +731,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalTotalLabel: { fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
+  modalTotalSub: { fontSize: 11, color: Colors.success, marginTop: 2 },
   modalTotalValue: { fontSize: 20, fontWeight: '800', color: Colors.primary },
   addToCartBtn: {
     flexDirection: 'row',

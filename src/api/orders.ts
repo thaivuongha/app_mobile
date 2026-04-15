@@ -4,7 +4,12 @@ export interface OrderItem {
   productName: string;
   brandName: string;
   quantity: number;
+  /** Giá gốc tại thời điểm đặt */
   priceAtOrder: string;
+  /** Hoa hồng tại thời điểm đặt */
+  commissionAtOrder: string;
+  /** Giá bán = priceAtOrder + commissionAtOrder */
+  sellingPriceAtOrder: string;
 }
 
 export interface ShippingAddress {

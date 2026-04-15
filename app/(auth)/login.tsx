@@ -1,4 +1,4 @@
-import { useRouter, Link } from 'expo-router';
+﻿import { useRouter, Link } from 'expo-router';
 import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
@@ -33,7 +33,7 @@ function EmboxLogo() {
         maskElement={<Text style={styles.logoName}>EMBOX</Text>}
       >
         <LinearGradient
-          colors={['#9333EA', '#EF4444']}
+          colors={[Colors.primary, Colors.primaryDark]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
@@ -138,7 +138,7 @@ export default function LoginScreen() {
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* ── Hero header ───────────────────────────────────── */}
         <View style={styles.hero}>

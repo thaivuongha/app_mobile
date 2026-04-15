@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { useAuthStore } from '@/src/stores/authStore';
 import { setSessionExpiredCallback } from '@/src/api/client';
+import { Colors } from '@/constants/Colors';
 
 const SPLASH_DURATION = 1200; // ms hiển thị splash tối thiểu
 
@@ -41,7 +42,7 @@ export default function IndexScreen() {
         maskElement={<Text style={styles.logoText}>EMBOX</Text>}
       >
         <LinearGradient
-          colors={['#9333EA', '#EF4444']}
+          colors={[Colors.primary, Colors.primaryDark]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
@@ -56,7 +57,7 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.background,
     justifyContent: 'center',
     alignItems: 'center',
   },

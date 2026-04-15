@@ -5,12 +5,12 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   Alert,
   ActivityIndicator,
   StatusBar,
   Switch,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -183,11 +183,14 @@ export default function DeliveryAddressFormScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={16}
+        enableResetScrollToCoords={false}
       >
         {/* Recipient info */}
         <View style={styles.card}>
@@ -314,7 +317,7 @@ export default function DeliveryAddressFormScreen() {
         </View>
 
         <View style={{ height: 24 }} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Save button */}
       <View style={styles.footer}>
@@ -341,6 +344,7 @@ export default function DeliveryAddressFormScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
+  flex: { flex: 1 },
 
   header: {
     flexDirection: 'row',

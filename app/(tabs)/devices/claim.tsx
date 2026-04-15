@@ -6,10 +6,9 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,6 +32,10 @@ export default function ClaimDeviceScreen() {
   const handleClaim = async () => {
     const serial = serialNumber.trim();
     const key = ownerKey.trim();
+    if (floor === null) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng chọn lầu đặt máy');
+      return;
+    }
     if (!serial || !key) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập Serial Number và Owner Key (từ thẻ trong hộp)');
       return;
@@ -57,15 +60,14 @@ export default function ClaimDeviceScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.flex}
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={16}
+        enableResetScrollToCoords={false}
       >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
           {/* Section 1: Thông tin thiết bị */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -83,7 +85,9 @@ export default function ClaimDeviceScreen() {
               returnKeyType="next"
             />
 
-            <Text style={styles.label}>Chọn lầu</Text>
+            <Text style={styles.label}>
+              Chọn lầu <Text style={styles.required}>*</Text>
+            </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -102,6 +106,9 @@ export default function ClaimDeviceScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
+            {floor === null && (
+              <Text style={styles.fieldHint}>Bắt buộc chọn lầu đặt máy</Text>
+            )}
           </View>
 
           {/* Section 2: Thông tin thiết bị từ thẻ */}
@@ -161,8 +168,7 @@ export default function ClaimDeviceScreen() {
               </>
             )}
           </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
@@ -189,6 +195,8 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary },
 
   label: { fontSize: 13, fontWeight: '500', color: Colors.textSecondary, marginBottom: 8 },
+  required: { color: Colors.danger },
+  fieldHint: { fontSize: 12, color: Colors.danger, marginTop: 6 },
   required: { color: Colors.danger },
 
   input: {
