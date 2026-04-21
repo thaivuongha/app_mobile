@@ -123,7 +123,7 @@ export default function WalletScreen() {
                 <View style={styles.reservedRow}>
                   <Ionicons name="lock-closed" size={12} color="rgba(255,255,255,0.7)" />
                   <Text style={styles.reservedText}>
-                    Đang giam: {formatVND(w!.reservedBalance)}
+                    Đã cọc: {formatVND(w!.reservedBalance)} (Chờ giao hàng)
                   </Text>
                 </View>
               )}
