@@ -10,8 +10,8 @@
  *   - Spec:    https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/ble/blufi.html
  */
 
-import { sha256 as nobleSha256 } from '@noble/hashes/sha2';
-import { cbc } from '@noble/ciphers/aes';
+import { sha256 as nobleSha256 } from '@noble/hashes/sha2.js';
+import { cbc } from '@noble/ciphers/aes.js';
 
 // DH prime (p) 1024-bit — Espressif cố định trong firmware
 // Nguồn: lib-blufi BlufiDH.java + EspBlufiForAndroid
