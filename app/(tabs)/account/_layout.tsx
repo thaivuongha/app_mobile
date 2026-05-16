@@ -10,6 +10,8 @@ export default function MeLayout() {
         headerTintColor: Colors.primary,
         headerTitleStyle: { fontWeight: '600', color: Colors.textPrimary },
         headerShadowVisible: false,
+        headerBackTitle: '',
+        headerBackButtonDisplayMode: 'minimal',
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />

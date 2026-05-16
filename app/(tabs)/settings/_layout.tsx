@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 
 export default function SettingsLayout() {
   return (
-    <Stack>
+    <Stack screenOptions={{ headerBackTitle: '', headerBackButtonDisplayMode: 'minimal' }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="delivery-addresses" options={{ title: 'Địa chỉ giao hàng' }} />
       <Stack.Screen name="delivery-address-form" options={{ title: 'Thêm/Sửa địa chỉ' }} />
