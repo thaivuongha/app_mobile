@@ -16,6 +16,10 @@ import { logout } from '@/src/api/auth';
 import { useAuthStore } from '@/src/stores/authStore';
 import { getWalletBalance } from '@/src/api/wallet';
 import { Colors } from '@/constants/Colors';
+import Constants from 'expo-constants';
+
+const APP_VERSION = Constants.expoConfig?.version ?? '—';
+const APP_NAME = Constants.expoConfig?.name ?? 'Embox';
 
 function formatVND(amount: number): string {
   return amount.toLocaleString('vi-VN') + 'đ';
@@ -235,7 +239,7 @@ export default function MeScreen() {
           <MenuItem
             icon="help-circle-outline"
             label="Trung tâm hỗ trợ"
-            onPress={() => Alert.alert('Hỗ trợ', 'Liên hệ: support@vendingmachine.vn')}
+            onPress={() => Alert.alert('Hỗ trợ', 'Liên hệ: support@embox.vn')}
           />
           <MenuItem
             icon="document-text-outline"
@@ -245,8 +249,8 @@ export default function MeScreen() {
           <MenuItem
             icon="information-circle-outline"
             label="Về ứng dụng"
-            sublabel="Version 1.0.0"
-            onPress={() => Alert.alert('Về ứng dụng', 'VendingMachine v1.0.0')}
+            sublabel={`Phiên bản ${APP_VERSION}`}
+            onPress={() => Alert.alert('Về ứng dụng', `${APP_NAME} v${APP_VERSION}`)}
           />
         </MenuSection>
 
