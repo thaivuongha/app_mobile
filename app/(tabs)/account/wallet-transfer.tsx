@@ -9,8 +9,8 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
-  StatusBar,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -171,7 +171,7 @@ export default function WalletTransferScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar style="dark" />
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {/* Warning box */}

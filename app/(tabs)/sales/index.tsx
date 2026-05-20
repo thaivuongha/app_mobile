@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
-  StatusBar,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -256,7 +256,7 @@ export default function SalesScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+      <StatusBar style="dark" />
 
       {/* Header */}
       <View style={styles.header}>

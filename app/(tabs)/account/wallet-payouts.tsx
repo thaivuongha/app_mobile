@@ -3,8 +3,8 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  StatusBar,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -126,7 +126,7 @@ export default function WalletPayoutsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar style="dark" />
 
       {/* Summary header */}
       {!isLoading && total > 0 && (

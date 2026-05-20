@@ -3,12 +3,12 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -247,7 +247,7 @@ export default function UnlockPinScreen() {
 
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+        <StatusBar style="dark" />
         <View style={styles.padScreen}>
           {/* Tiêu đề */}
           <View style={styles.padHeader}>
@@ -288,7 +288,7 @@ export default function UnlockPinScreen() {
   // ─── Màn idle (xem trạng thái + nút hành động) ────────────────────────────
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+      <StatusBar style="dark" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}

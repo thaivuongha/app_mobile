@@ -33,19 +33,14 @@ const getAppName = () => {
     "name": getAppName(),
     "slug": "embox",
     "uniqueIdentifier": getUniqueIdentifier(),
-    "version": "1.0.1",
-    "orientation": "portrait",
+    "version": "1.0.2",
+    "orientation": "default",
     "icon": "./assets/images/logo-ios.png",
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "backgroundColor": "#FFFFFF"
-    },
-    "androidStatusBar": {
-      "backgroundColor": "#FFFFFF",
-      "barStyle": "dark-content",
-      "translucent": false
     },
     "ios": {
       "supportsTablet": true,
@@ -100,7 +95,9 @@ const getAppName = () => {
           "bluetoothAlwaysPermission": "Ứng dụng cần Bluetooth để cấu hình WiFi cho máy bán hàng qua BLE (BluFi).",
           "neverForLocation": false
         }
-      ]
+      ],
+      "react-native-edge-to-edge",
+      "./plugins/with-android-orientation-fixes"
     ],
     "experiments": {
       "typedRoutes": true

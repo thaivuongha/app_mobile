@@ -6,10 +6,10 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
-  StatusBar,
   SectionList,
   Dimensions,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -337,7 +337,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar style="light" />
 
       {/* ── Hero header ──────────────────────────────────────── */}
       <View style={styles.hero}>

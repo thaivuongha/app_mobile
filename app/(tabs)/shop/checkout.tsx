@@ -7,10 +7,10 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
-  StatusBar,
   Switch,
   Image,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -292,7 +292,7 @@ export default function CheckoutScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+      <StatusBar style="dark" />
 
       {/* Header */}
       <View style={styles.header}>

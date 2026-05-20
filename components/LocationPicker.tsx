@@ -21,9 +21,10 @@ import {
   ActivityIndicator,
   StyleSheet,
   SafeAreaView,
-  StatusBar,
+  StatusBar as RNStatusBar,
   Platform,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 
@@ -113,7 +114,7 @@ export function LocationPicker({
         onRequestClose={handleClose}
       >
         <SafeAreaView style={styles.modalContainer}>
-          <StatusBar barStyle="dark-content" />
+          <StatusBar style="dark" />
 
           {/* Header */}
           <View style={styles.modalHeader}>
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
   modalHeader: {
     flexDirection: 'row',

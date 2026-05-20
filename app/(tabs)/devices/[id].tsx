@@ -5,9 +5,9 @@ import {
   ScrollView,
   RefreshControl,
   SafeAreaView,
-  StatusBar,
   ActivityIndicator,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getDevice, getDeviceStatus, getDeviceSlots } from '@/src/api/devices';
@@ -71,7 +71,7 @@ export default function DeviceDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+      <StatusBar style="dark" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
