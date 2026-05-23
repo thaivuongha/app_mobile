@@ -277,9 +277,23 @@ export default function CheckoutScreen() {
       });
       await queryClient.invalidateQueries({ queryKey: ['my-orders'] });
       clearCart();
-      Alert.alert('Đặt hàng thành công! 🎉', 'Đơn hàng của bạn đang được xử lý.', [
-        { text: 'Xem đơn hàng', onPress: () => router.replace('/(tabs)/orders') },
-      ]);
+
+      // Pop shop stack về root (shop/index) trước khi show alert để tránh:
+      // - GO_BACK error do checkout ở root stack
+      // - cross-tab navigation từ nested stack bị bug với react-native-screens cũ
+      router.dismissAll();
+
+      // Defer Alert sang tick sau để dismissAll hoàn tất animation
+      setTimeout(() => {
+        Alert.alert('Đặt hàng thành công! 🎉', 'Đơn hàng của bạn đang được xử lý.', [
+          { text: 'Tiếp tục mua hàng', style: 'cancel' },
+          {
+            text: 'Xem đơn hàng',
+            // setTimeout để escape Alert dismiss animation trên iOS
+            onPress: () => setTimeout(() => router.push('/(tabs)/orders'), 0),
+          },
+        ]);
+      }, 0);
     } catch (e) {
       Alert.alert('Lỗi', e instanceof ApiClientError ? e.message : 'Đặt đơn thất bại');
     } finally {
@@ -296,7 +310,10 @@ export default function CheckoutScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => router.canGoBack() ? router.back() : router.dismissAll()}
+        >
           <Ionicons name="arrow-back" size={22} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Xác nhận đơn hàng</Text>

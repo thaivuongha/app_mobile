@@ -13,7 +13,7 @@ export default function OrdersLayout() {
         headerBackButtonDisplayMode: 'minimal',
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Đơn hàng' }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ title: 'Chi tiết đơn' }} />
     </Stack>
   );
