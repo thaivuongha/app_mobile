@@ -46,7 +46,11 @@ const getAppName = () => {
       "supportsTablet": true,
       "bundleIdentifier": getUniqueIdentifier(),
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Ứng dụng cần quyền vị trí để quét và kết nối thiết bị Bluetooth khi cấu hình WiFi cho máy bán hàng.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Ứng dụng cần quyền vị trí để quét và kết nối thiết bị Bluetooth khi cấu hình WiFi cho máy bán hàng.",
+        "NSBluetoothAlwaysUsageDescription": "Ứng dụng cần Bluetooth để cấu hình WiFi cho máy bán hàng qua BLE (BluFi).",
+        "NSBluetoothPeripheralUsageDescription": "Ứng dụng cần Bluetooth để cấu hình WiFi cho máy bán hàng qua BLE (BluFi)."
       }
     },
     "android": {
