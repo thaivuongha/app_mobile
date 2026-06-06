@@ -16,6 +16,7 @@
 
 import type BleManagerType from 'react-native-ble-manager';
 import type { EventSubscription } from 'react-native';
+import { Platform } from 'react-native';
 import {
   BLUFI_SERVICE_UUID,
   BLUFI_WRITE_UUID,
@@ -223,16 +224,25 @@ export class BluFiSession {
       'Không thể đọc GATT services. Thử lại hoặc khởi động lại thiết bị.'
     );
 
-    // Negotiate MTU lớn hơn để tránh bị cắt frame thành nhiều BLE packet
-    // ESP32 BluFi frame negotiate có thể lên đến ~135 bytes, cần MTU >= 138
+    // Android: negotiate MTU lớn hơn để tránh bị cắt frame thành nhiều BLE packet
+    // iOS: requestMTU không được hỗ trợ — Core Bluetooth tự negotiate khi connect,
+    //       dùng getMaximumWriteValueLengthForWithoutResponse để query kết quả thực tế.
     try {
-      const negotiatedMtu = await withTimeout(
-        ble.requestMTU(this.peripheralId, 512),
-        5_000,
-        'MTU negotiation timeout'
-      );
-      // ATT Write Without Response overhead: 1 byte opcode + 2 bytes handle = 3 bytes
-      this.mtu = Math.max(20, negotiatedMtu - 3);
+      if (Platform.OS === 'android') {
+        const negotiatedMtu = await withTimeout(
+          ble.requestMTU(this.peripheralId, 512),
+          5_000,
+          'MTU negotiation timeout'
+        );
+        // ATT Write Without Response overhead: 1 byte opcode + 2 bytes handle = 3 bytes
+        this.mtu = Math.max(20, negotiatedMtu - 3);
+      } else {
+        // iOS: query MTU thực tế sau khi Core Bluetooth tự negotiate
+        const maxLen = await ble.getMaximumWriteValueLengthForWithoutResponse(
+          this.peripheralId
+        );
+        this.mtu = Math.max(20, maxLen);
+      }
     } catch {
       // Fallback: dùng 20 bytes — sẽ cần BluFi fragmentation cho frame lớn
       this.mtu = 20;
