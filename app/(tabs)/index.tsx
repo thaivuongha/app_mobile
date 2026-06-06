@@ -13,7 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { getMyDevices, getDeviceSlots, getDeviceStatus } from '@/src/api/devices';
 import type { Device, DeviceSlot } from '@/src/api/devices';
@@ -86,7 +86,15 @@ function StatPill({
 
 // ─── Device Card ──────────────────────────────────────────────────────────────
 
-function DeviceCard({ device, onPress }: { device: Device; onPress: () => void }) {
+function DeviceCard({
+  device,
+  slots,
+  onPress,
+}: {
+  device: Device;
+  slots?: DeviceSlot[];
+  onPress: () => void;
+}) {
   const isOnline = device.status === 'ACTIVE';
   const hasIssue = device.status === 'MAINTENANCE' || device.status === 'INACTIVE';
 
@@ -116,6 +124,20 @@ function DeviceCard({ device, onPress }: { device: Device; onPress: () => void }
       {/* Name */}
       <Text style={styles.cardName} numberOfLines={2}>{displayName(device)}</Text>
       <Text style={styles.cardSerial} numberOfLines={1}>{device.serialNumber}</Text>
+
+      {/* Slot dots */}
+      <View style={styles.slotDots}>
+        {[1, 2, 3, 4].map((n) => {
+          const slot = slots?.find((s) => s.slotNumber === n);
+          const filled = slot != null && !slot.isEmpty && !!slot.productName;
+          return (
+            <View
+              key={n}
+              style={[styles.slotDot, filled ? styles.slotDotFilled : styles.slotDotEmpty]}
+            />
+          );
+        })}
+      </View>
 
       {/* Floor badge */}
       {device.floor != null && (
@@ -330,6 +352,22 @@ export default function HomeScreen() {
     [devices],
   );
 
+  const slotsQueries = useQueries({
+    queries: devices.map((d) => ({
+      queryKey: ['device-slots', d.id],
+      queryFn: () => getDeviceSlots(d.id),
+      staleTime: 60_000,
+    })),
+  });
+
+  const slotsMap = useMemo(() => {
+    const m = new Map<string, DeviceSlot[]>();
+    devices.forEach((d, i) => {
+      m.set(d.id, slotsQueries[i]?.data?.data ?? []);
+    });
+    return m;
+  }, [devices, slotsQueries]);
+
   const handleDevicePress = useCallback((device: Device) => {
     setSelectedDevice(device);
     setPopupVisible(true);
@@ -415,6 +453,7 @@ export default function HomeScreen() {
                   <DeviceCard
                     key={device.id}
                     device={device}
+                    slots={slotsMap.get(device.id)}
                     onPress={() => handleDevicePress(device)}
                   />
                 ))}
@@ -783,4 +822,10 @@ const styles = StyleSheet.create({
   slotPrice: { marginTop: 4, fontSize: 13, fontWeight: '700', color: Colors.orange },
   slotEmptyIcon: { marginTop: 8, marginBottom: 4, opacity: 0.35 },
   slotEmptyLabel: { fontSize: 12, color: Colors.textMuted, fontStyle: 'italic' },
+
+  // ── Slot dots (card) ──
+  slotDots: { flexDirection: 'row', justifyContent: 'center', gap: 5, paddingBottom: 10 },
+  slotDot: { width: 6, height: 6, borderRadius: 3 },
+  slotDotFilled: { backgroundColor: Colors.primary },
+  slotDotEmpty: { backgroundColor: Colors.border },
 });

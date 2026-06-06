@@ -45,9 +45,12 @@ function formatRevenue(val: number) {
 }
 
 // ─── Bar Chart ─────────────────────────────────────────────────────────────────
+const BAR_WIDTH = 28;
+const BAR_WRAPPER_WIDTH = 40;
+
 function MiniBarChart({ data }: { data: { label: string; value: number }[] }) {
   const max = Math.max(...data.map((d) => d.value), 1);
-  const BAR_MAX_H = 60;
+  const BAR_MAX_H = 44;
 
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chartScroll}>
@@ -55,8 +58,8 @@ function MiniBarChart({ data }: { data: { label: string; value: number }[] }) {
         {data.map((item, idx) => (
           <View key={idx} style={styles.barWrapper}>
             <Text style={styles.barValue}>{formatRevenue(item.value)}</Text>
-            <View style={[styles.bar, { height: Math.max((item.value / max) * BAR_MAX_H, 4) }]} />
-            <Text style={styles.barLabel} numberOfLines={1}>{item.label}</Text>
+            <View style={[styles.bar, { height: Math.max((item.value / max) * BAR_MAX_H, 3) }]} />
+            <Text style={styles.barLabel} numberOfLines={2}>{item.label}</Text>
           </View>
         ))}
       </View>
@@ -79,6 +82,7 @@ function SummaryTab({
   const summaryQuery = useQuery({
     queryKey: ['sales-summary', groupBy, deviceId],
     queryFn: () => getSalesSummary({ groupBy, dateFrom, dateTo, deviceId }),
+    retry: 1,
   });
 
   const rawItems = summaryQuery.data?.data ?? [];
@@ -127,25 +131,13 @@ function SummaryTab({
         </View>
       </View>
 
-      {/* Chart */}
-      {summaryQuery.isLoading ? (
-        <ActivityIndicator style={{ margin: 24 }} color={Colors.primary} />
-      ) : chartData.length > 0 ? (
-        <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>
-            Doanh thu theo {groupBy === 'week' ? 'tuần' : groupBy === 'month' ? 'tháng' : 'năm'}
-          </Text>
-          <MiniBarChart data={chartData} />
-        </View>
-      ) : (
-        <View style={styles.emptyState}>
-          <Ionicons name="bar-chart-outline" size={48} color={Colors.textMuted} />
-          <Text style={styles.emptyText}>Chưa có dữ liệu doanh thu</Text>
-        </View>
-      )}
-
       {/* Table */}
-      {rawItems.length > 0 && (
+      {summaryQuery.isError ? (
+        <View style={styles.emptyState}>
+          <Ionicons name="alert-circle-outline" size={48} color={Colors.danger} />
+          <Text style={[styles.emptyText, { color: Colors.danger }]}>Không thể tải dữ liệu</Text>
+        </View>
+      ) : rawItems.length > 0 && (
         <View style={styles.tableCard}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableCell, styles.tableCellDate]}>Kỳ</Text>
@@ -168,6 +160,23 @@ function SummaryTab({
           })}
         </View>
       )}
+
+      {/* Chart */}
+      {summaryQuery.isLoading ? (
+        <ActivityIndicator style={{ margin: 24 }} color={Colors.primary} />
+      ) : !summaryQuery.isError && chartData.length > 0 ? (
+        <View style={styles.chartCard}>
+          <Text style={styles.chartTitle}>
+            Doanh thu theo {groupBy === 'week' ? 'tuần' : groupBy === 'month' ? 'tháng' : 'năm'}
+          </Text>
+          <MiniBarChart data={chartData} />
+        </View>
+      ) : !summaryQuery.isError ? (
+        <View style={styles.emptyState}>
+          <Ionicons name="bar-chart-outline" size={48} color={Colors.textMuted} />
+          <Text style={styles.emptyText}>Chưa có dữ liệu doanh thu</Text>
+        </View>
+      ) : null}
 
       <View style={{ height: 32 }} />
     </ScrollView>
@@ -254,44 +263,23 @@ export default function SalesScreen() {
   });
   const devices = devicesQuery.data?.data ?? [];
 
+  const sortedDevices = useMemo(() => {
+    return [...devices].sort((a, b) => {
+      const fa = a.floor ?? Infinity;
+      const fb = b.floor ?? Infinity;
+      if (fa !== fb) return fa - fb;
+      return (a.deviceName ?? '').localeCompare(b.deviceName ?? '', 'vi');
+    });
+  }, [devices]);
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <StatusBar style="dark" />
 
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Doanh thu</Text>
       </View>
-
-      {/* Device filter */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.deviceFilter}
-      >
-        <TouchableOpacity
-          style={[styles.deviceChip, !deviceId && styles.deviceChipActive]}
-          onPress={() => setDeviceId(undefined)}
-        >
-          <Text style={[styles.deviceChipText, !deviceId && styles.deviceChipTextActive]}>
-            Tất cả
-          </Text>
-        </TouchableOpacity>
-        {devices.map((d) => (
-          <TouchableOpacity
-            key={d.id}
-            style={[styles.deviceChip, deviceId === d.id && styles.deviceChipActive]}
-            onPress={() => setDeviceId(deviceId === d.id ? undefined : d.id)}
-          >
-            <Text
-              style={[styles.deviceChipText, deviceId === d.id && styles.deviceChipTextActive]}
-              numberOfLines={1}
-            >
-              {d.deviceName || d.serialNumber}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
 
       {/* Tab bar */}
       <View style={styles.tabBar}>
@@ -331,6 +319,38 @@ export default function SalesScreen() {
           <HistoryTab deviceId={deviceId} />
         )}
       </View>
+
+      {/* Device filter — cuối màn hình để ngón tay cái dễ chọn */}
+      <View style={styles.deviceFilterBar}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.deviceFilter}
+        >
+          <TouchableOpacity
+            style={[styles.deviceChip, !deviceId && styles.deviceChipActive]}
+            onPress={() => setDeviceId(undefined)}
+          >
+            <Text style={[styles.deviceChipText, !deviceId && styles.deviceChipTextActive]}>
+              Tất cả
+            </Text>
+          </TouchableOpacity>
+          {sortedDevices.map((d) => (
+            <TouchableOpacity
+              key={d.id}
+              style={[styles.deviceChip, deviceId === d.id && styles.deviceChipActive]}
+              onPress={() => setDeviceId(deviceId === d.id ? undefined : d.id)}
+            >
+              <Text
+                style={[styles.deviceChipText, deviceId === d.id && styles.deviceChipTextActive]}
+                numberOfLines={1}
+              >
+                {d.deviceName || d.serialNumber}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -346,7 +366,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
 
-  // Device filter
+  // Device filter bar (bottom)
+  deviceFilterBar: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    backgroundColor: Colors.card,
+    paddingBottom: 4,
+  },
   deviceFilter: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
   deviceChip: {
     paddingHorizontal: 14,
@@ -421,11 +447,11 @@ const styles = StyleSheet.create({
   },
   chartTitle: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, marginBottom: 12 },
   chartScroll: {},
-  chartBars: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, minHeight: 100 },
-  barWrapper: { alignItems: 'center', width: 44 },
+  chartBars: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, minHeight: 80 },
+  barWrapper: { alignItems: 'center', width: BAR_WRAPPER_WIDTH, overflow: 'hidden' },
   barValue: { fontSize: 9, color: Colors.textMuted, marginBottom: 2 },
-  bar: { width: 24, backgroundColor: Colors.primary, borderRadius: 4, opacity: 0.85 },
-  barLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 4, textAlign: 'center', width: 44 },
+  bar: { width: BAR_WIDTH, backgroundColor: Colors.primary, borderRadius: 4, opacity: 0.85 },
+  barLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 4, textAlign: 'center', width: BAR_WRAPPER_WIDTH },
 
   // Table
   tableCard: {
