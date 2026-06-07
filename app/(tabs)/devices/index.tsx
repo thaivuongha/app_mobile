@@ -13,12 +13,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { getMyDevices } from '@/src/api/devices';
 import type { Device } from '@/src/api/devices';
 import { Colors } from '@/constants/Colors';
+import { formatLastSeen } from '@/src/utils/lastSeen';
 
 function DeviceCard({ item, onPress }: { item: Device; onPress: () => void }) {
-  const isActive = item.status === 'ACTIVE';
+  const isOnline = item.liveStatus?.isOnline ?? false;
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-      <View style={[styles.cardAccent, isActive ? styles.cardAccentActive : styles.cardAccentInactive]} />
+      <View style={[styles.cardAccent, isOnline ? styles.cardAccentActive : styles.cardAccentInactive]} />
       <View style={styles.cardBody}>
         <View style={styles.cardIconBox}>
           <Ionicons name="hardware-chip-outline" size={22} color={Colors.primary} />
@@ -26,11 +27,17 @@ function DeviceCard({ item, onPress }: { item: Device; onPress: () => void }) {
         <View style={styles.cardInfo}>
           <Text style={styles.cardTitle} numberOfLines={1}>{item.deviceName || item.serialNumber}</Text>
           <Text style={styles.cardSerial}>Serial: {item.serialNumber}</Text>
+          <View style={styles.cardLastSeen}>
+            <Ionicons name="time-outline" size={11} color={Colors.textMuted} />
+            <Text style={styles.cardLastSeenText} numberOfLines={1}>
+              Hoạt động {formatLastSeen(item.liveStatus?.lastSeenAt)}
+            </Text>
+          </View>
         </View>
-        <View style={[styles.statusBadge, isActive ? styles.statusActive : styles.statusInactive]}>
-          <View style={[styles.statusDot, isActive ? styles.statusDotActive : styles.statusDotInactive]} />
-          <Text style={[styles.statusText, isActive ? styles.statusTextActive : styles.statusTextInactive]}>
-            {isActive ? 'Hoạt động' : item.status}
+        <View style={[styles.statusBadge, isOnline ? styles.statusActive : styles.statusInactive]}>
+          <View style={[styles.statusDot, isOnline ? styles.statusDotActive : styles.statusDotInactive]} />
+          <Text style={[styles.statusText, isOnline ? styles.statusTextActive : styles.statusTextInactive]}>
+            {isOnline ? 'Online' : 'Offline'}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
@@ -114,6 +121,8 @@ const styles = StyleSheet.create({
   cardInfo: { flex: 1 },
   cardTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary, marginBottom: 2 },
   cardSerial: { fontSize: 12, color: Colors.textMuted },
+  cardLastSeen: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 3 },
+  cardLastSeenText: { fontSize: 11, color: Colors.textMuted, flexShrink: 1 },
 
   statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   statusActive: { backgroundColor: Colors.successLight ?? '#F0FDF4' },

@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getMyDevices, getDeviceSlots, getDeviceStatus } from '@/src/api/devices';
 import type { Device, DeviceSlot } from '@/src/api/devices';
 import { Colors } from '@/constants/Colors';
+import { formatLastSeen } from '@/src/utils/lastSeen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -95,11 +96,12 @@ function DeviceCard({
   slots?: DeviceSlot[];
   onPress: () => void;
 }) {
-  const isOnline = device.status === 'ACTIVE';
+  const isOnline = device.liveStatus?.isOnline ?? false;
   const hasIssue = device.status === 'MAINTENANCE' || device.status === 'INACTIVE';
 
   const statusColor = isOnline ? Colors.success : hasIssue ? Colors.warning : Colors.textMuted;
   const statusLabel = isOnline ? 'Online' : hasIssue ? 'Lỗi' : 'Offline';
+  const lastSeenLabel = formatLastSeen(device.liveStatus?.lastSeenAt);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
@@ -124,6 +126,12 @@ function DeviceCard({
       {/* Name */}
       <Text style={styles.cardName} numberOfLines={2}>{displayName(device)}</Text>
       <Text style={styles.cardSerial} numberOfLines={1}>{device.serialNumber}</Text>
+
+      {/* Hoạt động lần cuối */}
+      <View style={styles.cardLastSeen}>
+        <Ionicons name="time-outline" size={11} color={Colors.textMuted} />
+        <Text style={styles.cardLastSeenText} numberOfLines={1}>{lastSeenLabel}</Text>
+      </View>
 
       {/* Slot dots */}
       <View style={styles.slotDots}>
@@ -269,6 +277,9 @@ function DevicePopup({
               <Text style={[styles.onlineText, { color: isOnline ? Colors.success : Colors.textMuted }]}>
                 {isOnline ? 'Online' : 'Offline'}
               </Text>
+              <Text style={styles.lastSeenMeta} numberOfLines={1}>
+                · {formatLastSeen(status?.lastSeenAt)}
+              </Text>
               {device.floor != null && (
                 <View style={styles.metaBadge}>
                   <Ionicons name="layers-outline" size={11} color={Colors.primary} />
@@ -348,7 +359,7 @@ export default function HomeScreen() {
   const devices = data?.data ?? [];
   const sections = useMemo(() => groupByFloor(devices), [devices]);
   const onlineCount = useMemo(
-    () => devices.filter((d) => d.status === 'ACTIVE').length,
+    () => devices.filter((d) => d.liveStatus?.isOnline).length,
     [devices],
   );
 
@@ -656,9 +667,21 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     marginTop: 3,
-    marginBottom: 10,
+    marginBottom: 8,
     paddingHorizontal: 8,
     letterSpacing: 0.3,
+  },
+  cardLastSeen: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    marginBottom: 10,
+    paddingHorizontal: 8,
+  },
+  cardLastSeenText: {
+    fontSize: 10,
+    color: Colors.textMuted,
   },
   cardFloorBadge: {
     position: 'absolute',
@@ -747,6 +770,7 @@ const styles = StyleSheet.create({
   sheetMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' },
   onlineDot: { width: 7, height: 7, borderRadius: 3.5 },
   onlineText: { fontSize: 12, fontWeight: '500' },
+  lastSeenMeta: { fontSize: 12, color: Colors.textMuted, flexShrink: 1 },
   metaBadge: {
     flexDirection: 'row',
     alignItems: 'center',

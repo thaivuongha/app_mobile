@@ -10,12 +10,22 @@ export interface DeviceSlot {
   serialNumber?: string | null;
 }
 
+/** Trạng thái realtime rút gọn, gộp sẵn trong danh sách my-devices. */
+export interface DeviceLiveStatus {
+  isOnline: boolean;
+  lastSeenAt: string | null;
+  batteryLevel: number | null;
+}
+
 export interface Device {
   id: string;
   serialNumber: string;
   deviceName: string | null;
   floor: number | null;
+  /** Trạng thái cấu hình: ACTIVE / INACTIVE / MAINTENANCE / MANUFACTURED */
   status: string;
+  /** Trạng thái realtime suy ra từ heartbeat gần nhất */
+  liveStatus?: DeviceLiveStatus;
   slots?: DeviceSlot[];
 }
 

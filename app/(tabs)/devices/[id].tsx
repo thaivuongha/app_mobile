@@ -10,10 +10,13 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import { getDevice, getDeviceStatus, getDeviceSlots } from '@/src/api/devices';
 import { Colors } from '@/constants/Colors';
+import { formatLastSeen } from '@/src/utils/lastSeen';
 
 const REFETCH_INTERVAL = 15000;
+const TICK_INTERVAL = 30000;
 
 function InfoRow({ label, value, icon }: { label: string; value: string; icon?: keyof typeof Ionicons.glyphMap }) {
   return (
@@ -55,6 +58,13 @@ export default function DeviceDetailScreen() {
     slotsQuery.refetch();
   };
 
+  // Re-render định kỳ để chuỗi thời gian (3m/3h/...) tự cập nhật giữa các lần refetch.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), TICK_INTERVAL);
+    return () => clearInterval(timer);
+  }, []);
+
   const device = deviceQuery.data;
   const status = statusQuery.data;
   const slots = slotsQuery.data?.data ?? [];
@@ -90,11 +100,9 @@ export default function DeviceDetailScreen() {
           <Text style={[styles.statusText, isOnline ? styles.textOnline : styles.textOffline]}>
             {isOnline ? 'Đang online' : 'Offline'}
           </Text>
-          {status?.lastSeenAt && (
-            <Text style={styles.lastSeen}>
-              · {new Date(status.lastSeenAt).toLocaleString('vi-VN')}
-            </Text>
-          )}
+          <Text style={styles.lastSeen} numberOfLines={1}>
+            · Hoạt động {formatLastSeen(status?.lastSeenAt)}
+          </Text>
         </View>
 
         {/* Device info */}
@@ -195,7 +203,7 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 13, fontWeight: '700' },
   textOnline: { color: Colors.success },
   textOffline: { color: Colors.textMuted },
-  lastSeen: { fontSize: 12, color: Colors.textMuted },
+  lastSeen: { fontSize: 12, color: Colors.textMuted, flexShrink: 1 },
 
   card: {
     backgroundColor: Colors.card, borderRadius: 16, borderWidth: 1, borderColor: Colors.border,

@@ -232,7 +232,7 @@ export default function DeviceListScreen() {
           <View style={styles.statDivider} />
           <View style={styles.statBox}>
             <Text style={[styles.statValue, { color: Colors.success }]}>
-              {devices.filter((d) => d.status === 'ACTIVE').length}
+              {devices.filter((d) => d.liveStatus?.isOnline).length}
             </Text>
             <Text style={styles.statLabel}>Đang online</Text>
           </View>
