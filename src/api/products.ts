@@ -6,9 +6,11 @@ export interface Product {
   brandName: string;
   /** Giá gốc (vốn) — số tiền ký quỹ bị giam khi đặt hàng B2B */
   price: string;
-  /** Hoa hồng tính sẵn theo partnerLevel của user (backend tính) */
+  /** Hoa hồng ước tính = commissionValue × K (priceMultiplier của owner) — backend tính sẵn */
   commissionAmount: string;
-  /** Giá bán = price + commissionAmount — giá khách thanh toán tại máy */
+  /** Phần VAT ước tính = commissionAmount × 0.05 — Admin giữ để khai thuế */
+  vatAmount: string;
+  /** Giá bán cuối = ceil(price + commissionAmount + vatAmount, 1000) — giá khách thanh toán tại máy */
   sellingPrice: string;
   imageUrl: string | null;
   description: string | null;

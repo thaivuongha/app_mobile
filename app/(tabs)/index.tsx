@@ -192,9 +192,9 @@ function SlotCard({ slot }: { slot: DeviceSlot }) {
           {slot.brandName && (
             <Text style={styles.slotBrandName} numberOfLines={1}>{slot.brandName}</Text>
           )}
-          {slot.price && (
+          {slot.sellingPrice != null && (
             <Text style={styles.slotPrice}>
-              {Number(slot.price).toLocaleString('vi-VN')}đ
+              {slot.sellingPrice.toLocaleString('vi-VN')}đ
             </Text>
           )}
         </>

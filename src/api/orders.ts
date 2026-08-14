@@ -6,9 +6,13 @@ export interface OrderItem {
   quantity: number;
   /** Giá gốc tại thời điểm đặt */
   priceAtOrder: string;
-  /** Hoa hồng tại thời điểm đặt */
+  /**
+   * Snapshot commissionValue (hoa hồng gốc của sản phẩm) tại thời điểm đặt hàng B2B.
+   * Lưu ý: đây là commissionValue cơ bản, chưa nhân K — chỉ dùng để ước tính giá bán.
+   * Số tiền ký quỹ bị giam chỉ tính theo priceAtOrder × quantity.
+   */
   commissionAtOrder: string;
-  /** Giá bán = priceAtOrder + commissionAtOrder */
+  /** Ước tính giá bán = priceAtOrder + commissionAtOrder (chưa bao gồm VAT và làm tròn) */
   sellingPriceAtOrder: string;
 }
 

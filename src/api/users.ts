@@ -8,10 +8,12 @@ export interface User {
   isActive: boolean;
   isVerified: boolean;
   createdAt: string;
-  /** STANDARD (hoa hồng cố định) hoặc PREMIUM (theo % profitRate) */
-  partnerLevel?: 'STANDARD' | 'PREMIUM';
-  /** Tỷ lệ hoa hồng PREMIUM — dạng thập phân, VD: 0.2 = 20% */
-  profitRate?: number | null;
+  /**
+   * Hệ số nhân hoa hồng (K). Mặc định 1.0 (= 100%).
+   * Khoảng cho phép: 0.0 – 3.0. Owner tự chỉnh qua PATCH /users/me/price-multiplier.
+   * finalPrice = ceil(price + commissionValue × K × 1.05, 1000)
+   */
+  priceMultiplier: number;
 }
 
 export interface UserProfile {
@@ -76,4 +78,20 @@ export function removeUnlockPin(): Promise<{ message: string }> {
   return apiRequest<{ message: string }>('/api/v1/users/me/unlock-pin', {
     method: 'DELETE',
   });
+}
+
+// ─── Price Multiplier (K) ─────────────────────────────────────────────────────
+
+/**
+ * Cập nhật hệ số hoa hồng (K) của owner.
+ * @param priceMultiplier Giá trị từ 0.0 đến 3.0 (VD: 1.2 = 120%)
+ * Backend trả về { id, priceMultiplier } — dùng getMe() để lấy full user sau khi cập nhật.
+ */
+export function updatePriceMultiplier(
+  priceMultiplier: number,
+): Promise<{ id: string; priceMultiplier: number }> {
+  return apiRequest<{ id: string; priceMultiplier: number }>(
+    '/api/v1/users/me/price-multiplier',
+    { method: 'PATCH', body: { priceMultiplier } },
+  );
 }

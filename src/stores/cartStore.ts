@@ -5,9 +5,9 @@ export interface CartItem {
   name: string;
   /** Giá gốc (vốn) — số tiền ký quỹ bị giam khi đặt hàng */
   price: string;
-  /** Hoa hồng tính theo cấp đối tác */
+  /** Hoa hồng ước tính = commissionValue × K (priceMultiplier của owner) */
   commissionAmount: string;
-  /** Giá bán = price + commissionAmount */
+  /** Giá bán cuối = ceil(price + commissionAmount + vatAmount, 1000) */
   sellingPrice: string;
   imageUrl: string | null;
   quantity: number;
@@ -30,7 +30,7 @@ interface CartState {
   clearCart: () => void;
   /** Tổng tiền gốc (vốn bị giam khi đặt hàng) */
   getTotalCost: () => number;
-  /** Tổng hoa hồng ước tính */
+  /** Tổng hoa hồng ước tính (= Σ commissionAmount × qty, chưa gồm VAT) */
   getTotalCommission: () => number;
 }
 

@@ -4,7 +4,10 @@ export interface DeviceSlot {
   slotNumber: number;
   productInstanceId: string | null;
   productName: string | null;
+  /** Giá vốn (products.price) — chỉ dùng nội bộ, không hiển thị cho user */
   price?: string;
+  /** Giá bán cuối cùng cho khách = ceil(price + commissionValue × K × 1.05, 1000) */
+  sellingPrice?: number | null;
   isEmpty: boolean;
   brandName?: string;
   serialNumber?: string | null;

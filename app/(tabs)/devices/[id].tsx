@@ -168,8 +168,8 @@ export default function DeviceDetailScreen() {
                   ) : (
                     <>
                       <Text style={styles.slotProduct} numberOfLines={2}>{slot.productName ?? '—'}</Text>
-                      {slot.price != null && (
-                        <Text style={styles.slotPrice}>{Number(slot.price).toLocaleString('vi-VN')}đ</Text>
+                      {slot.sellingPrice != null && (
+                        <Text style={styles.slotPrice}>{slot.sellingPrice.toLocaleString('vi-VN')}đ</Text>
                       )}
                     </>
                   )}

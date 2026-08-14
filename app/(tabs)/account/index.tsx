@@ -1,17 +1,22 @@
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   StyleSheet,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
   ScrollView,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getMe, getMyProfile } from '@/src/api/users';
+import { useState } from 'react';
+import { getMe, getMyProfile, updatePriceMultiplier } from '@/src/api/users';
 import { logout } from '@/src/api/auth';
 import { useAuthStore } from '@/src/stores/authStore';
 import { getWalletBalance } from '@/src/api/wallet';
@@ -73,10 +78,48 @@ function MenuSection({
 export default function MeScreen() {
   const router = useRouter();
   const setHasToken = useAuthStore((s) => s.setHasToken);
+  const queryClient = useQueryClient();
 
   const userQuery = useQuery({ queryKey: ['users', 'me'], queryFn: getMe });
   const profileQuery = useQuery({ queryKey: ['user-profiles', 'me'], queryFn: getMyProfile });
   const walletQuery = useQuery({ queryKey: ['wallet'], queryFn: getWalletBalance });
+
+  const [kModalVisible, setKModalVisible] = useState(false);
+  const [kInputVal, setKInputVal] = useState('');
+
+  const updateKMutation = useMutation({
+    mutationFn: (val: number) => updatePriceMultiplier(val),
+    onSuccess: () => {
+      // Invalidate user để cập nhật badge K
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+      // Invalidate catalog sản phẩm — sellingPrice thay đổi theo K mới
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Invalidate tất cả device-slots — sellingPrice trong máy thay đổi
+      queryClient.invalidateQueries({ queryKey: ['device-slots'] });
+      // Invalidate my-devices — slots embedded cũng chứa sellingPrice
+      queryClient.invalidateQueries({ queryKey: ['my-devices'] });
+      setKModalVisible(false);
+      Alert.alert('Thành công', 'Đã cập nhật hệ số hoa hồng (K). Giá bán đã được làm mới.');
+    },
+    onError: () => {
+      Alert.alert('Lỗi', 'Không thể cập nhật. Vui lòng thử lại.');
+    },
+  });
+
+  const handleOpenKModal = () => {
+    const current = userQuery.data?.priceMultiplier ?? 1;
+    setKInputVal(current.toString());
+    setKModalVisible(true);
+  };
+
+  const handleSaveK = () => {
+    const val = parseFloat(kInputVal.replace(',', '.'));
+    if (isNaN(val) || val < 0 || val > 3) {
+      Alert.alert('Giá trị không hợp lệ', 'Hệ số K phải từ 0.0 đến 3.0');
+      return;
+    }
+    updateKMutation.mutate(val);
+  };
 
   const handleLogout = () => {
     Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
@@ -150,16 +193,11 @@ export default function MeScreen() {
             <Text style={styles.profileName}>{displayName || '—'}</Text>
             <Text style={styles.profilePhone}>{user?.phoneNumber}</Text>
             <View style={styles.profileBadgeRow}>
-              {user?.partnerLevel && (
-                <View style={[
-                  styles.roleBadge,
-                  user.partnerLevel === 'PREMIUM' && styles.roleBadgePremium,
-                ]}>
-                  <Text style={[
-                    styles.roleBadgeText,
-                    user.partnerLevel === 'PREMIUM' && styles.roleBadgeTextPremium,
-                  ]}>
-                    {user.partnerLevel === 'PREMIUM' ? '⭐ PREMIUM' : 'STANDARD'}
+              {user != null && (
+                <View style={styles.roleBadge}>
+                  <Ionicons name="trending-up-outline" size={11} color={Colors.primary} style={{ marginRight: 3 }} />
+                  <Text style={styles.roleBadgeText}>
+                    K = {user.priceMultiplier.toFixed(2)}×
                   </Text>
                 </View>
               )}
@@ -209,6 +247,16 @@ export default function MeScreen() {
             label="Địa chỉ giao hàng"
             sublabel="Quản lý địa chỉ nhận hàng"
             onPress={() => router.push({ pathname: '/(tabs)/account/delivery-addresses', params: { from: 'account' } })}
+          />
+          <MenuItem
+            icon="trending-up-outline"
+            label="Hệ số hoa hồng (K)"
+            sublabel={
+              user != null
+                ? `Hiện tại: ${user.priceMultiplier.toFixed(2)}× — ảnh hưởng giá bán tại máy`
+                : 'Đang tải...'
+            }
+            onPress={handleOpenKModal}
           />
         </MenuSection>
 
@@ -266,6 +314,60 @@ export default function MeScreen() {
 
         <View style={{ height: 20 }} />
       </ScrollView>
+
+      {/* Modal chỉnh sửa hệ số K */}
+      <Modal
+        visible={kModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setKModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.kModalOverlay}
+        >
+          <TouchableOpacity
+            style={styles.kModalBackdrop}
+            activeOpacity={1}
+            onPress={() => setKModalVisible(false)}
+          />
+          <View style={styles.kModalCard}>
+            <Text style={styles.kModalTitle}>Hệ số hoa hồng (K)</Text>
+            <Text style={styles.kModalDesc}>
+              Giá bán = ceil(giá vốn + hoa hồng × K × 1.05, 1000đ){'\n'}
+              Khoảng cho phép: 0.0 – 3.0 (mặc định 1.0)
+            </Text>
+            <TextInput
+              style={styles.kModalInput}
+              value={kInputVal}
+              onChangeText={setKInputVal}
+              keyboardType="decimal-pad"
+              placeholder="VD: 1.0"
+              placeholderTextColor={Colors.textMuted}
+              autoFocus
+            />
+            <View style={styles.kModalActions}>
+              <TouchableOpacity
+                style={[styles.kModalBtn, styles.kModalBtnCancel]}
+                onPress={() => setKModalVisible(false)}
+              >
+                <Text style={styles.kModalBtnCancelText}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.kModalBtn, styles.kModalBtnSave]}
+                onPress={handleSaveK}
+                disabled={updateKMutation.isPending}
+              >
+                {updateKMutation.isPending ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.kModalBtnSaveText}>Lưu</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -282,9 +384,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
 
-  profileBadgeRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
-  roleBadgePremium: { backgroundColor: '#FEF3C7' },
-  roleBadgeTextPremium: { color: '#92400E' },
+  profileBadgeRow: { flexDirection: 'row', gap: 6, marginTop: 6, alignItems: 'center' },
 
   // Profile card
   profileCard: {
@@ -331,7 +431,8 @@ const styles = StyleSheet.create({
   profileName: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary },
   profilePhone: { fontSize: 14, color: Colors.textSecondary, marginTop: 2 },
   roleBadge: {
-    marginTop: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -339,6 +440,53 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   roleBadgeText: { fontSize: 11, color: Colors.primary, fontWeight: '600' },
+
+  // K modal
+  kModalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  kModalBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },
+  kModalCard: {
+    width: '85%',
+    backgroundColor: Colors.card,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  kModalTitle: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary, marginBottom: 8 },
+  kModalDesc: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  kModalInput: {
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    backgroundColor: Colors.background,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  kModalActions: { flexDirection: 'row', gap: 12 },
+  kModalBtn: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kModalBtnCancel: { backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border },
+  kModalBtnCancelText: { fontSize: 15, fontWeight: '600', color: Colors.textSecondary },
+  kModalBtnSave: { backgroundColor: Colors.primary },
+  kModalBtnSaveText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 
   // Section
   section: { marginHorizontal: 16, marginBottom: 12 },
