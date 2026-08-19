@@ -125,6 +125,24 @@ export default function LoginScreen() {
       setHasToken(true);
       router.replace('/(tabs)');
     } catch (e) {
+      if (e instanceof ApiClientError && e.statusCode === 403) {
+        // Tài khoản đúng mật khẩu nhưng chưa xác thực OTP — điều hướng sang màn xác thực
+        // thay vì chỉ báo lỗi chung, để user hoàn tất đăng ký thay vì bị kẹt.
+        Alert.alert('Tài khoản chưa xác thực', e.message, [
+          {
+            text: 'Xác thực ngay',
+            onPress: () =>
+              router.push({
+                pathname: '/(auth)/verify-otp',
+                // justSent=0: mã OTP gửi lúc đăng ký có thể đã cũ/hết hạn từ lâu — không
+                // ép cooldown 60s ở màn xác thực, để user bấm "Gửi lại mã" ngay được.
+                params: { phoneNumber: trimmed, justSent: '0' },
+              }),
+          },
+          { text: 'Để sau', style: 'cancel' },
+        ]);
+        return;
+      }
       const message = e instanceof ApiClientError ? e.message : 'Đăng nhập thất bại. Vui lòng thử lại.';
       Alert.alert('Đăng nhập thất bại', message);
     } finally {

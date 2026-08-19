@@ -11,6 +11,7 @@ export default function AuthLayout() {
     >
       <Stack.Screen name="login" options={{ title: 'Đăng nhập', headerBackVisible: false }} />
       <Stack.Screen name="register" options={{ title: 'Đăng ký' }} />
+      <Stack.Screen name="verify-otp" options={{ title: 'Xác thực OTP', headerBackVisible: false }} />
       <Stack.Screen name="forgot-password" options={{ title: 'Quên mật khẩu' }} />
       <Stack.Screen name="reset-password" options={{ title: 'Đặt lại mật khẩu' }} />
     </Stack>

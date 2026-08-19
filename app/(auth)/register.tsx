@@ -1,4 +1,4 @@
-﻿import { useRouter, Link } from 'expo-router';
+﻿import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import { useState } from 'react';
 import {
   StyleSheet,
@@ -17,6 +17,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { register } from '@/src/api/auth';
 import { ApiClientError } from '@/src/api/client';
 import { Colors } from '@/constants/Colors';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function InputField({
   icon,
@@ -68,7 +70,10 @@ function InputField({
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const [phoneNumber, setPhoneNumber] = useState('');
+  // Prefill khi quay lại từ verify-otp (vd. gõ nhầm email) — đỡ phải gõ lại SĐT.
+  const params = useLocalSearchParams<{ phoneNumber?: string }>();
+  const [phoneNumber, setPhoneNumber] = useState(params.phoneNumber ?? '');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
@@ -76,9 +81,14 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    const trimmed = phoneNumber.trim();
-    if (!trimmed || !password) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập số điện thoại và mật khẩu');
+    const trimmedPhone = phoneNumber.trim();
+    const trimmedEmail = email.trim();
+    if (!trimmedPhone || !trimmedEmail || !password) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập số điện thoại, email và mật khẩu');
+      return;
+    }
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      Alert.alert('Email không hợp lệ', 'Vui lòng nhập đúng định dạng email (vd: ten@example.com)');
       return;
     }
     if (password.length < 8) {
@@ -91,11 +101,24 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     try {
-      await register({ phoneNumber: trimmed, password });
-      Alert.alert('Đăng ký thành công', 'Tài khoản đã được tạo. Vui lòng đăng nhập.', [
-        { text: 'OK', onPress: () => router.replace('/(auth)/login') },
-      ]);
+      await register({ phoneNumber: trimmedPhone, email: trimmedEmail, password });
+      router.replace({
+        pathname: '/(auth)/verify-otp',
+        // justSent=1 (mặc định): OTP vừa được gửi lúc đăng ký → cooldown 60s cho nút "Gửi lại mã".
+        params: { phoneNumber: trimmedPhone, justSent: '1' },
+      });
     } catch (e) {
+      if (e instanceof ApiClientError && e.statusCode === 409) {
+        // 409 có 2 lý do khác nhau: (1) SĐT đã có tài khoản THẬT (đã xác thực xong), hoặc
+        // (2) email đã được dùng cho một tài khoản khác (1 email = 1 tài khoản). Hiển thị
+        // đúng message backend trả về thay vì hard-code — tránh báo sai lý do (vd. báo
+        // "SĐT đã đăng ký" trong khi thực ra là email bị trùng).
+        Alert.alert('Không thể đăng ký', e.message, [
+          { text: 'Đăng nhập', onPress: () => router.push('/(auth)/login') },
+          { text: 'Đóng', style: 'cancel' },
+        ]);
+        return;
+      }
       const message = e instanceof ApiClientError ? e.message : 'Đăng ký thất bại';
       Alert.alert('Lỗi', message);
     } finally {
@@ -119,7 +142,6 @@ export default function RegisterScreen() {
             <Text style={styles.logoName}>EMBOX</Text>
           </View>
           <Text style={styles.heroTitle}>Tạo tài khoản</Text>
-          <Text style={styles.heroSub}>Đăng ký để bắt đầu quản lý thiết bị của bạn</Text>
         </View>
 
         {/* Form card */}
@@ -132,6 +154,18 @@ export default function RegisterScreen() {
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
+              editable={!loading}
+            />
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>Email xác thực</Text>
+            <InputField
+              icon="mail-outline"
+              placeholder="ten@example.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
               editable={!loading}
             />
           </View>
@@ -226,8 +260,7 @@ const styles = StyleSheet.create({
   },
   logoLetter: { fontSize: 28, fontWeight: '800', color: '#fff' },
   logoName: { fontSize: 18, fontWeight: '800', color: '#fff', letterSpacing: 4 },
-  heroTitle: { fontSize: 22, fontWeight: '800', color: '#fff', marginBottom: 6 },
-  heroSub: { fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'center' },
+  heroTitle: { fontSize: 22, fontWeight: '800', color: '#fff' },
 
   card: { flex: 1, backgroundColor: Colors.background, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20 },
   cardContent: { paddingHorizontal: 28, paddingTop: 28 },
