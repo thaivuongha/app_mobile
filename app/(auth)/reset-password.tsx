@@ -75,7 +75,7 @@ export default function ResetPasswordScreen() {
 
   const handleSubmit = async () => {
     if (!token.trim()) {
-      Alert.alert('Thiếu mã', 'Vui lòng nhập mã đặt lại từ SMS');
+      Alert.alert('Thiếu mã', 'Vui lòng dán mã đặt lại nhận được qua email');
       return;
     }
     if (newPassword.length < 8) {
@@ -113,17 +113,17 @@ export default function ResetPasswordScreen() {
             <Ionicons name="lock-open-outline" size={32} color="#fff" />
           </View>
           <Text style={styles.heroTitle}>Đặt lại mật khẩu</Text>
-          <Text style={styles.heroSub}>Nhập mã xác nhận từ SMS và mật khẩu mới của bạn</Text>
+          <Text style={styles.heroSub}>Dán mã xác nhận từ email và nhập mật khẩu mới của bạn</Text>
         </View>
 
         {/* Form card */}
         <ScrollView style={styles.card} contentContainerStyle={styles.cardContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>Mã xác nhận (từ SMS)</Text>
+            <Text style={styles.fieldLabel}>Mã xác nhận (từ email)</Text>
             <InputField
               icon="barcode-outline"
-              placeholder="Nhập mã OTP"
+              placeholder="Dán mã từ email vào đây"
               value={token}
               onChangeText={setToken}
               editable={!loading}

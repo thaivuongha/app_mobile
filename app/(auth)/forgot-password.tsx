@@ -33,8 +33,8 @@ export default function ForgotPasswordScreen() {
     try {
       const res = await forgotPassword(trimmed);
       Alert.alert(
-        'Đã gửi mã',
-        `${res.message} Mã có hiệu lực ${Math.round(res.expiresIn / 60)} phút. Vui lòng nhập mã từ SMS ở bước tiếp theo.`,
+        'Đã gửi yêu cầu',
+        res.message,
         [{ text: 'OK', onPress: () => router.replace('/(auth)/reset-password') }],
       );
     } catch (e) {
@@ -59,7 +59,7 @@ export default function ForgotPasswordScreen() {
           </View>
           <Text style={styles.heroTitle}>Quên mật khẩu?</Text>
           <Text style={styles.heroSub}>
-            Nhập số điện thoại đã đăng ký để nhận mã đặt lại qua SMS
+            Nhập số điện thoại đã đăng ký — mã đặt lại sẽ được gửi tới email liên kết với tài khoản
           </Text>
         </View>
 
@@ -82,6 +82,9 @@ export default function ForgotPasswordScreen() {
                 editable={!loading}
               />
             </View>
+            <Text style={styles.fieldHint}>
+              Tài khoản cần có email liên kết (thêm trong Hồ sơ) để nhận được mã đặt lại.
+            </Text>
           </View>
 
           <TouchableOpacity
@@ -151,6 +154,7 @@ const styles = StyleSheet.create({
 
   fieldGroup: { marginBottom: 20 },
   fieldLabel: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary, marginBottom: 8 },
+  fieldHint: { fontSize: 12, color: Colors.textMuted, marginTop: 8, lineHeight: 16 },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.card, borderRadius: 14, borderWidth: 1.5, borderColor: Colors.border,
