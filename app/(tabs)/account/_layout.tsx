@@ -21,10 +21,7 @@ export default function MeLayout() {
       <Stack.Screen name="unlock-pin" options={{ title: 'PIN mở khóa' }} />
       <Stack.Screen name="wifi-config" options={{ title: 'Cấu hình WiFi thiết bị' }} />
       {/* Settings screens — mở trong account stack để back về đúng trang Cá Nhân */}
-      <Stack.Screen name="commission" options={{ title: 'Lợi nhuận' }} />
       <Stack.Screen name="invoice" options={{ title: 'Cài đặt hóa đơn' }} />
-      <Stack.Screen name="payment-methods" options={{ title: 'Phương thức thanh toán' }} />
-      <Stack.Screen name="payment-method-form" options={{ title: 'Thông tin thanh toán' }} />
       <Stack.Screen name="delivery-addresses" options={{ title: 'Địa chỉ giao hàng' }} />
       <Stack.Screen name="delivery-address-form" options={{ title: 'Thêm / Sửa địa chỉ' }} />
       {/* Wallet screens */}

@@ -91,7 +91,7 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     try {
-      await register({ phoneNumber: trimmed, password, role: 'OWNER' });
+      await register({ phoneNumber: trimmed, password });
       Alert.alert('Đăng ký thành công', 'Tài khoản đã được tạo. Vui lòng đăng nhập.', [
         { text: 'OK', onPress: () => router.replace('/(auth)/login') },
       ]);

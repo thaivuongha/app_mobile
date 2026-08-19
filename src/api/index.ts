@@ -5,8 +5,6 @@ export * from './devices';
 export * from './products';
 export * from './orders';
 export * from './deliveryAddresses';
-export * from './paymentMethods';
-export * from './commissionSettings';
 export * from './invoiceSettings';
 export * from './transactions';
 export * from './sales';

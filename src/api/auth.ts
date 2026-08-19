@@ -12,10 +12,11 @@ export interface LoginResponse {
   expiresIn: number;
 }
 
+// Đăng ký công khai chỉ nhận phoneNumber + password — Backend luôn tạo role OWNER,
+// không nhận role từ client (tránh leo thang đặc quyền tự đăng ký ADMIN/STAFF).
 export interface RegisterBody {
   phoneNumber: string;
   password: string;
-  role?: 'ADMIN' | 'OWNER' | 'STAFF';
 }
 
 export interface RegisterResponse {

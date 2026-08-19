@@ -14,22 +14,10 @@ const SETTINGS_ITEMS = [
     desc: 'Quản lý địa chỉ nhận hàng',
   },
   {
-    icon: 'card-outline' as const,
-    label: 'Phương thức thanh toán',
-    href: '/(tabs)/settings/payment-methods' as const,
-    desc: 'Thông tin ngân hàng nhận tiền',
-  },
-  {
     icon: 'document-text-outline' as const,
     label: 'Cài đặt hóa đơn',
     href: '/(tabs)/settings/invoice' as const,
     desc: 'Thông tin xuất hóa đơn VAT',
-  },
-  {
-    icon: 'trending-up-outline' as const,
-    label: 'Lợi nhuận (commission)',
-    href: '/(tabs)/settings/commission' as const,
-    desc: 'Tỷ lệ phần trăm lợi nhuận',
   },
 ];
 

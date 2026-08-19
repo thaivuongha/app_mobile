@@ -55,7 +55,7 @@ src/
 │   ├── wallet.ts            # GET balance, ledger, topup init/status, transfer, payout accounts
 │   └── transactions.ts
 ├── stores/                  # Zustand
-│   ├── auth.ts              # token, user (partnerLevel, profitRate)
+│   ├── auth.ts              # token, user (priceMultiplier)
 │   └── cart.ts              # giỏ hàng B2B
 ├── hooks/
 │   ├── useWallet.ts         # số dư + sổ cái
@@ -76,13 +76,14 @@ src/
 
 ## Màn hình Catalog Shop (shop.tsx)
 
-Mỗi sản phẩm hiển thị **3 mức giá** (tính server-side theo `partnerLevel` người dùng):
-- **Giá nhập**: `originalPrice` = `products.price`
-- **Hoa hồng**: `commissionAmount`
-- **Giá bán**: `sellingPrice` = `originalPrice + commissionAmount`
+Mỗi sản phẩm hiển thị **giá bán** (tính server-side theo `priceMultiplier` (K) của người dùng):
+- **Giá nhập**: `price` = `products.price`
+- **Hoa hồng**: `commissionAmount` = `commissionValue × priceMultiplier`
+- **VAT**: `vatAmount` = `commissionAmount × 5%`
+- **Giá bán**: `sellingPrice` = `ceil((price + commissionAmount + vatAmount) / 1000) × 1000`
 
 ## Auth
 
 - Đăng nhập bằng **số điện thoại** + mật khẩu.
 - JWT lưu trong SecureStore; tự refresh khi 401.
-- `users/me` trả về `partnerLevel` + `profitRate` — lưu vào auth store, dùng để hiển thị level trên Account tab.
+- `users/me` trả về `priceMultiplier` (K) — lưu vào auth store; đổi qua `PATCH /users/me/price-multiplier`.
