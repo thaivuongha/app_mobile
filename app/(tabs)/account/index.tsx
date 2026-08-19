@@ -30,6 +30,11 @@ function formatVND(amount: number): string {
   return amount.toLocaleString('vi-VN') + 'đ';
 }
 
+/** Quy đổi hệ số K (0.0–3.0) sang tỷ lệ % nguyên để hiển thị cho người dùng (100% = mặc định). */
+function toCommissionPercent(priceMultiplier: number): number {
+  return Math.round(priceMultiplier * 100);
+}
+
 interface MenuItemProps {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
@@ -99,7 +104,7 @@ export default function MeScreen() {
       // Invalidate my-devices — slots embedded cũng chứa sellingPrice
       queryClient.invalidateQueries({ queryKey: ['my-devices'] });
       setKModalVisible(false);
-      Alert.alert('Thành công', 'Đã cập nhật hệ số hoa hồng (K). Giá bán đã được làm mới.');
+      Alert.alert('Thành công', 'Đã cập nhật tỷ lệ hoa hồng. Giá bán đã được làm mới.');
     },
     onError: () => {
       Alert.alert('Lỗi', 'Không thể cập nhật. Vui lòng thử lại.');
@@ -108,17 +113,24 @@ export default function MeScreen() {
 
   const handleOpenKModal = () => {
     const current = userQuery.data?.priceMultiplier ?? 1;
-    setKInputVal(current.toString());
+    setKInputVal(toCommissionPercent(current).toString());
     setKModalVisible(true);
   };
 
   const handleSaveK = () => {
-    const val = parseFloat(kInputVal.replace(',', '.'));
-    if (isNaN(val) || val < 0 || val > 3) {
-      Alert.alert('Giá trị không hợp lệ', 'Hệ số K phải từ 0.0 đến 3.0');
+    const trimmed = kInputVal.trim();
+    // Ràng buộc chặt: chỉ chấp nhận số nguyên dương (không thập phân, không dấu, không khoảng trắng)
+    // để tránh nhập sai đơn vị (ví dụ gõ nhầm hệ số K thay vì %).
+    if (!/^\d+$/.test(trimmed)) {
+      Alert.alert('Giá trị không hợp lệ', 'Tỷ lệ hoa hồng phải là số nguyên, ví dụ: 100');
       return;
     }
-    updateKMutation.mutate(val);
+    const percent = parseInt(trimmed, 10);
+    if (percent < 0 || percent > 300) {
+      Alert.alert('Giá trị không hợp lệ', 'Tỷ lệ hoa hồng phải từ 0% đến 300%');
+      return;
+    }
+    updateKMutation.mutate(percent / 100);
   };
 
   const handleLogout = () => {
@@ -197,7 +209,7 @@ export default function MeScreen() {
                 <View style={styles.roleBadge}>
                   <Ionicons name="trending-up-outline" size={11} color={Colors.primary} style={{ marginRight: 3 }} />
                   <Text style={styles.roleBadgeText}>
-                    K = {user.priceMultiplier.toFixed(2)}×
+                    Hoa hồng: {toCommissionPercent(user.priceMultiplier)}%
                   </Text>
                 </View>
               )}
@@ -250,10 +262,10 @@ export default function MeScreen() {
           />
           <MenuItem
             icon="trending-up-outline"
-            label="Hệ số hoa hồng (K)"
+            label="Tỷ lệ hoa hồng"
             sublabel={
               user != null
-                ? `Hiện tại: ${user.priceMultiplier.toFixed(2)}× — ảnh hưởng giá bán tại máy`
+                ? `Hiện tại: ${toCommissionPercent(user.priceMultiplier)}% — ảnh hưởng giá bán tại máy`
                 : 'Đang tải...'
             }
             onPress={handleOpenKModal}
@@ -332,20 +344,24 @@ export default function MeScreen() {
             onPress={() => setKModalVisible(false)}
           />
           <View style={styles.kModalCard}>
-            <Text style={styles.kModalTitle}>Hệ số hoa hồng (K)</Text>
+            <Text style={styles.kModalTitle}>Tỷ lệ hoa hồng</Text>
             <Text style={styles.kModalDesc}>
-              Giá bán = ceil(giá vốn + hoa hồng × K × 1.05, 1000đ){'\n'}
-              Khoảng cho phép: 0.0 – 3.0 (mặc định 1.0)
+              Tỷ lệ hoa hồng bạn nhận trên mỗi sản phẩm bán ra tại máy — ảnh hưởng trực tiếp đến giá bán khách phải trả.{'\n'}
+              Mặc định 100%. Chỉ nhập số nguyên từ 0 đến 300.
             </Text>
-            <TextInput
-              style={styles.kModalInput}
-              value={kInputVal}
-              onChangeText={setKInputVal}
-              keyboardType="decimal-pad"
-              placeholder="VD: 1.0"
-              placeholderTextColor={Colors.textMuted}
-              autoFocus
-            />
+            <View style={styles.kModalInputRow}>
+              <TextInput
+                style={styles.kModalInput}
+                value={kInputVal}
+                onChangeText={(text) => setKInputVal(text.replace(/[^0-9]/g, ''))}
+                keyboardType="number-pad"
+                maxLength={3}
+                placeholder="VD: 100"
+                placeholderTextColor={Colors.textMuted}
+                autoFocus
+              />
+              <Text style={styles.kModalInputSuffix}>%</Text>
+            </View>
             <View style={styles.kModalActions}>
               <TouchableOpacity
                 style={[styles.kModalBtn, styles.kModalBtnCancel]}
@@ -462,7 +478,14 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 16,
   },
+  kModalInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
   kModalInput: {
+    flex: 1,
     borderWidth: 1.5,
     borderColor: Colors.border,
     borderRadius: 12,
@@ -473,7 +496,11 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     backgroundColor: Colors.background,
     textAlign: 'center',
-    marginBottom: 20,
+  },
+  kModalInputSuffix: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textSecondary,
   },
   kModalActions: { flexDirection: 'row', gap: 12 },
   kModalBtn: {
