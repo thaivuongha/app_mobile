@@ -27,7 +27,7 @@ export default function MeLayout() {
       {/* Wallet screens */}
       <Stack.Screen name="wallet" options={{ title: 'Ví vận hành' }} />
       <Stack.Screen name="wallet-commission" options={{ title: 'Ví hoa hồng' }} />
-      <Stack.Screen name="wallet-topup" options={{ title: 'Nạp cọc' }} />
+      <Stack.Screen name="wallet-topup" options={{ title: 'Nạp ký quỹ' }} />
       <Stack.Screen name="wallet-transfer" options={{ title: 'Chuyển vốn' }} />
       <Stack.Screen name="wallet-ledger" options={{ title: 'Lịch sử biến động' }} />
       <Stack.Screen name="wallet-payout-accounts" options={{ title: 'Tài khoản nhận hoa hồng' }} />

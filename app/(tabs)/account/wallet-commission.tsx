@@ -184,7 +184,7 @@ export default function WalletCommissionScreen() {
         <View style={styles.noteBox}>
           <Ionicons name="information-circle-outline" size={15} color={Colors.textMuted} />
           <Text style={styles.noteText}>
-            Hoa hồng tích lũy tự động sau mỗi giao dịch bán lẻ từ thiết bị vending. Số dư được chi trả định kỳ vào tài khoản đã đăng ký.
+            Hoa hồng tích lũy tự động sau mỗi giao dịch bán lẻ từ thiết bị. Số dư được chi trả định kỳ vào tài khoản đã đăng ký.
           </Text>
         </View>
 

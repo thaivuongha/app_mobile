@@ -209,7 +209,7 @@ export default function WalletTopupScreen() {
     // Force immediate refetch thay vì chỉ mark stale
     queryClient.refetchQueries({ queryKey: ['wallet'] });
     Alert.alert(
-      'Nạp cọc thành công',
+      'Nạp ký quỹ thành công',
       `+${formatVND(session!.amount)} đã được cộng vào ví vận hành.`,
       [{ text: 'OK', onPress: () => router.back() }]
     );
@@ -258,8 +258,8 @@ export default function WalletTopupScreen() {
             <View style={styles.infoBox}>
               <Ionicons name="information-circle-outline" size={18} color={Colors.primary} />
               <Text style={styles.infoText}>
-                Nạp tiền vào ví vận hành để đặt hàng B2B. Số tiền bị giam khi đặt hàng,
-                hoàn lại sau khi giao hàng thành công.
+              Ví vận hành là khoản tiền cọc để nhập hàng. Tiền sẽ bị trừ khi nhập hàng thành công
+              và được hoàn lại sau mỗi giao dịch tại máy bán hàng.
               </Text>
             </View>
 

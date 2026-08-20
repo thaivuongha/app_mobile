@@ -133,7 +133,7 @@ export default function WalletScreen() {
           <View style={styles.actionRow}>
             <ActionBtn
               icon="qr-code-outline"
-              label="Nạp cọc"
+              label="Nạp ký quỹ"
               onPress={() => router.push('/(tabs)/account/wallet-topup' as never)}
             />
             <ActionBtn
@@ -149,7 +149,8 @@ export default function WalletScreen() {
         <View style={styles.noteBox}>
           <Ionicons name="information-circle-outline" size={15} color={Colors.textMuted} />
           <Text style={styles.noteText}>
-            Nạp tiền vào ví vận hành để đặt hàng B2B. Số tiền bị giam khi đặt hàng, hoàn lại sau khi giao hàng thành công.
+            Ví vận hành là khoản tiền cọc để nhập hàng. Tiền sẽ bị trừ khi nhập hàng thành công
+            và được hoàn lại sau mỗi giao dịch tại máy bán hàng.
           </Text>
         </View>
 

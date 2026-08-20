@@ -246,7 +246,6 @@ export default function MeScreen() {
           <MenuItem
             icon="person-outline"
             label="Chỉnh sửa hồ sơ"
-            sublabel="Tên, email, ảnh đại diện"
             onPress={() => router.push('/(tabs)/account/edit-profile')}
           />
           <MenuItem
@@ -277,7 +276,6 @@ export default function MeScreen() {
           <MenuItem
             icon="cube-outline"
             label="Danh sách thiết bị"
-            sublabel="Xem và xóa máy vending"
             onPress={() => router.push('/(tabs)/account/devices')}
           />
           <MenuItem
@@ -289,7 +287,6 @@ export default function MeScreen() {
           <MenuItem
             icon="wifi-outline"
             label="Cấu hình WiFi thiết bị"
-            sublabel="Gửi thông tin WiFi qua Bluetooth (BluFi)"
             onPress={() => router.push('/(tabs)/account/wifi-config')}
           />
         </MenuSection>
@@ -347,7 +344,7 @@ export default function MeScreen() {
             <Text style={styles.kModalTitle}>Tỷ lệ hoa hồng</Text>
             <Text style={styles.kModalDesc}>
               Tỷ lệ hoa hồng bạn nhận trên mỗi sản phẩm bán ra tại máy — ảnh hưởng trực tiếp đến giá bán khách phải trả.{'\n'}
-              Mặc định 100%. Chỉ nhập số nguyên từ 0 đến 300.
+              Giới hạn từ 0 đến 300%.
             </Text>
             <View style={styles.kModalInputRow}>
               <TextInput
