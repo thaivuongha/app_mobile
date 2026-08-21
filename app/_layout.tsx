@@ -54,8 +54,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        {/* Chỉ check update ở bản build thật (dev/preview đọc từ Metro nên không cần) */}
-        {!__DEV__ && <AppUpdateChecker />}
+        <AppUpdateChecker />
         <RootLayoutNav />
       </QueryClientProvider>
     </SafeAreaProvider>
