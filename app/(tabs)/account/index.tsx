@@ -343,7 +343,7 @@ export default function MeScreen() {
           <View style={styles.kModalCard}>
             <Text style={styles.kModalTitle}>Tỷ lệ hoa hồng</Text>
             <Text style={styles.kModalDesc}>
-              Tỷ lệ hoa hồng bạn nhận trên mỗi sản phẩm bán ra tại máy — ảnh hưởng trực tiếp đến giá bán khách phải trả.{'\n'}
+              Tỷ lệ hoa hồng bạn nhận trên mỗi sản phẩm bán ra tại máy. Ảnh hưởng trực tiếp đến giá bán khách phải trả.{'\n'}
               Giới hạn từ 0 đến 300%.
             </Text>
             <View style={styles.kModalInputRow}>
