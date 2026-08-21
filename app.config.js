@@ -33,7 +33,7 @@ const getAppName = () => {
     "name": getAppName(),
     "slug": "embox",
     "uniqueIdentifier": getUniqueIdentifier(),
-    "version": "1.0.3",
+    "version": "1.0.5",
     "orientation": "default",
     "icon": "./assets/images/logo-ios.png",
     "scheme": "mobile",

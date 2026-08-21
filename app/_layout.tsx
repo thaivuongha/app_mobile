@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
+import { AppUpdateChecker } from '@/components/AppUpdateChecker';
 
 const AppTheme = {
   ...DefaultTheme,
@@ -53,6 +54,8 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
+        {/* Chỉ check update ở bản build thật (dev/preview đọc từ Metro nên không cần) */}
+        {!__DEV__ && <AppUpdateChecker />}
         <RootLayoutNav />
       </QueryClientProvider>
     </SafeAreaProvider>
