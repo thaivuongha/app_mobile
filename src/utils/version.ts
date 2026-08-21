@@ -16,7 +16,7 @@ export function compareVersions(a: string, b: string): number {
   return 0;
 }
 
-/** true nếu `current` nhỏ hơn `target` (dùng để check cần update hay không). */
+/** true nếu `current` nhỏ hơn `target`. */
 export function isVersionLower(current: string, target: string): boolean {
   return compareVersions(current, target) < 0;
 }
