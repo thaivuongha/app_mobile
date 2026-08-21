@@ -30,14 +30,31 @@ const APP_VERSION = Constants.expoConfig?.version ?? '—';
 const APP_NAME = Constants.expoConfig?.name ?? 'Embox';
 const SUPPORT_EMAIL = 'support@embox.vn';
 const TERMS_URL = 'https://embox.vn';
+const FALLBACK_COMMISSION_PERCENT_MIN = 0;
+const FALLBACK_COMMISSION_PERCENT_MAX = 300;
 
 function formatVND(amount: number): string {
   return amount.toLocaleString('vi-VN') + 'đ';
 }
 
-/** Quy đổi hệ số K (0.0–3.0) sang tỷ lệ % nguyên để hiển thị cho người dùng (100% = mặc định). */
+/** Quy đổi hệ số K sang tỷ lệ % nguyên để hiển thị (100% = mặc định). */
 function toCommissionPercent(priceMultiplier: number): number {
   return Math.round(priceMultiplier * 100);
+}
+
+function getCommissionPercentLimits(user?: { commissionPercentMin?: number; commissionPercentMax?: number }) {
+  const min = user?.commissionPercentMin;
+  const max = user?.commissionPercentMax;
+  if (
+    typeof min === 'number' &&
+    typeof max === 'number' &&
+    Number.isFinite(min) &&
+    Number.isFinite(max) &&
+    min <= max
+  ) {
+    return { min, max };
+  }
+  return { min: FALLBACK_COMMISSION_PERCENT_MIN, max: FALLBACK_COMMISSION_PERCENT_MAX };
 }
 
 interface MenuItemProps {
@@ -145,6 +162,7 @@ export default function MeScreen() {
   };
 
   const handleSaveK = () => {
+    const limits = getCommissionPercentLimits(userQuery.data);
     const trimmed = kInputVal.trim();
     // Ràng buộc chặt: chỉ chấp nhận số nguyên dương (không thập phân, không dấu, không khoảng trắng)
     // để tránh nhập sai đơn vị (ví dụ gõ nhầm hệ số K thay vì %).
@@ -153,8 +171,8 @@ export default function MeScreen() {
       return;
     }
     const percent = parseInt(trimmed, 10);
-    if (percent < 0 || percent > 300) {
-      setKError('Tỷ lệ hoa hồng phải từ 0% đến 300%.');
+    if (percent < limits.min || percent > limits.max) {
+      setKError(`Tỷ lệ hoa hồng phải từ ${limits.min}% đến ${limits.max}%.`);
       return;
     }
     setKError('');
@@ -255,6 +273,7 @@ export default function MeScreen() {
   const user = userQuery.data;
   const profile = profileQuery.data;
   const wallet = walletQuery.data;
+  const commissionLimits = getCommissionPercentLimits(user);
 
   const displayName = profile
     ? [profile.firstName, profile.lastName].filter(Boolean).join(' ') || user?.phoneNumber
@@ -452,7 +471,7 @@ export default function MeScreen() {
             <Text style={styles.kModalTitle}>Tỷ lệ hoa hồng</Text>
             <Text style={styles.kModalDesc}>
               Tỷ lệ hoa hồng bạn nhận trên mỗi sản phẩm bán ra tại máy. Ảnh hưởng trực tiếp đến giá bán khách phải trả.{'\n'}
-              Giới hạn từ 0 đến 300%.
+              Giới hạn từ {commissionLimits.min} đến {commissionLimits.max}%.
             </Text>
             <View style={styles.kModalInputRow}>
               <TextInput
@@ -463,7 +482,7 @@ export default function MeScreen() {
                   if (kError) setKError('');
                 }}
                 keyboardType="number-pad"
-                maxLength={3}
+                maxLength={Math.max(3, String(Math.trunc(commissionLimits.max)).length)}
                 placeholder="VD: 100"
                 placeholderTextColor={Colors.textMuted}
                 autoFocus

@@ -10,10 +10,15 @@ export interface User {
   createdAt: string;
   /**
    * Hệ số nhân hoa hồng (K). Mặc định 1.0 (= 100%).
-   * Khoảng cho phép: 0.0 – 3.0. Owner tự chỉnh qua PATCH /users/me/price-multiplier.
+   * Backend trả K đã clamp theo COMMISSION_PERCENT_MIN/MAX.
+   * Owner tự chỉnh qua PATCH /users/me/price-multiplier.
    * finalPrice = ceil(price + commissionValue × K × 1.05, 1000)
    */
   priceMultiplier: number;
+  /** Giới hạn tỷ lệ % (khớp UI). Fallback 0 nếu backend cũ chưa trả field. */
+  commissionPercentMin?: number;
+  /** Giới hạn tỷ lệ % (khớp UI). Fallback 300 nếu backend cũ chưa trả field. */
+  commissionPercentMax?: number;
 }
 
 export interface UserProfile {
@@ -84,7 +89,7 @@ export function removeUnlockPin(): Promise<{ message: string }> {
 
 /**
  * Cập nhật hệ số hoa hồng (K) của owner.
- * @param priceMultiplier Giá trị từ 0.0 đến 3.0 (VD: 1.2 = 120%)
+ * @param priceMultiplier Giá trị K = percent/100 (VD: 1.2 = 120%). Range do backend cấu hình.
  * Backend trả về { id, priceMultiplier } — dùng getMe() để lấy full user sau khi cập nhật.
  */
 export function updatePriceMultiplier(
