@@ -4,6 +4,8 @@ export interface User {
   id: string;
   phoneNumber: string;
   email: string | null;
+  /** Email đang chờ OTP xác nhận (chưa ghi vào User.email). */
+  pendingEmail?: string | null;
   role: string;
   isActive: boolean;
   isVerified: boolean;
@@ -31,6 +33,7 @@ export interface UserProfile {
   gender: string | null;
   identityCard: string | null;
   address: string | null;
+  contactPhone: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,8 +42,35 @@ export function getMe(): Promise<User> {
   return apiRequest<User>('/api/v1/users/me');
 }
 
-export function updateMe(body: { email?: string }): Promise<User> {
-  return apiRequest<User>('/api/v1/users/me', { method: 'PATCH', body });
+export function requestEmailChange(
+  email: string,
+  currentPassword: string,
+): Promise<{ email: string; expiresIn: number; message: string }> {
+  return apiRequest('/api/v1/users/me/email/change', {
+    method: 'POST',
+    body: { email, currentPassword },
+  });
+}
+
+export function resendEmailChangeOtp(): Promise<{
+  email: string;
+  expiresIn: number;
+  message: string;
+}> {
+  return apiRequest('/api/v1/users/me/email/resend', { method: 'POST' });
+}
+
+export function verifyEmailChange(
+  otpCode: string,
+): Promise<{ id: string; email: string; message: string }> {
+  return apiRequest('/api/v1/users/me/email/verify', {
+    method: 'POST',
+    body: { otpCode },
+  });
+}
+
+export function cancelEmailChange(): Promise<{ message: string }> {
+  return apiRequest('/api/v1/users/me/email/change', { method: 'DELETE' });
 }
 
 export function getMyProfile(): Promise<UserProfile> {
@@ -49,12 +79,13 @@ export function getMyProfile(): Promise<UserProfile> {
 
 export function updateMyProfile(body: {
   firstName?: string;
-  lastName?: string;
+  lastName?: string | null;
   avatar?: string;
   dateOfBirth?: string;
   gender?: string;
   identityCard?: string;
   address?: string;
+  contactPhone?: string;
 }): Promise<UserProfile> {
   return apiRequest<UserProfile>('/api/v1/user-profiles/me', {
     method: 'PATCH',
