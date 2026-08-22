@@ -20,6 +20,8 @@ import { Colors } from '@/constants/Colors';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const VN_MOBILE_PHONE_REGEX = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+
 function InputField({
   icon,
   placeholder,
@@ -31,6 +33,7 @@ function InputField({
   showToggle,
   onToggle,
   showText,
+  autoCapitalize = 'none',
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   placeholder: string;
@@ -42,6 +45,7 @@ function InputField({
   showToggle?: boolean;
   onToggle?: () => void;
   showText?: boolean;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 }) {
   return (
     <View style={styles.inputWrapper}>
@@ -56,7 +60,7 @@ function InputField({
         placeholderTextColor={Colors.textMuted}
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry && !showText}
-        autoCapitalize="none"
+        autoCapitalize={autoCapitalize}
         editable={editable}
       />
       {showToggle && (
@@ -71,24 +75,51 @@ function InputField({
 export default function RegisterScreen() {
   const router = useRouter();
   // Prefill khi quay lại từ verify-otp (vd. gõ nhầm email) — đỡ phải gõ lại SĐT.
-  const params = useLocalSearchParams<{ phoneNumber?: string }>();
+  const params = useLocalSearchParams<{
+    phoneNumber?: string;
+    firstName?: string;
+    address?: string;
+    contactPhone?: string;
+  }>();
   const [phoneNumber, setPhoneNumber] = useState(params.phoneNumber ?? '');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState(params.firstName ?? '');
+  const [address, setAddress] = useState(params.address ?? '');
+  const [contactPhone, setContactPhone] = useState(params.contactPhone ?? params.phoneNumber ?? '');
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const handlePhoneChange = (t: string) => {
+    setPhoneNumber(t);
+    // Prefill SĐT liên hệ theo SĐT đăng nhập nếu user chưa sửa riêng.
+    if (!contactPhone || contactPhone === phoneNumber) {
+      setContactPhone(t);
+    }
+  };
+
   const handleRegister = async () => {
     const trimmedPhone = phoneNumber.trim();
     const trimmedEmail = email.trim();
+    const trimmedName = firstName.trim();
+    const trimmedAddress = address.trim();
+    const trimmedContactPhone = contactPhone.trim();
     if (!trimmedPhone || !trimmedEmail || !password) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập số điện thoại, email và mật khẩu');
       return;
     }
+    if (!trimmedName || !trimmedAddress || !trimmedContactPhone) {
+      Alert.alert('Thiếu thông tin liên hệ', 'Vui lòng nhập họ tên, địa chỉ và số điện thoại liên hệ');
+      return;
+    }
     if (!EMAIL_REGEX.test(trimmedEmail)) {
       Alert.alert('Email không hợp lệ', 'Vui lòng nhập đúng định dạng email (vd: ten@example.com)');
+      return;
+    }
+    if (!VN_MOBILE_PHONE_REGEX.test(trimmedPhone) || !VN_MOBILE_PHONE_REGEX.test(trimmedContactPhone)) {
+      Alert.alert('Số điện thoại không hợp lệ', 'Vui lòng nhập SĐT Việt Nam 10 số (đầu 03, 05, 07, 08, 09)');
       return;
     }
     if (password.length < 8) {
@@ -101,11 +132,24 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     try {
-      await register({ phoneNumber: trimmedPhone, email: trimmedEmail, password });
+      await register({
+        phoneNumber: trimmedPhone,
+        email: trimmedEmail,
+        password,
+        firstName: trimmedName,
+        address: trimmedAddress,
+        contactPhone: trimmedContactPhone,
+      });
       router.replace({
         pathname: '/(auth)/verify-otp',
         // justSent=1 (mặc định): OTP vừa được gửi lúc đăng ký → cooldown 60s cho nút "Gửi lại mã".
-        params: { phoneNumber: trimmedPhone, justSent: '1' },
+        params: {
+          phoneNumber: trimmedPhone,
+          firstName: trimmedName,
+          address: trimmedAddress,
+          contactPhone: trimmedContactPhone,
+          justSent: '1',
+        },
       });
     } catch (e) {
       if (e instanceof ApiClientError && e.statusCode === 409) {
@@ -152,7 +196,7 @@ export default function RegisterScreen() {
               icon="call-outline"
               placeholder="0901 234 567"
               value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              onChangeText={handlePhoneChange}
               keyboardType="phone-pad"
               editable={!loading}
             />
@@ -196,6 +240,45 @@ export default function RegisterScreen() {
               showToggle
               showText={showConfirm}
               onToggle={() => setShowConfirm((v) => !v)}
+              editable={!loading}
+            />
+          </View>
+
+          <Text style={styles.sectionLabel}>Thông tin liên hệ</Text>
+          <Text style={styles.sectionHint}>Embox dùng để liên hệ khi cần hỗ trợ vận hành.</Text>
+
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>Họ và tên</Text>
+            <InputField
+              icon="person-outline"
+              placeholder="Nguyễn Văn A"
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize="words"
+              editable={!loading}
+            />
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>Địa chỉ</Text>
+            <InputField
+              icon="location-outline"
+              placeholder="Số nhà, đường, quận/huyện, tỉnh/thành"
+              value={address}
+              onChangeText={setAddress}
+              autoCapitalize="sentences"
+              editable={!loading}
+            />
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>Số điện thoại liên hệ</Text>
+            <InputField
+              icon="call-outline"
+              placeholder="Có thể khác SĐT đăng nhập"
+              value={contactPhone}
+              onChangeText={setContactPhone}
+              keyboardType="phone-pad"
               editable={!loading}
             />
           </View>
@@ -267,6 +350,8 @@ const styles = StyleSheet.create({
 
   fieldGroup: { marginBottom: 14 },
   fieldLabel: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary, marginBottom: 8, letterSpacing: 0.2 },
+  sectionLabel: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary, marginTop: 8, marginBottom: 4 },
+  sectionHint: { fontSize: 12, color: Colors.textMuted, marginBottom: 14 },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.card, borderRadius: 14, borderWidth: 1.5, borderColor: Colors.border,

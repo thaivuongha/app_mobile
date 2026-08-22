@@ -24,7 +24,13 @@ const RESEND_COOLDOWN_SECONDS = 60;
 export default function VerifyOtpScreen() {
   const router = useRouter();
   const setHasToken = useAuthStore((s) => s.setHasToken);
-  const params = useLocalSearchParams<{ phoneNumber?: string; justSent?: string }>();
+  const params = useLocalSearchParams<{
+    phoneNumber?: string;
+    justSent?: string;
+    firstName?: string;
+    address?: string;
+    contactPhone?: string;
+  }>();
   const phoneNumber = params.phoneNumber ?? '';
   // Chỉ ép cooldown khi vừa gửi OTP từ màn Đăng ký. Nếu vào từ Đăng nhập (tài khoản có
   // sẵn nhưng chưa xác thực), mã cũ có thể đã hết hạn từ lâu → cho phép bấm "Gửi lại mã" ngay.
@@ -91,7 +97,14 @@ export default function VerifyOtpScreen() {
   const handleBackToRegister = () => {
     router.replace({
       pathname: '/(auth)/register',
-      params: phoneNumber ? { phoneNumber } : undefined,
+      params: phoneNumber
+        ? {
+            phoneNumber,
+            ...(params.firstName ? { firstName: params.firstName } : {}),
+            ...(params.address ? { address: params.address } : {}),
+            ...(params.contactPhone ? { contactPhone: params.contactPhone } : {}),
+          }
+        : undefined,
     });
   };
 

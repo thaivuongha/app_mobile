@@ -20,6 +20,9 @@ export interface RegisterBody {
   phoneNumber: string;
   email: string;
   password: string;
+  firstName: string;
+  address: string;
+  contactPhone: string;
 }
 
 // Chưa tạo tài khoản thật ngay lúc này (chỉ lưu "chờ xác thực") — id/role chỉ có sau khi
