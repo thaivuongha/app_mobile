@@ -22,6 +22,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { useBlufi } from '@/src/hooks/useBlufi';
 import type { BluFiDevice } from '@/src/services/blufi/types';
 
@@ -440,7 +441,7 @@ function CredentialsScreen({
   onRefreshWifiList: () => void;
 }) {
   return (
-    <ScrollView contentContainerStyle={styles.centeredContent} keyboardShouldPersistTaps="handled">
+    <KeyboardAwareScrollView contentContainerStyle={styles.centeredContent}>
       {/* Thiết bị đã chọn */}
       <View style={styles.deviceSelected}>
         <View style={styles.deviceIcon}>
@@ -542,7 +543,7 @@ function CredentialsScreen({
         <Ionicons name="send" size={18} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.primaryBtnText}>Gửi cấu hình WiFi</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

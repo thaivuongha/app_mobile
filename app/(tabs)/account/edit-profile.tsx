@@ -4,7 +4,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   Alert,
   ActivityIndicator,
 } from 'react-native';
@@ -12,6 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { getMe, getMyProfile, updateMyProfile, requestEmailChange, resendEmailChangeOtp, verifyEmailChange, cancelEmailChange } from '@/src/api/users';
 import { ApiClientError } from '@/src/api/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -232,7 +232,7 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScrollView style={styles.scroll} contentContainerStyle={styles.content}>
 
         {/* Avatar placeholder */}
         <View style={styles.avatarSection}>
@@ -400,7 +400,7 @@ export default function EditProfileScreen() {
         </View>
 
         <View style={{ height: 32 }} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

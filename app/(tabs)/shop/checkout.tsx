@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   Alert,
@@ -13,7 +12,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { useCartStore } from '@/src/stores/cartStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -320,11 +319,9 @@ export default function CheckoutScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
       >
         {/* ── Order summary ────────────────────────────────────────── */}
         <Section icon="bag-outline" title={`Tóm tắt đơn hàng (${items.length} loại)`}>
@@ -560,7 +557,7 @@ export default function CheckoutScreen() {
         </Section>
 
         <View style={{ height: 120 }} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* ── Footer ─────────────────────────────────────────────────── */}
       <View style={styles.footer}>

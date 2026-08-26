@@ -4,16 +4,14 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
   ActivityIndicator,
-  ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { resetPassword } from '@/src/api/auth';
 import { ApiClientError } from '@/src/api/client';
 import { Colors } from '@/constants/Colors';
@@ -101,11 +99,9 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['bottom']}>
       <StatusBar style="light" />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-
-        {/* Hero */}
+      <KeyboardAwareScrollView contentContainerStyle={styles.page}>
         <View style={styles.hero}>
           <View style={[styles.circle, styles.circleTopRight]} />
           <View style={[styles.circle, styles.circleBottomLeft]} />
@@ -116,8 +112,7 @@ export default function ResetPasswordScreen() {
           <Text style={styles.heroSub}>Dán mã xác nhận từ email và nhập mật khẩu mới của bạn</Text>
         </View>
 
-        {/* Form card */}
-        <ScrollView style={styles.card} contentContainerStyle={styles.cardContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <View style={styles.card}>
 
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>Mã xác nhận (từ email)</Text>
@@ -177,15 +172,15 @@ export default function ResetPasswordScreen() {
           </TouchableOpacity>
 
           <View style={{ height: 24 }} />
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.primary },
-  flex: { flex: 1 },
+  page: { flexGrow: 1 },
 
   hero: {
     backgroundColor: Colors.primary,
@@ -211,8 +206,15 @@ const styles = StyleSheet.create({
   heroTitle: { fontSize: 24, fontWeight: '800', color: '#fff' },
   heroSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', textAlign: 'center', lineHeight: 20 },
 
-  card: { flex: 1, backgroundColor: Colors.background, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20 },
-  cardContent: { paddingHorizontal: 28, paddingTop: 32 },
+  card: {
+    flexGrow: 1,
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -20,
+    paddingHorizontal: 28,
+    paddingTop: 32,
+  },
 
   fieldGroup: { marginBottom: 14 },
   fieldLabel: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary, marginBottom: 8 },

@@ -6,17 +6,15 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
   ActivityIndicator,
-  ScrollView,
   Dimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { login } from '@/src/api/auth';
 import { ApiClientError } from '@/src/api/client';
 import { useAuthStore } from '@/src/stores/authStore';
@@ -151,25 +149,13 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['bottom']}>
       <StatusBar style="dark" />
-
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        {/* ── Hero header ───────────────────────────────────── */}
+      <KeyboardAwareScrollView contentContainerStyle={styles.page}>
         <View style={styles.hero}>
           <EmboxLogo />
         </View>
-
-        {/* ── Form card ─────────────────────────────────────── */}
-        <ScrollView
-          style={styles.card}
-          contentContainerStyle={styles.cardContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={styles.card}>
           <Text style={styles.cardTitle}>Đăng nhập</Text>
           <Text style={styles.cardSubtitle}>Chào mừng trở lại 👋</Text>
 
@@ -200,14 +186,12 @@ export default function LoginScreen() {
             />
           </View>
 
-          {/* Quên mật khẩu */}
           <Link href="/(auth)/forgot-password" asChild>
             <TouchableOpacity style={styles.forgotBtn}>
               <Text style={styles.forgotText}>Quên mật khẩu?</Text>
             </TouchableOpacity>
           </Link>
 
-          {/* Nút đăng nhập */}
           <TouchableOpacity
             style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
             onPress={handleLogin}
@@ -224,14 +208,12 @@ export default function LoginScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Divider */}
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>hoặc</Text>
             <View style={styles.dividerLine} />
           </View>
 
-          {/* Đăng ký */}
           <Link href="/(auth)/register" asChild>
             <TouchableOpacity style={styles.registerBtn} activeOpacity={0.8}>
               <Text style={styles.registerBtnText}>Tạo tài khoản mới</Text>
@@ -239,8 +221,8 @@ export default function LoginScreen() {
           </Link>
 
           <View style={{ height: 16 }} />
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
@@ -249,12 +231,12 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  flex: { flex: 1 },
+  page: { flexGrow: 1 },
 
   // Hero
   hero: {
     backgroundColor: Colors.background,
-    paddingTop: 48,
+    paddingTop: 24,
     paddingBottom: 36,
     paddingHorizontal: 28,
     alignItems: 'center',
@@ -276,14 +258,12 @@ const styles = StyleSheet.create({
 
   // Card
   card: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: Colors.card,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     borderTopWidth: 1,
     borderColor: Colors.border,
-  },
-  cardContent: {
     paddingHorizontal: 28,
     paddingTop: 32,
   },

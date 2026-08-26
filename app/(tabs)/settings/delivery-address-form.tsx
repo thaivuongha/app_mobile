@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   Alert,
   ActivityIndicator,
   Switch,
@@ -14,6 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import {
   getDeliveryAddresses,
   createDeliveryAddress,
@@ -183,11 +183,9 @@ export default function DeliveryAddressFormScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
       >
         {/* Recipient info */}
         <View style={styles.card}>
@@ -314,7 +312,7 @@ export default function DeliveryAddressFormScreen() {
         </View>
 
         <View style={{ height: 24 }} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Save button */}
       <View style={styles.footer}>

@@ -6,13 +6,12 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { claimDevice } from '@/src/api/devices';
 import { ApiClientError } from '@/src/api/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -57,14 +56,8 @@ export default function ClaimDeviceScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.flex}
-      >
-        <ScrollView
+      <KeyboardAwareScrollView
           contentContainerStyle={styles.container}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
         >
           {/* Section 1: Thông tin thiết bị */}
           <View style={styles.section}>
@@ -161,8 +154,7 @@ export default function ClaimDeviceScreen() {
               </>
             )}
           </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

@@ -4,16 +4,14 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
   ActivityIndicator,
-  ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { changePassword } from '@/src/api/auth';
 import { ApiClientError } from '@/src/api/client';
 import { Colors } from '@/constants/Colors';
@@ -101,8 +99,7 @@ export default function ChangePasswordScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScrollView style={styles.scroll} contentContainerStyle={styles.content}>
 
           {/* Icon header */}
           <View style={styles.iconSection}>
@@ -163,8 +160,7 @@ export default function ChangePasswordScreen() {
           </TouchableOpacity>
 
           <View style={{ height: 32 }} />
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

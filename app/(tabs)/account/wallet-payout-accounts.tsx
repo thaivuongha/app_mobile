@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { keyboardAvoidingBehavior } from '@/components/KeyboardAwareScrollView';
 import {
   getPayoutAccounts,
   createPayoutAccount,
@@ -99,7 +100,7 @@ function BankPickerModal({
       <View style={pickerStyles.overlay}>
         <TouchableOpacity style={pickerStyles.backdrop} activeOpacity={1} onPress={onClose} />
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={keyboardAvoidingBehavior}
           style={pickerStyles.sheet}
         >
           <View style={pickerStyles.handle} />
@@ -276,7 +277,7 @@ function AccountFormModal({
       <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
         <KeyboardAvoidingView
           style={styles.modalWrapper}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={keyboardAvoidingBehavior}
         >
           <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose} />
           <View style={styles.formSheet}>

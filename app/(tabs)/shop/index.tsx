@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { keyboardAvoidingBehavior } from '@/components/KeyboardAwareScrollView';
 import { getProducts } from '@/src/api/products';
 import { useCartStore } from '@/src/stores/cartStore';
 import { useQuery as useOrdersBadge } from '@tanstack/react-query';
@@ -88,7 +89,7 @@ function AddToCartModal({
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={keyboardAvoidingBehavior}
         style={styles.modalOverlay}
       >
         <Pressable style={styles.modalBackdrop} onPress={onClose} />

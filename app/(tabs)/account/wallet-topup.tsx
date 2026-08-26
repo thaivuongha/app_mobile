@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
@@ -13,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import QRCode from 'react-native-qrcode-svg';
 import { initTopup, getTopupStatus } from '@/src/api/wallet';
 import type { TopupInitResponse } from '@/src/api/wallet';
@@ -244,7 +244,7 @@ export default function WalletTopupScreen() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <StatusBar style="dark" />
 
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView contentContainerStyle={styles.scroll}>
         {session ? (
           <QRView
             session={session}
@@ -316,7 +316,7 @@ export default function WalletTopupScreen() {
             </TouchableOpacity>
           </>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

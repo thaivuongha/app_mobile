@@ -19,6 +19,10 @@ npm run ios
 npm run web
 ```
 
+# Cài đặt lên device
+cd mobile
+APP_VARIANT=production npx expo run:android --variant release
+
 ## Biến môi trường
 
 Tạo file `.env` (xem `.env.example`):

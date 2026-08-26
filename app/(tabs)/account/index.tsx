@@ -8,13 +8,13 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
-  Platform,
   Linking,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { keyboardAvoidingBehavior } from '@/components/KeyboardAwareScrollView';
 import { useState } from 'react';
 import { getMe, getMyProfile, updatePriceMultiplier } from '@/src/api/users';
 import { logout } from '@/src/api/auth';
@@ -459,7 +459,7 @@ export default function MeScreen() {
         onRequestClose={() => setKModalVisible(false)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={keyboardAvoidingBehavior}
           style={styles.kModalOverlay}
         >
           <TouchableOpacity

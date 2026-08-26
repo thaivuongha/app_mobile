@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
@@ -14,6 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { getWalletBalance, walletTransfer } from '@/src/api/wallet';
 import { Colors } from '@/constants/Colors';
 
@@ -173,7 +173,7 @@ export default function WalletTransferScreen() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <StatusBar style="dark" />
 
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView contentContainerStyle={styles.scroll}>
         {/* Warning box */}
         <View style={styles.warningBox}>
           <Ionicons name="warning-outline" size={18} color={Colors.warning} />
@@ -254,7 +254,7 @@ export default function WalletTransferScreen() {
           <Ionicons name="swap-horizontal-outline" size={20} color="#fff" />
           <Text style={styles.transferBtnText}>Chuyển vốn</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <ConfirmModal
         visible={showConfirm}
