@@ -107,7 +107,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          title: 'Cá nhân',
+          title: 'Đối tác',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
               name="person-outline"
