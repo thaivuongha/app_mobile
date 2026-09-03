@@ -74,7 +74,9 @@ function EntryRow({ entry }: { entry: LedgerEntry }) {
           </View>
           <Text style={styles.entryDate}>{formatDate(entry.createdAt)}</Text>
         </View>
-        {entry.note && <Text style={styles.entryNote} numberOfLines={1}>{entry.note}</Text>}
+        {entry.note && !/thuế|TNCN/i.test(entry.note) && (
+          <Text style={styles.entryNote} numberOfLines={1}>{entry.note}</Text>
+        )}
       </View>
 
       {/* Amount + balance */}

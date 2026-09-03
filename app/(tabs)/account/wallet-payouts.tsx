@@ -43,8 +43,6 @@ function StatusBadge({ status }: { status: CommissionPayout['status'] }) {
 // ─── Payout card ──────────────────────────────────────────────────────────────
 
 function PayoutCard({ payout }: { payout: CommissionPayout }) {
-  const taxPct = Math.round(payout.taxRate * 100);
-
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -64,17 +62,7 @@ function PayoutCard({ payout }: { payout: CommissionPayout }) {
 
       <View style={styles.amounts}>
         <View style={styles.amountRow}>
-          <Text style={styles.amountLabel}>Tổng hoa hồng (gross)</Text>
-          <Text style={styles.amountValue}>{formatVND(payout.grossAmount)}</Text>
-        </View>
-        <View style={styles.amountRow}>
-          <Text style={styles.amountLabel}>Thuế TNCN ({taxPct}%)</Text>
-          <Text style={[styles.amountValue, { color: Colors.danger }]}>
-            -{formatVND(payout.taxAmount)}
-          </Text>
-        </View>
-        <View style={[styles.amountRow, styles.amountRowFinal]}>
-          <Text style={styles.amountLabelFinal}>Thực nhận (net)</Text>
+          <Text style={styles.amountLabelFinal}>Số tiền chi trả</Text>
           <Text style={styles.amountValueFinal}>{formatVND(payout.netAmount)}</Text>
         </View>
       </View>
@@ -88,7 +76,7 @@ function PayoutCard({ payout }: { payout: CommissionPayout }) {
         </View>
       )}
 
-      {payout.note && (
+      {payout.note && !/thuế|TNCN/i.test(payout.note) && (
         <Text style={styles.note} numberOfLines={2}>{payout.note}</Text>
       )}
     </View>
@@ -132,10 +120,6 @@ export default function WalletPayoutsScreen() {
       {!isLoading && total > 0 && (
         <View style={styles.summaryHeader}>
           <Text style={styles.summaryText}>{total} lần chi trả</Text>
-          <View style={styles.taxNote}>
-            <Ionicons name="information-circle-outline" size={13} color={Colors.textMuted} />
-            <Text style={styles.taxNoteText}>Khấu trừ 10% thuế TNCN theo quy định</Text>
-          </View>
         </View>
       )}
 
@@ -190,8 +174,6 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   summaryText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
-  taxNote: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  taxNoteText: { fontSize: 11, color: Colors.textMuted },
 
   card: {
     backgroundColor: Colors.card,
@@ -242,14 +224,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   amountRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  amountRowFinal: {
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    marginTop: 2,
-  },
-  amountLabel: { fontSize: 13, color: Colors.textSecondary },
-  amountValue: { fontSize: 14, fontWeight: '500', color: Colors.textPrimary },
   amountLabelFinal: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
   amountValueFinal: { fontSize: 16, fontWeight: '800', color: Colors.success },
 

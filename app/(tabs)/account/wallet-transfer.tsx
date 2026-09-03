@@ -178,8 +178,8 @@ export default function WalletTransferScreen() {
         <View style={styles.warningBox}>
           <Ionicons name="warning-outline" size={18} color={Colors.warning} />
           <Text style={styles.warningText}>
-            Tiền sau khi chuyển sẽ có trong ví hoa hồng và được chi trả theo đợt định kỳ
-            (khấu trừ 10% thuế TNCN). Hành động này không thể hoàn tác.
+            Tiền sau khi chuyển sẽ có trong ví hoa hồng và được chi trả theo đợt định kỳ.
+            Hành động này không thể hoàn tác.
           </Text>
         </View>
 

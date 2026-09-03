@@ -110,7 +110,7 @@ export default function WalletCommissionScreen() {
           <View style={styles.cardNote}>
             <Ionicons name="information-circle-outline" size={13} color="rgba(255,255,255,0.6)" />
             <Text style={styles.cardNoteText}>
-              Công ty chi trả định kỳ hàng tháng (khấu trừ 10% thuế TNCN)
+              Công ty chi trả định kỳ hàng tháng
             </Text>
           </View>
         </View>
@@ -184,7 +184,7 @@ export default function WalletCommissionScreen() {
         <View style={styles.noteBox}>
           <Ionicons name="information-circle-outline" size={15} color={Colors.textMuted} />
           <Text style={styles.noteText}>
-            Hoa hồng tích lũy tự động sau mỗi giao dịch bán lẻ từ thiết bị. Số dư được chi trả định kỳ vào tài khoản đã đăng ký.
+            Hoa hồng tích lũy tự động sau mỗi giao dịch bán lẻ từ thiết bị. Số dư được chi trả định kỳ vào số tài khoản đã đăng ký.
           </Text>
         </View>
 
