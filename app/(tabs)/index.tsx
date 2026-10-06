@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
   slotEmptyLabel: { fontSize: 12, color: Colors.textMuted, fontStyle: 'italic' },
 
   // ── Slot dots (card) ──
-  slotDots: { flexDirection: 'row', justifyContent: 'center', gap: 5, paddingBottom: 10 },
+  slotDots: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 5, paddingBottom: 10 },
   slotDot: { width: 6, height: 6, borderRadius: 3 },
   slotDotFilled: { backgroundColor: Colors.primary },
   slotDotEmpty: { backgroundColor: Colors.border },
