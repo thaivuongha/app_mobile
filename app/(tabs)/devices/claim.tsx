@@ -118,7 +118,7 @@ export default function ClaimDeviceScreen() {
               style={styles.input}
               value={serialNumber}
               onChangeText={setSerialNumber}
-              placeholder="VM-2026-000001"
+              placeholder="K7M2Q9PX"
               autoCapitalize="characters"
               editable={!loading}
               returnKeyType="next"
