@@ -40,7 +40,7 @@ app/
 ├── (auth)/                  # Login, Register, Forgot/Reset password
 ├── (tabs)/
 │   ├── index.tsx            # Dashboard — tổng doanh thu, ví, máy hoạt động
-│   ├── devices.tsx          # Thiết bị — claim, danh sách máy, 4 khe
+│   ├── devices.tsx          # Thiết bị — claim, danh sách máy, các khe (tùy model)
 │   ├── shop.tsx             # Shop — catalog sản phẩm (giá nhập + hoa hồng + giá bán)
 │   ├── orders.tsx           # Đơn hàng B2B — đặt hàng, theo dõi, xác nhận nhận hàng
 │   ├── wallet.tsx           # Ví đối tác — 3 số dư, sổ cái, nạp cọc, chuyển vốn

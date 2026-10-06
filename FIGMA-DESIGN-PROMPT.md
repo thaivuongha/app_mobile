@@ -15,7 +15,7 @@ App sử dụng **Bottom Tab Navigation** với **4 tabs chính**:
 ### Tab 1: **Home** 🏠
 - **Màn hình chính**: Danh sách thiết bị dạng **lưới (Grid)** - 2 cột
 - **Nút "+"** (top right hoặc FAB): Claim thiết bị mới
-- **Tương tác**: Tap vào card thiết bị → **Popup/Bottom Sheet** hiển thị sản phẩm trong 4 khe của máy
+- **Tương tác**: Tap vào card thiết bị → **Popup/Bottom Sheet** hiển thị sản phẩm trong các khe của máy (số khe tùy model, mặc định 4, có model 8 khe)
 - **Chức năng**: Quản lý thiết bị, xem trạng thái realtime (pin, online, nhiệt độ), xem sản phẩm trong máy
 
 ### Tab 2: **Shop** 🛒
@@ -85,7 +85,7 @@ App sử dụng **Bottom Tab Navigation** với **4 tabs chính**:
 1. Mở app → **Tab Home** (màn hình chính)
 2. Xem danh sách thiết bị dạng lưới (grid 2 cột)
 3. Tap vào card thiết bị → **Popup hiển thị sản phẩm trong máy**:
-   - Xem 4 khe và sản phẩm trong từng khe
+   - Xem các khe (số khe tùy model) và sản phẩm trong từng khe
    - Thông tin máy: trạng thái, pin, nhiệt độ
 4. Đóng popup → Quay về danh sách
 5. Nhấn nút "+" để claim thêm máy mới (nếu có)
@@ -182,7 +182,7 @@ App sử dụng **Bottom Tab Navigation** với **4 tabs chính**:
     - Lầu (nếu đã chọn khi claim)
     - Trạng thái: Online/Offline badge (màu xanh/xám)
     - Pin: % + icon pin
-    - Số khe có hàng: "2/4 khe" hoặc icon
+    - Số khe có hàng: "2/N khe" (N = tổng số khe của máy, tùy model) hoặc icon
     - Nhiệt độ (nếu có, hiển thị nhỏ)
   - Tap vào card → **Popup/Bottom Sheet** hiển thị sản phẩm trong máy
 - Pull to refresh
@@ -196,9 +196,9 @@ App sử dụng **Bottom Tab Navigation** với **4 tabs chính**:
   - Trạng thái: Online/Offline
   - Pin: %
   - Nhiệt độ
-- **Danh sách 4 khe** (Grid 2x2 hoặc List):
+- **Danh sách các khe** (Grid 2 cột, số hàng tùy tổng số khe của máy — mặc định 4 khe/2 hàng, model 8 khe/4 hàng — hoặc List):
   - Mỗi khe hiển thị:
-    - Slot số (1, 2, 3, 4)
+    - Slot số (1, 2, 3, ... theo tổng số khe)
     - Hình ảnh sản phẩm (nếu có)
     - Tên sản phẩm
     - Thương hiệu
@@ -239,8 +239,8 @@ App sử dụng **Bottom Tab Navigation** với **4 tabs chính**:
 - Nút "Làm mới"
 - Nút "Cài đặt máy" (đổi tên, status)
 
-**Tab 2: Khe máy (4 khe)**
-- Grid 2x2 hoặc List 4 items:
+**Tab 2: Khe máy (số khe tùy model, mặc định 4)**
+- Grid 2 cột (số hàng = tổng khe / 2) hoặc List:
   - Mỗi khe: Slot số, hình ảnh sản phẩm (nếu có), tên SP, giá, trạng thái (Có hàng/Trống)
 - Chỉ xem (không có nút gán khe — thiết bị tự detect qua NFC)
 
@@ -742,7 +742,7 @@ App sử dụng **Bottom Tab Navigation** với **4 tabs chính**:
 
 2. **Home Tab - Grid Layout**: Danh sách thiết bị hiển thị dạng lưới (2 cột), mỗi card compact nhưng đủ thông tin. Nút "+" để claim thiết bị (FAB hoặc top right)
 
-3. **Popup sản phẩm**: Khi tap vào card thiết bị, hiển thị popup/bottom sheet với 4 khe và sản phẩm. Popup có thể swipe down để đóng
+3. **Popup sản phẩm**: Khi tap vào card thiết bị, hiển thị popup/bottom sheet với các khe (tùy model) và sản phẩm. Popup có thể swipe down để đóng
 
 4. **Claim thiết bị**: Form có 3 phần chính: Đặt tên (theo phòng), Chọn lầu (picker), Serial + Owner Key. Lưu ý UX: Hướng dẫn rõ ràng về thẻ trong hộp
 

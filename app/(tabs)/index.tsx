@@ -133,14 +133,13 @@ function DeviceCard({
         <Text style={styles.cardLastSeenText} numberOfLines={1}>{lastSeenLabel}</Text>
       </View>
 
-      {/* Slot dots */}
+      {/* Slot dots (số lượng tùy model, lấy theo slots trả về từ API) */}
       <View style={styles.slotDots}>
-        {[1, 2, 3, 4].map((n) => {
-          const slot = slots?.find((s) => s.slotNumber === n);
-          const filled = slot != null && !slot.isEmpty && !!slot.productName;
+        {(slots ?? []).map((slot) => {
+          const filled = !slot.isEmpty && !!slot.productName;
           return (
             <View
-              key={n}
+              key={slot.slotNumber}
               style={[styles.slotDot, filled ? styles.slotDotFilled : styles.slotDotEmpty]}
             />
           );
@@ -234,11 +233,10 @@ function DevicePopup({
     refetchInterval: 15000,
   });
 
-  const rawSlots = slotsQuery.data?.data ?? [];
-  const slots: DeviceSlot[] = [1, 2, 3, 4].map((n) => {
-    const found = rawSlots.find((s) => s.slotNumber === n);
-    return found ?? { slotNumber: n, productInstanceId: null, productName: null, isEmpty: true };
-  });
+  // Số khe tùy model (không cố định 4) — lấy theo đúng danh sách slots trả về từ API, sắp theo slotNumber.
+  const slots: DeviceSlot[] = [...(slotsQuery.data?.data ?? [])].sort(
+    (a, b) => a.slotNumber - b.slotNumber,
+  );
 
   const status = statusQuery.data;
   const battery = status?.batteryLevel ?? null;
@@ -309,14 +307,13 @@ function DevicePopup({
           <ActivityIndicator style={{ marginVertical: 32 }} color={Colors.primary} />
         ) : (
           <View style={styles.slotGrid}>
-            <View style={styles.slotRow}>
-              <SlotCard slot={slots[0]} />
-              <SlotCard slot={slots[1]} />
-            </View>
-            <View style={styles.slotRow}>
-              <SlotCard slot={slots[2]} />
-              <SlotCard slot={slots[3]} />
-            </View>
+            {/* Lưới 2 cột, số hàng tùy theo số khe thực tế của thiết bị (không cố định 4) */}
+            {Array.from({ length: Math.ceil(slots.length / 2) }).map((_, rowIndex) => (
+              <View style={styles.slotRow} key={rowIndex}>
+                <SlotCard slot={slots[rowIndex * 2]} />
+                {slots[rowIndex * 2 + 1] && <SlotCard slot={slots[rowIndex * 2 + 1]} />}
+              </View>
+            ))}
           </View>
         )}
         <View style={{ height: 24 }} />

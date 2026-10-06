@@ -149,7 +149,9 @@ export default function DeviceDetailScreen() {
             <View style={styles.cardIconBox}>
               <Ionicons name="grid-outline" size={20} color={Colors.primary} />
             </View>
-            <Text style={styles.cardTitle}>4 khe hàng</Text>
+            <Text style={styles.cardTitle}>
+              {slots.length > 0 ? `${slots.length} khe hàng` : 'Khe hàng'}
+            </Text>
           </View>
           {slots.length === 0 ? (
             <View style={styles.emptySlots}>
