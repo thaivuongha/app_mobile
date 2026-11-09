@@ -58,15 +58,15 @@ function groupByFloor(devices: StaffDevice[]): FloorSection[] {
   }));
 }
 
-// Cùng quy ước với app của chủ: pin ≤ 20% báo đỏ.
+// Cùng quy ước với app của chủ: đỏ khi pin ≤ 20%, xanh khi máy online, xám khi offline.
 function batteryIcon(level: number): keyof typeof Ionicons.glyphMap {
   if (level >= 80) return 'battery-full';
   if (level >= 40) return 'battery-half';
   return 'battery-dead';
 }
-function batteryColor(level: number | null): string {
+function batteryColor(level: number | null, isOnline: boolean): string {
   if (level != null && level <= 20) return Colors.danger;
-  if (level != null) return Colors.success;
+  if (isOnline && level != null) return Colors.success;
   return Colors.textMuted;
 }
 
@@ -80,7 +80,8 @@ function DeviceCard({
   onPress: () => void;
 }) {
   const battery = device.liveStatus?.batteryLevel ?? null;
-  const batteryTint = batteryColor(battery);
+  const isOnline = device.liveStatus?.isOnline ?? false;
+  const batteryTint = batteryColor(battery, isOnline);
   const slots = device.slots ?? [];
   const emptyCount = slots.filter((s) => s.isEmpty || !s.productName).length;
 
@@ -145,7 +146,7 @@ function SlotCard({ slot }: { slot: StaffSlot }) {
             <Image source={{ uri: slot.imageUrl }} style={styles.slotImage} resizeMode="cover" />
           ) : (
             <View style={styles.slotProductIcon}>
-              <Ionicons name="cube" size={26} color={Colors.primary} />
+              <Ionicons name="cube" size={32} color={Colors.primary} />
             </View>
           )}
           <Text style={styles.slotProductName} numberOfLines={2}>{slot.productName}</Text>
@@ -179,6 +180,7 @@ function DevicePopup({
   const insets = useSafeAreaInsets();
   if (!device) return null;
   const battery = device.liveStatus?.batteryLevel ?? null;
+  const isOnline = device.liveStatus?.isOnline ?? false;
   const slots = [...(device.slots ?? [])].sort((a, b) => a.slotNumber - b.slotNumber);
 
   return (
@@ -191,8 +193,8 @@ function DevicePopup({
           <View style={styles.batteryBlock}>
             {battery != null ? (
               <>
-                <Ionicons name={batteryIcon(battery)} size={22} color={batteryColor(battery)} />
-                <Text style={[styles.batteryText, { color: batteryColor(battery) }]}>
+                <Ionicons name={batteryIcon(battery)} size={22} color={batteryColor(battery, isOnline)} />
+                <Text style={[styles.batteryText, { color: batteryColor(battery, isOnline) }]}>
                   {battery}%
                 </Text>
               </>
@@ -303,7 +305,11 @@ export default function StaffDevicesScreen() {
           <View>
             <Text style={styles.heroTitle}>Thiết bị</Text>
             <Text style={styles.heroSub}>
-              {devices.length > 0 ? 'Sản phẩm cần châm thêm' : 'Chưa có thiết bị nào được chia sẻ'}
+              {isError
+                ? 'Không tải được danh sách'
+                : devices.length > 0
+                  ? 'Sản phẩm cần châm thêm'
+                  : 'Chưa có thiết bị nào được chia sẻ'}
             </Text>
           </View>
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
@@ -629,31 +635,32 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: Colors.primary + '35',
-    padding: 12,
+    padding: 10,
+    paddingTop: 14,
     minHeight: 130,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 2,
   },
   slotCardEmpty: { borderColor: Colors.border, borderStyle: 'dashed', backgroundColor: Colors.background },
   slotBadge: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 6,
+    top: 6,
+    left: 6,
+    width: 18,
+    height: 18,
+    borderRadius: 5,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   slotBadgeEmpty: { backgroundColor: Colors.border },
-  slotBadgeText: { fontSize: 11, fontWeight: '800', color: '#fff' },
+  slotBadgeText: { fontSize: 10, fontWeight: '800', color: '#fff' },
   slotBadgeTextEmpty: { color: Colors.textMuted },
-  slotImage: { width: 44, height: 44, borderRadius: 8, marginTop: 6, marginBottom: 2 },
-  slotProductIcon: { marginTop: 8, marginBottom: 2 },
-  slotProductName: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary, textAlign: 'center', lineHeight: 18 },
-  slotBrandName: { fontSize: 11, color: Colors.textSecondary, textAlign: 'center' },
+  slotImage: { width: 72, height: 72, borderRadius: 10, marginBottom: 2 },
+  slotProductIcon: { marginTop: 4, marginBottom: 2 },
+  slotProductName: { fontSize: 12, fontWeight: '700', color: Colors.textPrimary, textAlign: 'center', lineHeight: 16 },
+  slotBrandName: { fontSize: 10, color: Colors.textSecondary, textAlign: 'center' },
   slotEmptyIcon: { marginTop: 8, marginBottom: 4, opacity: 0.35 },
   slotEmptyLabel: { fontSize: 12, color: Colors.textMuted, fontStyle: 'italic' },
 });

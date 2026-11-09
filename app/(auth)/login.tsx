@@ -38,7 +38,6 @@ function EmboxLogo() {
           <Text style={[styles.logoName, { opacity: 0 }]}>EMBOX</Text>
         </LinearGradient>
       </MaskedView>
-      <Text style={styles.logoTagline}>Quản lý khách sạn & thiết bị vending</Text>
     </View>
   );
 }
@@ -166,7 +165,6 @@ export default function LoginScreen() {
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Đăng nhập</Text>
-          <Text style={styles.cardSubtitle}>Chào mừng trở lại 👋</Text>
 
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>Số điện thoại</Text>
@@ -230,9 +228,9 @@ export default function LoginScreen() {
           </Link>
 
           <Link href="/(auth)/staff-code" asChild>
-            <TouchableOpacity style={styles.staffBtn} activeOpacity={0.7}>
-              <Ionicons name="key-outline" size={15} color={Colors.textSecondary} />
-              <Text style={styles.staffBtnText}>Là nhân viên? Nhập mã từ chủ</Text>
+            <TouchableOpacity style={styles.staffBtn} activeOpacity={0.75}>
+              <Ionicons name="key-outline" size={16} color={Colors.primary} />
+              <Text style={styles.staffBtnText}>Đăng nhập bằng mã chia sẻ</Text>
             </TouchableOpacity>
           </Link>
 
@@ -265,12 +263,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 6,
   },
-  logoTagline: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 2,
-  },
 
   // Card
   card: {
@@ -288,11 +280,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: Colors.textPrimary,
     letterSpacing: -0.5,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginTop: 4,
     marginBottom: 28,
   },
 
@@ -395,13 +382,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    marginTop: 18,
-    paddingVertical: 6,
+    gap: 8,
+    marginTop: 16,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: Colors.primaryLight,
   },
   staffBtnText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: Colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
   },
 });

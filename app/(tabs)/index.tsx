@@ -196,7 +196,7 @@ function SlotCard({ slot }: { slot: DeviceSlot }) {
             <Image source={{ uri: slot.imageUrl }} style={styles.slotImage} resizeMode="cover" />
           ) : (
             <View style={styles.slotProductIcon}>
-              <Ionicons name="cube" size={26} color={Colors.primary} />
+              <Ionicons name="cube" size={32} color={Colors.primary} />
             </View>
           )}
           <Text style={styles.slotProductName} numberOfLines={2}>
@@ -423,7 +423,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/(tabs)/devices/share')}
               activeOpacity={0.8}
             >
-              <Ionicons name="people-outline" size={20} color="#fff" />
+              <Ionicons name="share-outline" size={20} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.addBtn}
@@ -850,11 +850,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: Colors.primary + '35',
-    padding: 12,
+    padding: 10,
+    paddingTop: 14,
     minHeight: 130,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 2,
   },
   slotCardEmpty: {
     borderColor: Colors.border,
@@ -863,29 +864,29 @@ const styles = StyleSheet.create({
   },
   slotBadge: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 6,
+    top: 6,
+    left: 6,
+    width: 18,
+    height: 18,
+    borderRadius: 5,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   slotBadgeEmpty: { backgroundColor: Colors.border },
-  slotBadgeText: { fontSize: 11, fontWeight: '800', color: '#fff' },
+  slotBadgeText: { fontSize: 10, fontWeight: '800', color: '#fff' },
   slotBadgeTextEmpty: { color: Colors.textMuted },
-  slotImage: { width: 44, height: 44, borderRadius: 8, marginTop: 6, marginBottom: 2 },
-  slotProductIcon: { marginTop: 8, marginBottom: 2 },
+  slotImage: { width: 72, height: 72, borderRadius: 10, marginBottom: 2 },
+  slotProductIcon: { marginTop: 4, marginBottom: 2 },
   slotProductName: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: Colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 16,
   },
-  slotBrandName: { fontSize: 11, color: Colors.textSecondary, textAlign: 'center' },
-  slotPrice: { marginTop: 4, fontSize: 13, fontWeight: '700', color: Colors.orange },
+  slotBrandName: { fontSize: 10, color: Colors.textSecondary, textAlign: 'center' },
+  slotPrice: { marginTop: 2, fontSize: 12, fontWeight: '700', color: Colors.orange },
   slotEmptyIcon: { marginTop: 8, marginBottom: 4, opacity: 0.35 },
   slotEmptyLabel: { fontSize: 12, color: Colors.textMuted, fontStyle: 'italic' },
 

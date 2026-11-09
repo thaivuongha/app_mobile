@@ -70,10 +70,6 @@ export default function StaffCodeScreen() {
         </View>
 
         <Text style={styles.title}>Nhập mã chia sẻ</Text>
-        <Text style={styles.subtitle}>
-          Xin mã 12 ký tự từ chủ nhà nghỉ/khách sạn để xem danh sách thiết bị và sản phẩm cần
-          châm thêm — không cần tài khoản riêng.
-        </Text>
 
         <TextInput
           style={styles.codeInput}
@@ -97,7 +93,7 @@ export default function StaffCodeScreen() {
             <ActivityIndicator color="#fff" size="small" />
           ) : (
             <>
-              <Text style={styles.submitBtnText}>Xem thiết bị</Text>
+              <Text style={styles.submitBtnText}>Đăng nhập</Text>
               <Ionicons name="arrow-forward" size={18} color="#fff" />
             </>
           )}
@@ -120,15 +116,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
-  title: { fontSize: 22, fontWeight: '800', color: Colors.textPrimary, letterSpacing: -0.3 },
-  subtitle: {
-    fontSize: 13.5,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginTop: 8,
+  title: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    letterSpacing: -0.3,
     marginBottom: 28,
-    paddingHorizontal: 8,
   },
 
   codeInput: {

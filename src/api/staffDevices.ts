@@ -12,8 +12,8 @@ export interface StaffDevice {
   id: string;
   deviceName: string | null;
   floor: number | null;
-  // Chỉ có mức pin — KHÔNG có isOnline/lastSeenAt (xem docs/MOBILE.md, mục nhân viên).
-  liveStatus: { batteryLevel: number | null };
+  // isOnline chỉ để tô màu pin giống app chủ. Không có lastSeenAt.
+  liveStatus: { batteryLevel: number | null; isOnline: boolean };
   slots: StaffSlot[];
 }
 

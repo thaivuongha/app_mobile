@@ -14,7 +14,7 @@ export default function AuthLayout() {
       <Stack.Screen name="verify-otp" options={{ title: 'Xác thực OTP', headerBackVisible: false }} />
       <Stack.Screen name="forgot-password" options={{ title: 'Quên mật khẩu' }} />
       <Stack.Screen name="reset-password" options={{ title: 'Đặt lại mật khẩu' }} />
-      <Stack.Screen name="staff-code" options={{ title: 'Nhập mã từ chủ' }} />
+      <Stack.Screen name="staff-code" options={{ title: 'Đăng nhập mã chia sẻ' }} />
     </Stack>
   );
 }
