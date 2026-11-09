@@ -87,7 +87,7 @@ function DeviceCard({
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
-      <View style={[styles.cardAccentBar, { backgroundColor: Colors.primary }]} />
+      <View style={[styles.cardAccentBar, { backgroundColor: Colors.border }]} />
 
       <View style={styles.cardHeader}>
         <View style={styles.cardBattery}>
@@ -108,7 +108,7 @@ function DeviceCard({
       </View>
 
       <View style={styles.deviceIconWrapper}>
-        <Ionicons name="cube" size={32} color={Colors.primary} />
+        <Ionicons name="cube-outline" size={32} color={Colors.textMuted} />
       </View>
 
       <Text style={styles.cardName} numberOfLines={2}>{displayName(device)}</Text>
@@ -278,7 +278,7 @@ export default function StaffDevicesScreen() {
   }, []);
 
   const handleLogout = () => {
-    Alert.alert('Đăng xuất', 'Thoát khỏi phiên xem thiết bị này?', [
+    Alert.alert('Đăng xuất', undefined, [
       { text: 'Hủy', style: 'cancel' },
       {
         text: 'Đăng xuất',
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 14,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.background,
     alignSelf: 'center',
     marginVertical: 10,
   },
