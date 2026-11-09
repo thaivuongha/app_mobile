@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Modal,
+  ScrollView,
   TextInput,
   Pressable,
   KeyboardAvoidingView,
@@ -40,6 +41,8 @@ export default function ShopInventoryScreen() {
   );
 
   const items = data?.data ?? [];
+  const warehouseTotal = items.reduce((sum, item) => sum + item.warehouseQty, 0);
+  const onMachineTotal = items.reduce((sum, item) => sum + item.onMachineQty, 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -68,27 +71,60 @@ export default function ShopInventoryScreen() {
             <Text style={styles.retryText}>Thử lại</Text>
           </TouchableOpacity>
         </View>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item) => item.productId}
-          contentContainerStyle={items.length === 0 ? styles.listEmpty : styles.list}
-          showsVerticalScrollIndicator={false}
+      ) : items.length === 0 ? (
+        <ScrollView
+          style={styles.fill}
+          contentContainerStyle={styles.centered}
           refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              tintColor={Colors.primary}
-            />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={Colors.primary} />
           }
-          ListEmptyComponent={
-            <View style={styles.centered}>
-              <Ionicons name="cube-outline" size={56} color={Colors.textMuted} />
-              <Text style={styles.emptyTitle}>Chưa có hàng trong kho</Text>
-            </View>
-          }
-          renderItem={({ item }) => <StockRow item={item} onEdit={() => setEditing(item)} />}
-        />
+        >
+          <Ionicons name="cube-outline" size={56} color={Colors.textMuted} />
+          <Text style={styles.emptyTitle}>Chưa có hàng trong kho</Text>
+        </ScrollView>
+      ) : (
+        <View style={styles.tableCard}>
+          <View style={styles.headRow}>
+            <Text style={[styles.headLabel, styles.productCell]} numberOfLines={1}>
+              Sản phẩm
+            </Text>
+            <Text style={[styles.headLabel, styles.numCell]} numberOfLines={1}>
+              Tồn kho
+            </Text>
+            <Text style={[styles.headLabel, styles.numCell]} numberOfLines={1}>
+              Trên máy
+            </Text>
+          </View>
+          <FlatList
+            style={styles.list}
+            data={items}
+            keyExtractor={(item) => item.productId}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                tintColor={Colors.primary}
+              />
+            }
+            renderItem={({ item }) => (
+              <StockRow item={item} onEdit={() => setEditing(item)} />
+            )}
+          />
+          <View style={styles.totalRow}>
+            <Text style={[styles.totalLabel, styles.productCell]}>Tổng</Text>
+            <Text
+              style={[
+                styles.totalValue,
+                styles.numCell,
+                warehouseTotal < 0 && styles.qtyNegative,
+              ]}
+            >
+              {warehouseTotal}
+            </Text>
+            <Text style={[styles.totalValue, styles.numCell]}>{onMachineTotal}</Text>
+          </View>
+        </View>
       )}
 
       <CountModal
@@ -105,38 +141,32 @@ export default function ShopInventoryScreen() {
 
 function StockRow({ item, onEdit }: { item: PartnerStockItem; onEdit: () => void }) {
   return (
-    <View style={styles.card}>
-      {item.imageUrl ? (
-        <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
-      ) : (
-        <View style={[styles.image, styles.imagePlaceholder]}>
-          <Ionicons name="cube-outline" size={28} color={Colors.textMuted} />
-        </View>
-      )}
-      <View style={styles.cardBody}>
-        <Text style={styles.productName} numberOfLines={2}>
-          {item.name}
-        </Text>
-        <Text style={styles.brand} numberOfLines={1}>
-          {item.brandName}
-        </Text>
-        <View style={styles.qtyRow}>
-          <View style={styles.qtyBlock}>
-            <Text style={styles.qtyLabel}>Tồn kho</Text>
-            <Text style={[styles.qtyValue, item.warehouseQty < 0 && styles.qtyNegative]}>
-              {item.warehouseQty}
-            </Text>
+    <TouchableOpacity style={styles.dataRow} onPress={onEdit} activeOpacity={0.7}>
+      <View style={[styles.productCell, styles.productContent]}>
+        {item.imageUrl ? (
+          <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
+        ) : (
+          <View style={[styles.image, styles.imagePlaceholder]}>
+            <Ionicons name="cube-outline" size={18} color={Colors.textMuted} />
           </View>
-          <View style={styles.qtyBlock}>
-            <Text style={styles.qtyLabel}>Trên máy</Text>
-            <Text style={styles.qtyValue}>{item.onMachineQty}</Text>
-          </View>
-          <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
-            <Ionicons name="create-outline" size={18} color={Colors.primary} />
-          </TouchableOpacity>
+        )}
+        <View style={styles.productText}>
+          <Text style={styles.productName} numberOfLines={2}>
+            {item.name}
+          </Text>
+          <Text style={styles.brand} numberOfLines={1}>
+            {item.brandName}
+          </Text>
         </View>
       </View>
-    </View>
+      <View style={styles.qtyCell}>
+        <Ionicons name="create-outline" size={13} color={Colors.textMuted} style={styles.editHint} />
+        <Text style={[styles.qtyValue, item.warehouseQty < 0 && styles.qtyNegative]}>
+          {item.warehouseQty}
+        </Text>
+      </View>
+      <Text style={[styles.qtyValue, styles.numCell]}>{item.onMachineQty}</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -163,7 +193,7 @@ function CountModal({
   const openQty = item ? String(item.warehouseQty) : '';
 
   const handleSave = () => {
-    const parsed = Number.parseInt(qtyText || openQty, 10);
+    const parsed = Number.parseInt(qtyText, 10);
     if (!Number.isInteger(parsed) || parsed < 0) {
       Alert.alert('Số không hợp lệ', 'Nhập số chai từ 0 trở lên.');
       return;
@@ -188,6 +218,7 @@ function CountModal({
       <KeyboardAvoidingView behavior={keyboardAvoidingBehavior} style={styles.modalOverlay}>
         <Pressable style={styles.modalBackdrop} onPress={onClose} />
         <View style={styles.sheet}>
+          <View style={styles.sheetHandle} />
           <Text style={styles.sheetTitle}>Kiểm kho</Text>
           <Text style={styles.sheetProduct} numberOfLines={2}>
             {item?.name}
@@ -241,9 +272,7 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, fontSize: 18, fontWeight: '600', color: Colors.textPrimary, marginLeft: 4 },
 
-  list: { padding: 16, paddingBottom: 32 },
-  listEmpty: { flexGrow: 1 },
-
+  fill: { flex: 1 },
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -263,49 +292,97 @@ const styles = StyleSheet.create({
   },
   retryText: { color: '#fff', fontSize: 15, fontWeight: '600' },
 
-  card: {
-    flexDirection: 'row',
-    gap: 12,
+  tableCard: {
+    flexGrow: 0,
+    flexShrink: 1,
+    margin: 16,
     backgroundColor: Colors.card,
     borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
     borderWidth: 1,
     borderColor: Colors.border,
+    overflow: 'hidden',
   },
-  image: { width: 72, height: 72, borderRadius: 10 },
-  imagePlaceholder: {
+  list: { flexGrow: 0, flexShrink: 1 },
+  headRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
-  cardBody: { flex: 1, justifyContent: 'center' },
-  productName: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary, lineHeight: 20 },
-  brand: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
-  qtyRow: { flexDirection: 'row', gap: 16, marginTop: 10 },
-  qtyBlock: { minWidth: 72 },
-  qtyLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '600' },
-  qtyValue: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary, marginTop: 2 },
-  qtyNegative: { color: Colors.danger },
-  editBtn: {
-    marginLeft: 'auto',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  headLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  dataRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  productCell: { flex: 1 },
+  productContent: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingRight: 8 },
+  productText: { flex: 1 },
+  numCell: { width: 84, textAlign: 'right' },
+  qtyCell: {
+    width: 84,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 3,
+  },
+  editHint: { opacity: 0.45 },
+  image: { width: 40, height: 40, borderRadius: 10, backgroundColor: Colors.surface },
+  imagePlaceholder: { alignItems: 'center', justifyContent: 'center' },
+  productName: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, lineHeight: 18 },
+  brand: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  qtyValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    fontVariant: ['tabular-nums'],
+  },
+  qtyNegative: { color: Colors.danger },
+  totalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     backgroundColor: Colors.primaryLight,
+  },
+  totalLabel: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.primary,
+    fontVariant: ['tabular-nums'],
   },
 
   modalOverlay: { flex: 1, justifyContent: 'flex-end' },
   modalBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
     backgroundColor: Colors.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 12,
     paddingBottom: 32,
     gap: 10,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+    alignSelf: 'center',
+    marginBottom: 8,
   },
   sheetTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
   sheetProduct: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
