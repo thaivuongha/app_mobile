@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
@@ -29,6 +30,7 @@ function formatDisplay(raw: string): string {
 
 export default function StaffCodeScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const setSession = useAuthStore((s) => s.setSession);
   const [raw, setRaw] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,12 +45,18 @@ export default function StaffCodeScreen() {
     setLoading(true);
     try {
       await redeemShareCode(raw);
+      // Điện thoại dùng chung: xóa cache của chủ hoặc nhân viên trước đó trước khi vào màn mới.
+      queryClient.clear();
       setSession('staff');
       router.replace('/(staff)');
     } catch (e) {
-      const message =
-        e instanceof ApiClientError ? e.message : 'Không thể kết nối. Vui lòng thử lại.';
-      Alert.alert('Mã không hợp lệ', message);
+      if (e instanceof ApiClientError && e.statusCode === 429) {
+        Alert.alert('Thử lại sau', 'Nhập quá nhiều lần. Đợi một phút rồi thử lại.');
+        return;
+      }
+      const invalid = e instanceof ApiClientError && e.statusCode === 401;
+      const message = e instanceof ApiClientError ? e.message : 'Không thể kết nối. Vui lòng thử lại.';
+      Alert.alert(invalid ? 'Mã không hợp lệ' : 'Không vào được', message);
     } finally {
       setLoading(false);
     }

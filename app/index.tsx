@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
@@ -11,15 +12,17 @@ const SPLASH_DURATION = 1200; // ms hiển thị splash tối thiểu
 
 export default function IndexScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { hasToken, role, isHydrated, hydrate, setHasToken } = useAuthStore();
   const [splashReady, setSplashReady] = useState(false);
 
   useEffect(() => {
     setSessionExpiredCallback(() => {
+      queryClient.clear();
       setHasToken(false);
       router.replace('/(auth)/login');
     });
-  }, [router, setHasToken]);
+  }, [router, setHasToken, queryClient]);
 
   useEffect(() => {
     hydrate();

@@ -3,6 +3,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  ScrollView,
   ActivityIndicator,
   RefreshControl,
   SectionList,
@@ -10,10 +11,10 @@ import {
   Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { getStaffDevices } from '@/src/api/staffDevices';
 import type { StaffDevice, StaffSlot } from '@/src/api/staffDevices';
@@ -175,6 +176,7 @@ function DevicePopup({
   visible: boolean;
   onClose: () => void;
 }) {
+  const insets = useSafeAreaInsets();
   if (!device) return null;
   const battery = device.liveStatus?.batteryLevel ?? null;
   const slots = [...(device.slots ?? [])].sort((a, b) => a.slotNumber - b.slotNumber);
@@ -214,16 +216,18 @@ function DevicePopup({
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.slotsTitle}>Sản phẩm trong máy</Text>
-        <View style={styles.slotGrid}>
-          {Array.from({ length: Math.ceil(slots.length / 2) }).map((_, rowIndex) => (
-            <View style={styles.slotRow} key={rowIndex}>
-              <SlotCard slot={slots[rowIndex * 2]} />
-              {slots[rowIndex * 2 + 1] && <SlotCard slot={slots[rowIndex * 2 + 1]} />}
-            </View>
-          ))}
-        </View>
-        <View style={{ height: 24 }} />
+        <ScrollView style={styles.sheetScroll} showsVerticalScrollIndicator={false} bounces={false}>
+          <Text style={styles.slotsTitle}>Sản phẩm trong máy</Text>
+          <View style={styles.slotGrid}>
+            {Array.from({ length: Math.ceil(slots.length / 2) }).map((_, rowIndex) => (
+              <View style={styles.slotRow} key={rowIndex}>
+                <SlotCard slot={slots[rowIndex * 2]} />
+                {slots[rowIndex * 2 + 1] && <SlotCard slot={slots[rowIndex * 2 + 1]} />}
+              </View>
+            ))}
+          </View>
+          <View style={{ height: insets.bottom + 24 }} />
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -252,11 +256,13 @@ function FloorHeader({ title, count }: { title: string; count: number }) {
 
 export default function StaffDevicesScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
   const setSession = useAuthStore((s) => s.setSession);
   const [selectedDevice, setSelectedDevice] = useState<StaffDevice | null>(null);
   const [popupVisible, setPopupVisible] = useState(false);
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: ['staff-devices'],
     queryFn: () => getStaffDevices(),
   });
@@ -277,6 +283,7 @@ export default function StaffDevicesScreen() {
         style: 'destructive',
         onPress: async () => {
           await staffLogout();
+          queryClient.clear();
           setSession(null);
           router.replace('/(auth)/login');
         },
@@ -326,6 +333,17 @@ export default function StaffDevicesScreen() {
             <ActivityIndicator size="large" color={Colors.primary} />
             <Text style={styles.centerStateText}>Đang tải thiết bị...</Text>
           </View>
+        ) : isError ? (
+          <View style={styles.centerState}>
+            <View style={styles.emptyIconBox}>
+              <Ionicons name="cloud-offline-outline" size={40} color={Colors.primary} />
+            </View>
+            <Text style={styles.emptyTitle}>Không tải được</Text>
+            <Text style={styles.emptySubtitle}>Kiểm tra mạng rồi thử lại</Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()} activeOpacity={0.85}>
+              <Text style={styles.retryBtnText}>Thử lại</Text>
+            </TouchableOpacity>
+          </View>
         ) : devices.length === 0 ? (
           <View style={styles.centerState}>
             <View style={styles.emptyIconBox}>
@@ -352,7 +370,7 @@ export default function StaffDevicesScreen() {
                 {row.length === 1 && <View style={styles.cardPlaceholder} />}
               </View>
             )}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
             stickySectionHeadersEnabled={false}
             showsVerticalScrollIndicator={false}
             refreshControl={
@@ -534,6 +552,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
   emptySubtitle: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  retryBtnText: { color: '#fff', fontSize: 15, fontWeight: '600' },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
@@ -543,6 +569,7 @@ const styles = StyleSheet.create({
     maxHeight: '75%',
     paddingHorizontal: 20,
   },
+  sheetScroll: { flexGrow: 0, flexShrink: 1 },
   sheetHandle: {
     width: 36,
     height: 4,

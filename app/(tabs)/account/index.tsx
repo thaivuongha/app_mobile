@@ -262,6 +262,7 @@ export default function MeScreen() {
             } catch (_) {
               // xóa token dù logout API thất bại
             }
+            queryClient.clear();
             setHasToken(false);
             router.replace('/(auth)/login');
           },

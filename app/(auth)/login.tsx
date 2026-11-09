@@ -1,5 +1,5 @@
 import { useRouter, Link } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import {
@@ -102,6 +102,15 @@ function InputField({
 export default function LoginScreen() {
   const router = useRouter();
   const setHasToken = useAuthStore((s) => s.setHasToken);
+  const role = useAuthStore((s) => s.role);
+  const hasToken = useAuthStore((s) => s.hasToken);
+
+  // Nút back của Android có thể quay lại màn này trong khi phiên vẫn còn
+  // (nhân viên vừa nhập mã, hoặc chủ vừa đăng nhập). Đẩy về đúng màn của phiên đó.
+  useEffect(() => {
+    if (role === 'staff') router.replace('/(staff)');
+    else if (hasToken && role === 'owner') router.replace('/(tabs)');
+  }, [role, hasToken, router]);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
