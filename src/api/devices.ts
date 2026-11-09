@@ -115,27 +115,42 @@ export function removeDevice(id: string): Promise<{ message: string }> {
 
 // ─── Mã chia sẻ cho nhân viên (xem thiết bị, không cần tài khoản) ──────────────
 
-export interface ShareCodeStatus {
+export interface ShareCodeItem {
+  id: string;
+  label: string;
+  createdAt: string;
+}
+
+export interface ShareCodeList {
+  data: ShareCodeItem[];
+  /** App cũ: còn mã hay không. App mới đọc `data`. */
   exists: boolean;
   createdAt: string | null;
 }
 
 export interface ShareCodeCreated {
+  id: string;
+  label: string;
   /** Mã thô dạng AAAA-BBBB-CCCC — CHỈ trả về đúng lần này, không thể xem lại. */
   code: string;
   createdAt: string;
 }
 
-export function getShareCodeStatus(): Promise<ShareCodeStatus> {
-  return apiRequest<ShareCodeStatus>('/api/v1/devices/share-code');
+export function getShareCodes(): Promise<ShareCodeList> {
+  return apiRequest<ShareCodeList>('/api/v1/devices/share-code');
 }
 
-/** Tạo (hoặc tạo lại) mã chia sẻ — tạo mã mới thu hồi ngay mọi phiên nhân viên đang dùng mã cũ. */
-export function regenerateShareCode(): Promise<ShareCodeCreated> {
-  return apiRequest<ShareCodeCreated>('/api/v1/devices/share-code', { method: 'POST' });
+/** Thêm một mã cho một người. Không xóa các mã khác. */
+export function createShareCode(label: string): Promise<ShareCodeCreated> {
+  return apiRequest<ShareCodeCreated>('/api/v1/devices/share-code', {
+    method: 'POST',
+    body: { label },
+  });
 }
 
-/** Ngừng chia sẻ — mọi phiên nhân viên đang dùng mã hiện tại bị đăng xuất ngay. */
-export function revokeShareCode(): Promise<{ message: string }> {
-  return apiRequest<{ message: string }>('/api/v1/devices/share-code', { method: 'DELETE' });
+/** Xóa đúng một mã. Chỉ thiết bị đã nhập mã đó bị đăng xuất. */
+export function revokeShareCode(id: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(`/api/v1/devices/share-code/${id}`, {
+    method: 'DELETE',
+  });
 }

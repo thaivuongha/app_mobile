@@ -37,7 +37,7 @@ export async function setAccessToken(access: string): Promise<void> {
 
 /**
  * Nhân viên redeem mã chia sẻ — chỉ có access token, KHÔNG có refresh token.
- * Hệ quả: khi token hết hạn hoặc bị thu hồi (owner tạo mã mới), lần gọi API kế tiếp
+ * Hệ quả: khi token hết hạn hoặc bị thu hồi (owner xóa đúng mã này), lần gọi API kế tiếp
  * nhận 401 → apiRequest cố refresh → không có refreshToken → tự đăng xuất về login.
  * Đúng hành vi mong muốn, không cần xử lý đặc biệt trong api/client.ts.
  */
