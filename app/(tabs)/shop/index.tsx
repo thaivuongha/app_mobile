@@ -355,7 +355,7 @@ export default function ShopScreen() {
 
           <TouchableOpacity
             style={styles.iconBtn}
-            onPress={() => router.push('/(tabs)/orders')}
+            onPress={() => router.push('/(tabs)/shop/orders')}
           >
             <Ionicons name="receipt-outline" size={22} color={Colors.textSecondary} />
             {pendingCount > 0 && (

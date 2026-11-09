@@ -102,16 +102,31 @@ function DeviceCard({
   const statusColor = isOnline ? Colors.success : hasIssue ? Colors.warning : Colors.textMuted;
   const statusLabel = isOnline ? 'Online' : hasIssue ? 'Lỗi' : 'Offline';
   const lastSeenLabel = formatLastSeen(device.liveStatus?.lastSeenAt);
+  const battery = device.liveStatus?.batteryLevel ?? null;
+  const batteryTint = batteryColor(battery, isOnline);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
       {/* Top accent bar */}
       <View style={[styles.cardAccentBar, { backgroundColor: isOnline ? Colors.primary : Colors.border }]} />
 
-      {/* Status row */}
       <View style={styles.cardHeader}>
-        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-        <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
+        <View style={styles.cardStatus}>
+          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+          <Text style={[styles.statusText, { color: statusColor }]} numberOfLines={1}>
+            {statusLabel}
+          </Text>
+        </View>
+        <View style={styles.cardBattery}>
+          <Ionicons
+            name={battery != null ? batteryIcon(battery) : 'battery-dead-outline'}
+            size={14}
+            color={batteryTint}
+          />
+          <Text style={[styles.cardBatteryText, { color: batteryTint }]}>
+            {battery != null ? `${battery}%` : '—'}
+          </Text>
+        </View>
       </View>
 
       {/* Icon */}
@@ -145,13 +160,6 @@ function DeviceCard({
           );
         })}
       </View>
-
-      {/* Floor badge */}
-      {device.floor != null && (
-        <View style={styles.cardFloorBadge}>
-          <Text style={styles.cardFloorText}>T{device.floor}</Text>
-        </View>
-      )}
     </TouchableOpacity>
   );
 }
@@ -163,9 +171,10 @@ function batteryIcon(level: number): keyof typeof Ionicons.glyphMap {
   if (level >= 40) return 'battery-half';
   return 'battery-dead';
 }
-function batteryColor(level: number): string {
-  if (level > 20) return Colors.success;
-  return Colors.danger;
+function batteryColor(level: number | null, isOnline: boolean): string {
+  if (level != null && level <= 20) return Colors.danger;
+  if (isOnline && level != null) return Colors.success;
+  return Colors.textMuted;
 }
 
 // ─── Slot Card ────────────────────────────────────────────────────────────────
@@ -257,8 +266,8 @@ function DevicePopup({
           <View style={styles.batteryBlock}>
             {battery != null ? (
               <>
-                <Ionicons name={batteryIcon(battery)} size={22} color={batteryColor(battery)} />
-                <Text style={[styles.batteryText, { color: batteryColor(battery) }]}>
+                <Ionicons name={batteryIcon(battery)} size={22} color={batteryColor(battery, isOnline)} />
+                <Text style={[styles.batteryText, { color: batteryColor(battery, isOnline) }]}>
                   {battery}%
                 </Text>
               </>
@@ -630,12 +639,19 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 12,
     paddingTop: 10,
     marginBottom: 4,
+    gap: 6,
+  },
+  cardStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
   },
   statusDot: { width: 7, height: 7, borderRadius: 3.5, marginRight: 5 },
-  statusText: { fontSize: 11, fontWeight: '600' },
+  statusText: { fontSize: 11, fontWeight: '600', flexShrink: 1 },
 
   deviceIconWrapper: {
     alignItems: 'center',
@@ -680,16 +696,17 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: Colors.textMuted,
   },
-  cardFloorBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+  cardBattery: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    flexShrink: 0,
   },
-  cardFloorText: { fontSize: 10, fontWeight: '700', color: Colors.primary },
+  cardBatteryText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textMuted,
+  },
 
   // ── States ──
   centerState: {

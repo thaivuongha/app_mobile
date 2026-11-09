@@ -8,6 +8,7 @@ export default function ShopLayout() {
       <Stack.Screen name="checkout" />
       <Stack.Screen name="addresses" />
       <Stack.Screen name="inventory" />
+      <Stack.Screen name="orders" />
     </Stack>
   );
 }
