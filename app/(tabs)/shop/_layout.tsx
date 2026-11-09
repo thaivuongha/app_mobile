@@ -7,6 +7,7 @@ export default function ShopLayout() {
       <Stack.Screen name="cart" options={{ presentation: 'modal' }} />
       <Stack.Screen name="checkout" />
       <Stack.Screen name="addresses" />
+      <Stack.Screen name="inventory" />
     </Stack>
   );
 }

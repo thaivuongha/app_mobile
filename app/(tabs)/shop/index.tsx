@@ -341,6 +341,13 @@ export default function ShopScreen() {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.iconBtn}
+            onPress={() => router.push('/(tabs)/shop/inventory')}
+          >
+            <Ionicons name="cube-outline" size={22} color={Colors.textSecondary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.iconBtn}
             onPress={() => router.push('/(tabs)/shop/addresses')}
           >
             <Ionicons name="location-outline" size={22} color={Colors.textSecondary} />
