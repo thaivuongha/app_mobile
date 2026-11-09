@@ -10,6 +10,7 @@ export interface DeviceSlot {
   sellingPrice?: number | null;
   isEmpty: boolean;
   brandName?: string;
+  imageUrl?: string | null;
   serialNumber?: string | null;
 }
 

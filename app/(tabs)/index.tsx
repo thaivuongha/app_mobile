@@ -4,13 +4,14 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  Image,
   ActivityIndicator,
   RefreshControl,
   SectionList,
   Dimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useQueries } from '@tanstack/react-query';
@@ -191,9 +192,13 @@ function SlotCard({ slot }: { slot: DeviceSlot }) {
 
       {filled ? (
         <>
-          <View style={styles.slotProductIcon}>
-            <Ionicons name="cube" size={26} color={Colors.primary} />
-          </View>
+          {slot.imageUrl ? (
+            <Image source={{ uri: slot.imageUrl }} style={styles.slotImage} resizeMode="cover" />
+          ) : (
+            <View style={styles.slotProductIcon}>
+              <Ionicons name="cube" size={26} color={Colors.primary} />
+            </View>
+          )}
           <Text style={styles.slotProductName} numberOfLines={2}>
             {slot.productName}
           </Text>
@@ -229,6 +234,7 @@ function DevicePopup({
   visible: boolean;
   onClose: () => void;
 }) {
+  const insets = useSafeAreaInsets();
   const slotsQuery = useQuery({
     queryKey: ['device-slots', device?.id],
     queryFn: () => getDeviceSlots(device!.id),
@@ -310,22 +316,22 @@ function DevicePopup({
           </TouchableOpacity>
         </View>
 
-        {/* Slot grid */}
-        <Text style={styles.slotsTitle}>Sản phẩm trong máy</Text>
-        {slotsQuery.isLoading ? (
-          <ActivityIndicator style={{ marginVertical: 32 }} color={Colors.primary} />
-        ) : (
-          <View style={styles.slotGrid}>
-            {/* Lưới 2 cột, số hàng tùy theo số khe thực tế của thiết bị (không cố định 4) */}
-            {Array.from({ length: Math.ceil(slots.length / 2) }).map((_, rowIndex) => (
-              <View style={styles.slotRow} key={rowIndex}>
-                <SlotCard slot={slots[rowIndex * 2]} />
-                {slots[rowIndex * 2 + 1] && <SlotCard slot={slots[rowIndex * 2 + 1]} />}
-              </View>
-            ))}
-          </View>
-        )}
-        <View style={{ height: 24 }} />
+        <ScrollView style={styles.sheetScroll} showsVerticalScrollIndicator={false} bounces={false}>
+          <Text style={styles.slotsTitle}>Sản phẩm trong máy</Text>
+          {slotsQuery.isLoading ? (
+            <ActivityIndicator style={{ marginVertical: 32 }} color={Colors.primary} />
+          ) : (
+            <View style={styles.slotGrid}>
+              {Array.from({ length: Math.ceil(slots.length / 2) }).map((_, rowIndex) => (
+                <View style={styles.slotRow} key={rowIndex}>
+                  <SlotCard slot={slots[rowIndex * 2]} />
+                  {slots[rowIndex * 2 + 1] && <SlotCard slot={slots[rowIndex * 2 + 1]} />}
+                </View>
+              ))}
+            </View>
+          )}
+          <View style={{ height: insets.bottom + 24 }} />
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -779,6 +785,7 @@ const styles = StyleSheet.create({
     maxHeight: '75%',
     paddingHorizontal: 20,
   },
+  sheetScroll: { flexGrow: 0, flexShrink: 1 },
   sheetHandle: {
     width: 36,
     height: 4,
@@ -868,6 +875,7 @@ const styles = StyleSheet.create({
   slotBadgeEmpty: { backgroundColor: Colors.border },
   slotBadgeText: { fontSize: 11, fontWeight: '800', color: '#fff' },
   slotBadgeTextEmpty: { color: Colors.textMuted },
+  slotImage: { width: 44, height: 44, borderRadius: 8, marginTop: 6, marginBottom: 2 },
   slotProductIcon: { marginTop: 8, marginBottom: 2 },
   slotProductName: {
     fontSize: 13,
