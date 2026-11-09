@@ -11,7 +11,7 @@ const SPLASH_DURATION = 1200; // ms hiển thị splash tối thiểu
 
 export default function IndexScreen() {
   const router = useRouter();
-  const { hasToken, isHydrated, hydrate, setHasToken } = useAuthStore();
+  const { hasToken, role, isHydrated, hydrate, setHasToken } = useAuthStore();
   const [splashReady, setSplashReady] = useState(false);
 
   useEffect(() => {
@@ -29,12 +29,14 @@ export default function IndexScreen() {
 
   useEffect(() => {
     if (!isHydrated || !splashReady) return;
-    if (hasToken) {
+    if (role === 'staff') {
+      router.replace('/(staff)');
+    } else if (hasToken) {
       router.replace('/(tabs)');
     } else {
       router.replace('/(auth)/login');
     }
-  }, [isHydrated, hasToken, splashReady, router]);
+  }, [isHydrated, hasToken, role, splashReady, router]);
 
   return (
     <View style={styles.container}>

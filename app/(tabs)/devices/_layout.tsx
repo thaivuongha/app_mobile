@@ -16,6 +16,7 @@ export default function DevicesLayout() {
       <Stack.Screen name="index" options={{ title: 'Danh sách thiết bị' }} />
       <Stack.Screen name="claim" options={{ title: 'Claim thiết bị mới' }} />
       <Stack.Screen name="[id]" options={{ title: 'Chi tiết thiết bị' }} />
+      <Stack.Screen name="share" options={{ title: 'Chia sẻ cho nhân viên' }} />
     </Stack>
   );
 }

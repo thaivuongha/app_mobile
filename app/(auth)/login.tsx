@@ -220,6 +220,13 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </Link>
 
+          <Link href="/(auth)/staff-code" asChild>
+            <TouchableOpacity style={styles.staffBtn} activeOpacity={0.7}>
+              <Ionicons name="key-outline" size={15} color={Colors.textSecondary} />
+              <Text style={styles.staffBtnText}>Là nhân viên? Nhập mã từ chủ</Text>
+            </TouchableOpacity>
+          </Link>
+
           <View style={{ height: 16 }} />
         </View>
       </KeyboardAwareScrollView>
@@ -374,4 +381,18 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
 
+  // Nhân viên — đăng nhập bằng mã chia sẻ
+  staffBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 18,
+    paddingVertical: 6,
+  },
+  staffBtnText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: Colors.textSecondary,
+  },
 });

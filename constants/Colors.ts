@@ -46,6 +46,10 @@ export const Colors = {
   warningLight: '#FEF3C7',
   danger: '#EF4444',
   dangerLight: '#FEE2E2',
+
+  // Accent cam/vàng — pill "online", cảnh báo nhiệt độ, giá SP trong popup (Tab Home)
+  orange: '#F59E0B',
+  orangeLight: 'rgba(245,158,11,0.12)',
 };
 
 // ─── Legacy compat (useColorScheme hook) ─────────────────────────────────────

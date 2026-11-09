@@ -411,13 +411,22 @@ export default function HomeScreen() {
                 : 'Chưa có thiết bị nào'}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.addBtn}
-            onPress={() => router.push('/(tabs)/devices/claim')}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="add" size={22} color={Colors.primary} />
-          </TouchableOpacity>
+          <View style={styles.heroActions}>
+            <TouchableOpacity
+              style={styles.shareBtn}
+              onPress={() => router.push('/(tabs)/devices/share')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="people-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addBtn}
+              onPress={() => router.push('/(tabs)/devices/claim')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="add" size={22} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Stats row */}
@@ -535,6 +544,17 @@ const styles = StyleSheet.create({
   heroTitle: { fontSize: 28, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
   heroSub: { fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 3 },
 
+  heroActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  shareBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   addBtn: {
     width: 42,
     height: 42,
