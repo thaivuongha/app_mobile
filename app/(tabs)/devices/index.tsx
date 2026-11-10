@@ -69,7 +69,7 @@ export default function DevicesListScreen() {
             <Ionicons name="hardware-chip-outline" size={40} color={Colors.primary} />
           </View>
           <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
-          <Text style={styles.emptyDesc}>Nhấn "Claim thiết bị" để thêm máy bán hàng đầu tiên</Text>
+          <Text style={styles.emptyDesc}>Nhấn "Thêm thiết bị" để thêm máy bán hàng đầu tiên</Text>
         </View>
       ) : (
         <FlatList
@@ -92,7 +92,7 @@ export default function DevicesListScreen() {
           activeOpacity={0.85}
         >
           <Ionicons name="add" size={22} color="#fff" />
-          <Text style={styles.fabText}>Claim thiết bị</Text>
+          <Text style={styles.fabText}>Thêm thiết bị</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

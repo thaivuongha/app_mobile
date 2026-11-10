@@ -252,7 +252,7 @@ export default function DeviceListScreen() {
           activeOpacity={0.8}
         >
           <Ionicons name="add-circle-outline" size={20} color={Colors.primary} />
-          <Text style={styles.claimButtonText}>Claim thiết bị mới</Text>
+          <Text style={styles.claimButtonText}>Thêm thiết bị mới</Text>
           <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
         </TouchableOpacity>
 
@@ -262,7 +262,7 @@ export default function DeviceListScreen() {
             <Ionicons name="cube-outline" size={56} color={Colors.textMuted} />
             <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
             <Text style={styles.emptySubtitle}>
-              Nhấn "Claim thiết bị mới" để bắt đầu
+              Nhấn "Thêm thiết bị mới" để bắt đầu
             </Text>
           </View>
         ) : (

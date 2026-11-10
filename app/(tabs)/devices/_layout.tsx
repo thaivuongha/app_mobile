@@ -36,7 +36,7 @@ export default function DevicesLayout() {
       <Stack.Screen
         name="claim"
         options={{
-          title: 'Claim thiết bị mới',
+          title: 'Thêm thiết bị mới',
           headerBackVisible: false,
           headerLeft: () => <BackToDevicesButton />,
         }}

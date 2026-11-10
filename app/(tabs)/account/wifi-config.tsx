@@ -94,13 +94,7 @@ export default function WifiConfigScreen() {
           <View style={[styles.iconBig, { backgroundColor: Colors.warningLight }]}>
             <Ionicons name="construct-outline" size={48} color={Colors.warning} />
           </View>
-          <Text style={styles.pageTitle}>Yêu cầu Development Build</Text>
-          <Text style={styles.pageDesc}>
-            Tính năng Bluetooth (BluFi) không chạy được trên Expo Go vì cần native module.{'\n\n'}
-            Bạn cần build app bằng:{'\n'}
-            {'  '}• <Text style={{ fontWeight: '700' }}>EAS Build</Text> (đề xuất){'\n'}
-            {'  '}• hoặc <Text style={{ fontWeight: '700' }}>expo prebuild</Text> + Android Studio / Xcode
-          </Text>
+          <Text style={styles.pageTitle}>Không kết nối được Bluetooth</Text>
           <TouchableOpacity style={styles.primaryBtn} onPress={() => router.back()} activeOpacity={0.85}>
             <Text style={styles.primaryBtnText}>Quay lại</Text>
           </TouchableOpacity>
@@ -291,10 +285,6 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         <Ionicons name="wifi" size={48} color={Colors.primary} />
       </View>
       <Text style={styles.pageTitle}>Cấu hình WiFi cho máy vending</Text>
-      <Text style={styles.pageDesc}>
-        Kết nối điện thoại với máy bán hàng qua Bluetooth để gửi thông tin WiFi. Thiết bị sẽ tự
-        kết nối vào mạng bạn cung cấp.
-      </Text>
 
       <View style={styles.stepList}>
         {[
@@ -317,10 +307,6 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           </View>
         ))}
       </View>
-
-      <Text style={styles.noteText}>
-        Yêu cầu quyền Bluetooth và Vị trí. App cần Development Build (không hỗ trợ Expo Go).
-      </Text>
 
       <TouchableOpacity style={styles.primaryBtn} onPress={onStart} activeOpacity={0.85}>
         <Ionicons name="bluetooth" size={20} color="#fff" style={{ marginRight: 8 }} />
@@ -370,9 +356,6 @@ function ScanScreen({
           <Ionicons name="bluetooth-outline" size={52} color={Colors.textMuted} />
           <Text style={styles.emptyTitle}>
             {isScanning ? 'Đang tìm kiếm...' : 'Không tìm thấy thiết bị'}
-          </Text>
-          <Text style={styles.emptyDesc}>
-            Đảm bảo máy vending đang ở chế độ cấu hình WiFi và trong phạm vi Bluetooth (~10m).
           </Text>
         </View>
       ) : (
@@ -534,10 +517,6 @@ function CredentialsScreen({
           </TouchableOpacity>
         </View>
       </View>
-
-      <Text style={styles.noteText}>
-        Thông tin WiFi chỉ gửi qua Bluetooth trong phạm vi ngắn (~5m). Không lưu trên server.
-      </Text>
 
       <TouchableOpacity style={styles.primaryBtn} onPress={onSend} activeOpacity={0.85}>
         <Ionicons name="send" size={18} color="#fff" style={{ marginRight: 8 }} />
@@ -716,14 +695,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginBottom: 28,
   },
-  noteText: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 24,
-    paddingHorizontal: 12,
-  },
 
   stepList: { width: '100%', gap: 10, marginBottom: 28 },
   stepRow: {
@@ -774,7 +745,6 @@ const styles = StyleSheet.create({
 
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 },
   emptyTitle: { fontSize: 16, fontWeight: '600', color: Colors.textSecondary },
-  emptyDesc: { fontSize: 13, color: Colors.textMuted, textAlign: 'center', lineHeight: 19 },
 
   deviceCard: {
     flexDirection: 'row',

@@ -304,13 +304,11 @@ export default function StaffDevicesScreen() {
         <View style={styles.heroTop}>
           <View>
             <Text style={styles.heroTitle}>Thiết bị</Text>
-            <Text style={styles.heroSub}>
-              {isError
-                ? 'Không tải được danh sách'
-                : devices.length > 0
-                  ? 'Sản phẩm cần châm thêm'
-                  : 'Chưa có thiết bị nào được chia sẻ'}
-            </Text>
+            {(isError || devices.length === 0) && (
+              <Text style={styles.heroSub}>
+                {isError ? 'Không tải được danh sách' : 'Chưa có thiết bị nào được chia sẻ'}
+              </Text>
+            )}
           </View>
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
             <Ionicons name="log-out-outline" size={20} color={Colors.primary} />
@@ -356,7 +354,6 @@ export default function StaffDevicesScreen() {
               <Ionicons name="cube-outline" size={40} color={Colors.primary} />
             </View>
             <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
-            <Text style={styles.emptySubtitle}>Chủ chưa thêm thiết bị nào vào tài khoản</Text>
           </View>
         ) : (
           <SectionList

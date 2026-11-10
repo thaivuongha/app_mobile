@@ -411,11 +411,9 @@ export default function HomeScreen() {
         <View style={styles.heroTop}>
           <View>
             <Text style={styles.heroTitle}>Thiết bị</Text>
-            <Text style={styles.heroSub}>
-              {devices.length > 0
-                ? 'Quản lý máy vending của bạn'
-                : 'Chưa có thiết bị nào'}
-            </Text>
+            {devices.length === 0 && (
+              <Text style={styles.heroSub}>Chưa có thiết bị nào</Text>
+            )}
           </View>
           <View style={styles.heroActions}>
             <TouchableOpacity
@@ -459,14 +457,14 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
             <Text style={styles.emptySubtitle}>
-              Nhấn nút "+" bên trên để claim thiết bị đầu tiên
+              Nhấn nút "+" bên trên để thêm thiết bị đầu tiên
             </Text>
             <TouchableOpacity
               style={styles.emptyBtn}
               onPress={() => router.push('/(tabs)/devices/claim')}
             >
               <Ionicons name="add-circle-outline" size={18} color="#fff" />
-              <Text style={styles.emptyBtnText}>Claim thiết bị</Text>
+              <Text style={styles.emptyBtnText}>Thêm thiết bị</Text>
             </TouchableOpacity>
           </View>
         ) : (
