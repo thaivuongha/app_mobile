@@ -18,6 +18,18 @@ import { formatLastSeen } from '@/src/utils/lastSeen';
 const REFETCH_INTERVAL = 15000;
 const TICK_INTERVAL = 30000;
 
+function batteryColor(level: number | null, isOnline: boolean): string {
+  if (level != null && level <= 20) return Colors.danger;
+  if (isOnline && level != null) return Colors.success;
+  return Colors.textMuted;
+}
+
+function configStatusLabel(status: string, isOnline: boolean): string {
+  if (status === 'MAINTENANCE') return 'Bảo trì';
+  if (status === 'INACTIVE') return 'Không hoạt động';
+  return isOnline ? 'Online' : 'Offline';
+}
+
 function InfoRow({ label, value, icon }: { label: string; value: string; icon?: keyof typeof Ionicons.glyphMap }) {
   return (
     <View style={styles.infoRow}>
@@ -77,7 +89,15 @@ export default function DeviceDetailScreen() {
     );
   }
 
-  const isOnline = status?.isOnline;
+  const statusPending = statusQuery.isLoading;
+  const isOnline = status?.isOnline === true;
+  const battery = status?.batteryLevel ?? null;
+  const batteryTint = batteryColor(battery, isOnline);
+  const reachabilityLabel = statusPending
+    ? 'Đang cập nhật'
+    : isOnline
+      ? 'Đang online'
+      : 'Offline';
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -95,14 +115,16 @@ export default function DeviceDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Status banner */}
-        <View style={[styles.statusBanner, isOnline ? styles.bannerOnline : styles.bannerOffline]}>
-          <View style={[styles.statusDot, isOnline ? styles.dotOnline : styles.dotOffline]} />
-          <Text style={[styles.statusText, isOnline ? styles.textOnline : styles.textOffline]}>
-            {isOnline ? 'Đang online' : 'Offline'}
+        <View style={[styles.statusBanner, !statusPending && isOnline ? styles.bannerOnline : styles.bannerOffline]}>
+          <View style={[styles.statusDot, !statusPending && isOnline ? styles.dotOnline : styles.dotOffline]} />
+          <Text style={[styles.statusText, !statusPending && isOnline ? styles.textOnline : styles.textOffline]}>
+            {reachabilityLabel}
           </Text>
-          <Text style={styles.lastSeen} numberOfLines={1}>
-            · Hoạt động {formatLastSeen(status?.lastSeenAt)}
-          </Text>
+          {!statusPending && (
+            <Text style={styles.lastSeen} numberOfLines={1}>
+              · Hoạt động {formatLastSeen(status?.lastSeenAt)}
+            </Text>
+          )}
         </View>
 
         {/* Device info */}
@@ -115,7 +137,11 @@ export default function DeviceDetailScreen() {
           </View>
           <InfoRow label="Tên" value={device.deviceName || '—'} icon="create-outline" />
           <InfoRow label="Serial" value={device.serialNumber} icon="barcode-outline" />
-          <InfoRow label="Trạng thái" value={device.status} icon="information-circle-outline" />
+          <InfoRow
+            label="Trạng thái"
+            value={statusPending ? '—' : configStatusLabel(device.status, isOnline)}
+            icon="information-circle-outline"
+          />
         </View>
 
         {/* Realtime */}
@@ -127,14 +153,14 @@ export default function DeviceDetailScreen() {
               </View>
               <Text style={styles.cardTitle}>Realtime</Text>
             </View>
-            {status.batteryLevel != null && (
+            {battery != null && (
               <View style={styles.infoRow}>
-                <Ionicons name="battery-half-outline" size={16} color={Colors.textMuted} style={{ marginRight: 8 }} />
+                <Ionicons name="battery-half-outline" size={16} color={batteryTint} style={{ marginRight: 8 }} />
                 <Text style={styles.infoLabel}>Pin</Text>
                 <View style={styles.batteryBar}>
-                  <View style={[styles.batteryFill, { width: `${status.batteryLevel}%` as any, backgroundColor: status.batteryLevel > 30 ? Colors.success : Colors.danger }]} />
+                  <View style={[styles.batteryFill, { width: `${battery}%` as any, backgroundColor: batteryTint }]} />
                 </View>
-                <Text style={styles.infoValue}>{status.batteryLevel}%</Text>
+                <Text style={[styles.infoValue, { color: batteryTint }]}>{battery}%</Text>
               </View>
             )}
             {status.temperature != null && (

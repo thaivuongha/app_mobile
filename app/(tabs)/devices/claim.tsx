@@ -1,4 +1,4 @@
-﻿import { useRouter } from 'expo-router';
+﻿import { useNavigation, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   StyleSheet,
@@ -37,6 +37,7 @@ const CLAIM_STEPS = [
 
 export default function ClaimDeviceScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const queryClient = useQueryClient();
 
   const [deviceName, setDeviceName] = useState('');
@@ -61,8 +62,22 @@ export default function ClaimDeviceScreen() {
         floor: floor ?? undefined,
       });
       await queryClient.invalidateQueries({ queryKey: ['my-devices'] });
+      setDeviceName('');
+      setFloor(null);
+      setSerialNumber('');
+      setOwnerKey('');
       Alert.alert('✅ Thành công', 'Thêm thiết bị thành công!', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)') },
+        {
+          text: 'OK',
+          onPress: () => {
+            const parent = navigation.getParent();
+            if (parent?.canGoBack()) {
+              parent.goBack();
+              return;
+            }
+            router.replace('/(tabs)');
+          },
+        },
       ]);
     } catch (e) {
       const message = e instanceof ApiClientError ? e.message : 'Thêm thiết bị thất bại. Vui lòng kiểm tra lại thông tin.';

@@ -290,7 +290,7 @@ export default function CheckoutScreen() {
           {
             text: 'Xem đơn hàng',
             // setTimeout để escape Alert dismiss animation trên iOS
-            onPress: () => setTimeout(() => router.push('/(tabs)/orders'), 0),
+            onPress: () => setTimeout(() => router.push('/(tabs)/shop/orders'), 0),
           },
         ]);
       }, 0);
