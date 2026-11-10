@@ -9,7 +9,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { getMyDevices } from '@/src/api/devices';
 import type { Device } from '@/src/api/devices';
 import { Colors } from '@/constants/Colors';
@@ -22,7 +22,7 @@ function DeviceCard({ item, onPress }: { item: Device; onPress: () => void }) {
       <View style={[styles.cardAccent, isOnline ? styles.cardAccentActive : styles.cardAccentInactive]} />
       <View style={styles.cardBody}>
         <View style={styles.cardIconBox}>
-          <Ionicons name="hardware-chip-outline" size={22} color={Colors.primary} />
+          <MaterialCommunityIcons name="fridge-industrial-outline" size={22} color={Colors.primary} />
         </View>
         <View style={styles.cardInfo}>
           <Text style={styles.cardTitle} numberOfLines={1}>{item.deviceName || item.serialNumber}</Text>
@@ -66,7 +66,7 @@ export default function DevicesListScreen() {
       ) : devices.length === 0 ? (
         <View style={styles.emptyBox}>
           <View style={styles.emptyIcon}>
-            <Ionicons name="hardware-chip-outline" size={40} color={Colors.primary} />
+            <MaterialCommunityIcons name="fridge-industrial-outline" size={40} color={Colors.primary} />
           </View>
           <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
           <Text style={styles.emptyDesc}>Nhấn "Thêm thiết bị" để thêm máy bán hàng đầu tiên</Text>

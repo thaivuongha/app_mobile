@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCartStore } from '@/src/stores/cartStore';
 import { Colors } from '@/constants/Colors';
@@ -23,22 +23,33 @@ function TabIcon({
   name,
   activeName,
   focused,
-  color,
   cartCount,
+  family = 'ionicons',
 }: {
-  name: keyof typeof Ionicons.glyphMap;
-  activeName: keyof typeof Ionicons.glyphMap;
+  name: string;
+  activeName: string;
   focused: boolean;
   color: string;
   cartCount?: number;
+  family?: 'ionicons' | 'community';
 }) {
+  const glyph = focused ? activeName : name;
+  const tint = focused ? Colors.textPrimary : Colors.textMuted;
   return (
     <View style={[styles.tabIcon, focused && styles.tabIconActive]}>
-      <Ionicons
-        name={focused ? activeName : name}
-        size={22}
-        color={focused ? Colors.textPrimary : Colors.textMuted}
-      />
+      {family === 'community' ? (
+        <MaterialCommunityIcons
+          name={glyph as keyof typeof MaterialCommunityIcons.glyphMap}
+          size={22}
+          color={tint}
+        />
+      ) : (
+        <Ionicons
+          name={glyph as keyof typeof Ionicons.glyphMap}
+          size={22}
+          color={tint}
+        />
+      )}
       {cartCount != null && <BadgeDot count={cartCount} />}
     </View>
   );
@@ -52,6 +63,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
@@ -67,8 +79,9 @@ export default function TabLayout() {
           title: 'Thiết bị',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
-              name="cube-outline"
-              activeName="cube"
+              name="fridge-industrial-outline"
+              activeName="fridge-industrial"
+              family="community"
               focused={focused}
               color={color}
             />

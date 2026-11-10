@@ -15,7 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { getStaffDevices } from '@/src/api/staffDevices';
 import type { StaffDevice, StaffSlot } from '@/src/api/staffDevices';
 import { staffLogout } from '@/src/api/staffAuth';
@@ -72,6 +72,17 @@ function batteryColor(level: number | null, isOnline: boolean): string {
 
 // ─── Device Card ──────────────────────────────────────────────────────────────
 
+const DOTS_PER_ROW = 4;
+
+function slotRows<T extends { slotNumber: number }>(slots: T[]): T[][] {
+  const sorted = [...slots].sort((a, b) => a.slotNumber - b.slotNumber);
+  const rows: T[][] = [];
+  for (let i = 0; i < sorted.length; i += DOTS_PER_ROW) {
+    rows.push(sorted.slice(i, i + DOTS_PER_ROW));
+  }
+  return rows;
+}
+
 function DeviceCard({
   device,
   onPress,
@@ -108,21 +119,29 @@ function DeviceCard({
       </View>
 
       <View style={styles.deviceIconWrapper}>
-        <Ionicons name="cube-outline" size={32} color={Colors.textMuted} />
+        <MaterialCommunityIcons name="fridge-industrial-outline" size={32} color={Colors.textMuted} />
       </View>
 
       <Text style={styles.cardName} numberOfLines={2}>{displayName(device)}</Text>
 
       <View style={styles.slotDots}>
-        {slots.map((slot) => {
-          const filled = !slot.isEmpty && !!slot.productName;
-          return (
-            <View
-              key={slot.slotNumber}
-              style={[styles.slotDot, filled ? styles.slotDotFilled : styles.slotDotEmpty]}
-            />
-          );
-        })}
+        {slotRows(slots).map((row) => (
+          <View key={row[0].slotNumber} style={styles.slotDotRow}>
+            {row.map((slot) => {
+              const filled = !slot.isEmpty && !!slot.productName;
+              return (
+                <View
+                  key={slot.slotNumber}
+                  style={[styles.slotDot, filled ? styles.slotDotFilled : styles.slotDotEmpty]}
+                >
+                  <Text style={[styles.slotDotText, !filled && styles.slotDotTextEmpty]}>
+                    {slot.slotNumber}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        ))}
       </View>
     </TouchableOpacity>
   );
@@ -318,7 +337,7 @@ export default function StaffDevicesScreen() {
         {devices.length > 0 && (
           <View style={styles.statsRow}>
             <View style={styles.statPill}>
-              <Ionicons name="cube-outline" size={14} color="rgba(255,255,255,0.8)" />
+              <MaterialCommunityIcons name="fridge-industrial-outline" size={14} color="rgba(255,255,255,0.8)" />
               <Text style={styles.statValue}>{devices.length}</Text>
               <Text style={styles.statLabel}>máy</Text>
             </View>
@@ -351,7 +370,7 @@ export default function StaffDevicesScreen() {
         ) : devices.length === 0 ? (
           <View style={styles.centerState}>
             <View style={styles.emptyIconBox}>
-              <Ionicons name="cube-outline" size={40} color={Colors.primary} />
+              <MaterialCommunityIcons name="fridge-industrial-outline" size={40} color={Colors.primary} />
             </View>
             <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
           </View>
@@ -537,10 +556,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  slotDots: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 5, paddingBottom: 12 },
-  slotDot: { width: 6, height: 6, borderRadius: 3 },
+  slotDots: { alignItems: 'center', gap: 8, paddingHorizontal: 8, paddingBottom: 12 },
+  slotDotRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  slotDot: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   slotDotFilled: { backgroundColor: Colors.primary },
   slotDotEmpty: { backgroundColor: Colors.border },
+  slotDotText: { fontSize: 10, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  slotDotTextEmpty: { color: Colors.textSecondary },
 
   centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40, gap: 10 },
   centerStateText: { fontSize: 14, color: Colors.textSecondary },

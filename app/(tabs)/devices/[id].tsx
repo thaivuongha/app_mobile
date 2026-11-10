@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { getDevice, getDeviceStatus, getDeviceSlots } from '@/src/api/devices';
 import { Colors } from '@/constants/Colors';
@@ -109,7 +109,7 @@ export default function DeviceDetailScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <View style={styles.cardIconBox}>
-              <Ionicons name="hardware-chip-outline" size={20} color={Colors.primary} />
+              <MaterialCommunityIcons name="fridge-industrial-outline" size={20} color={Colors.primary} />
             </View>
             <Text style={styles.cardTitle}>Thông tin thiết bị</Text>
           </View>

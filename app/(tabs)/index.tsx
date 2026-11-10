@@ -15,7 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useQueries } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { getMyDevices, getDeviceSlots, getDeviceStatus } from '@/src/api/devices';
 import type { Device, DeviceSlot } from '@/src/api/devices';
 import { Colors } from '@/constants/Colors';
@@ -67,19 +67,30 @@ function StatPill({
   value,
   label,
   accent,
+  family = 'ionicons',
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: string;
   value: number;
   label: string;
   accent?: boolean;
+  family?: 'ionicons' | 'community';
 }) {
+  const tint = accent ? Colors.orange : 'rgba(255,255,255,0.8)';
   return (
     <View style={[styles.statPill, accent && styles.statPillAccent]}>
-      <Ionicons
-        name={icon}
-        size={14}
-        color={accent ? Colors.orange : 'rgba(255,255,255,0.8)'}
-      />
+      {family === 'community' ? (
+        <MaterialCommunityIcons
+          name={icon as keyof typeof MaterialCommunityIcons.glyphMap}
+          size={14}
+          color={tint}
+        />
+      ) : (
+        <Ionicons
+          name={icon as keyof typeof Ionicons.glyphMap}
+          size={14}
+          color={tint}
+        />
+      )}
       <Text style={[styles.statValue, accent && styles.statValueAccent]}>{value}</Text>
       <Text style={[styles.statLabel, accent && styles.statLabelAccent]}>{label}</Text>
     </View>
@@ -87,6 +98,17 @@ function StatPill({
 }
 
 // ─── Device Card ──────────────────────────────────────────────────────────────
+
+const DOTS_PER_ROW = 4;
+
+function slotRows<T extends { slotNumber: number }>(slots: T[]): T[][] {
+  const sorted = [...slots].sort((a, b) => a.slotNumber - b.slotNumber);
+  const rows: T[][] = [];
+  for (let i = 0; i < sorted.length; i += DOTS_PER_ROW) {
+    rows.push(sorted.slice(i, i + DOTS_PER_ROW));
+  }
+  return rows;
+}
 
 function DeviceCard({
   device,
@@ -132,8 +154,8 @@ function DeviceCard({
 
       {/* Icon */}
       <View style={[styles.deviceIconWrapper, isOnline && styles.deviceIconWrapperActive]}>
-        <Ionicons
-          name={isOnline ? 'cube' : 'cube-outline'}
+        <MaterialCommunityIcons
+          name={isOnline ? 'fridge-industrial' : 'fridge-industrial-outline'}
           size={32}
           color={isOnline ? Colors.primary : Colors.textMuted}
         />
@@ -149,17 +171,24 @@ function DeviceCard({
         <Text style={styles.cardLastSeenText} numberOfLines={1}>{lastSeenLabel}</Text>
       </View>
 
-      {/* Slot dots (số lượng tùy model, lấy theo slots trả về từ API) */}
       <View style={styles.slotDots}>
-        {(slots ?? []).map((slot) => {
-          const filled = !slot.isEmpty && !!slot.productName;
-          return (
-            <View
-              key={slot.slotNumber}
-              style={[styles.slotDot, filled ? styles.slotDotFilled : styles.slotDotEmpty]}
-            />
-          );
-        })}
+        {slotRows(slots ?? []).map((row) => (
+          <View key={row[0].slotNumber} style={styles.slotDotRow}>
+            {row.map((slot) => {
+              const filled = !slot.isEmpty && !!slot.productName;
+              return (
+                <View
+                  key={slot.slotNumber}
+                  style={[styles.slotDot, filled ? styles.slotDotFilled : styles.slotDotEmpty]}
+                >
+                  <Text style={[styles.slotDotText, !filled && styles.slotDotTextEmpty]}>
+                    {slot.slotNumber}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        ))}
       </View>
     </TouchableOpacity>
   );
@@ -436,7 +465,7 @@ export default function HomeScreen() {
         {/* Stats row */}
         {devices.length > 0 && (
           <View style={styles.statsRow}>
-            <StatPill icon="cube-outline" value={devices.length} label="máy" />
+            <StatPill icon="fridge-industrial-outline" family="community" value={devices.length} label="máy" />
             <StatPill icon="wifi-outline" value={onlineCount} label="online" accent />
             <StatPill icon="layers-outline" value={sections.length} label="tầng" />
           </View>
@@ -453,7 +482,7 @@ export default function HomeScreen() {
         ) : devices.length === 0 ? (
           <View style={styles.centerState}>
             <View style={styles.emptyIconBox}>
-              <Ionicons name="cube-outline" size={40} color={Colors.primary} />
+              <MaterialCommunityIcons name="fridge-industrial-outline" size={40} color={Colors.primary} />
             </View>
             <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
             <Text style={styles.emptySubtitle}>
@@ -889,8 +918,11 @@ const styles = StyleSheet.create({
   slotEmptyLabel: { fontSize: 12, color: Colors.textMuted, fontStyle: 'italic' },
 
   // ── Slot dots (card) ──
-  slotDots: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 5, paddingBottom: 10 },
-  slotDot: { width: 6, height: 6, borderRadius: 3 },
+  slotDots: { alignItems: 'center', gap: 8, paddingHorizontal: 8, paddingBottom: 12 },
+  slotDotRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  slotDot: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   slotDotFilled: { backgroundColor: Colors.primary },
   slotDotEmpty: { backgroundColor: Colors.border },
+  slotDotText: { fontSize: 10, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  slotDotTextEmpty: { color: Colors.textSecondary },
 });

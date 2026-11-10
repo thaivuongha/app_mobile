@@ -7,7 +7,7 @@ export default function MeLayout() {
       screenOptions={{
         headerShown: true,
         headerStyle: { backgroundColor: Colors.background },
-        headerTintColor: Colors.primary,
+        headerTintColor: Colors.textPrimary,
         headerTitleStyle: { fontWeight: '600', color: Colors.textPrimary },
         headerShadowVisible: false,
         headerBackTitle: '',
@@ -23,7 +23,7 @@ export default function MeLayout() {
       {/* Settings screens — mở trong account stack để back về đúng trang Cá Nhân */}
       <Stack.Screen name="invoice" options={{ title: 'Cài đặt hóa đơn' }} />
       <Stack.Screen name="delivery-addresses" options={{ title: 'Địa chỉ giao hàng' }} />
-      <Stack.Screen name="delivery-address-form" options={{ title: 'Thêm / Sửa địa chỉ' }} />
+      <Stack.Screen name="delivery-address-form" options={{ title: 'Thêm / Sửa địa chỉ', headerShown: false }} />
       {/* Wallet screens */}
       <Stack.Screen name="wallet" options={{ title: 'Ví vận hành' }} />
       <Stack.Screen name="wallet-commission" options={{ title: 'Ví hoa hồng' }} />

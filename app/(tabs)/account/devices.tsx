@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { getMyDevices, removeDevice } from '@/src/api/devices';
 import type { Device } from '@/src/api/devices';
 import { Colors } from '@/constants/Colors';
@@ -62,7 +62,7 @@ function DeviceRow({
     <View style={styles.deviceRow}>
       {/* Icon + Info */}
       <View style={styles.deviceIconBox}>
-        <Ionicons name="cube-outline" size={26} color={color} />
+        <MaterialCommunityIcons name="fridge-industrial-outline" size={26} color={color} />
       </View>
 
       <View style={styles.deviceInfo}>
@@ -259,7 +259,7 @@ export default function DeviceListScreen() {
         {/* Empty state */}
         {devices.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="cube-outline" size={56} color={Colors.textMuted} />
+            <MaterialCommunityIcons name="fridge-industrial-outline" size={56} color={Colors.textMuted} />
             <Text style={styles.emptyTitle}>Chưa có thiết bị</Text>
             <Text style={styles.emptySubtitle}>
               Nhấn "Thêm thiết bị mới" để bắt đầu

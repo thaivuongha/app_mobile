@@ -63,7 +63,7 @@ export default function ShopAddressesScreen() {
         <Text style={styles.headerTitle}>Địa chỉ giao hàng</Text>
         <TouchableOpacity
           style={styles.addBtn}
-          onPress={() => router.push('/(tabs)/settings/delivery-address-form')}
+          onPress={() => router.push('/(tabs)/shop/delivery-address-form')}
         >
           <Ionicons name="add" size={22} color={Colors.primary} />
         </TouchableOpacity>
@@ -89,7 +89,7 @@ export default function ShopAddressesScreen() {
               </Text>
               <TouchableOpacity
                 style={styles.emptyButton}
-                onPress={() => router.push('/(tabs)/settings/delivery-address-form')}
+                onPress={() => router.push('/(tabs)/shop/delivery-address-form')}
               >
                 <Text style={styles.emptyButtonText}>+ Thêm địa chỉ</Text>
               </TouchableOpacity>
@@ -140,7 +140,7 @@ function AddressCard({
           style={styles.editBtn}
           onPress={() =>
             router.push({
-              pathname: '/(tabs)/settings/delivery-address-form',
+              pathname: '/(tabs)/shop/delivery-address-form',
               params: { id: item.id },
             })
           }

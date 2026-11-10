@@ -157,7 +157,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <StatusBar style="dark" />
       <KeyboardAwareScrollView contentContainerStyle={styles.page}>
         <View style={styles.hero}>

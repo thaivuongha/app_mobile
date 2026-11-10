@@ -13,7 +13,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { keyboardAvoidingBehavior } from '@/components/KeyboardAwareScrollView';
 import { useState } from 'react';
 import { getMe, getMyProfile, updatePriceMultiplier } from '@/src/api/users';
@@ -58,7 +58,8 @@ function getCommissionPercentLimits(user?: { commissionPercentMin?: number; comm
 }
 
 interface MenuItemProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap | keyof typeof MaterialCommunityIcons.glyphMap;
+  iconFamily?: 'ionicons' | 'community';
   label: string;
   sublabel?: string;
   onPress: () => void;
@@ -67,11 +68,20 @@ interface MenuItemProps {
   badgeTone?: 'danger' | 'primary';
 }
 
-function MenuItem({ icon, label, sublabel, onPress, danger, badge, badgeTone = 'danger' }: MenuItemProps) {
+function MenuItem({ icon, iconFamily = 'ionicons', label, sublabel, onPress, danger, badge, badgeTone = 'danger' }: MenuItemProps) {
+  const tint = danger ? Colors.danger : Colors.primary;
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.menuIcon, danger && styles.menuIconDanger]}>
-        <Ionicons name={icon} size={18} color={danger ? Colors.danger : Colors.primary} />
+        {iconFamily === 'community' ? (
+          <MaterialCommunityIcons
+            name={icon as keyof typeof MaterialCommunityIcons.glyphMap}
+            size={18}
+            color={tint}
+          />
+        ) : (
+          <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={tint} />
+        )}
       </View>
       <View style={styles.menuContent}>
         <Text style={[styles.menuLabel, danger && { color: Colors.danger }]}>{label}</Text>
@@ -394,7 +404,8 @@ export default function MeScreen() {
         {/* Thiết bị */}
         <MenuSection title="Thiết bị">
           <MenuItem
-            icon="cube-outline"
+            icon="fridge-industrial-outline"
+            iconFamily="community"
             label="Danh sách thiết bị"
             onPress={() => router.push('/(tabs)/account/devices')}
           />

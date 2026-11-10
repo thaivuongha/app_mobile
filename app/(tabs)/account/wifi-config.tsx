@@ -20,7 +20,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { useBlufi } from '@/src/hooks/useBlufi';
@@ -375,7 +375,7 @@ function ScanScreen({
                 activeOpacity={0.8}
               >
                 <View style={styles.deviceIcon}>
-                  <Ionicons name="hardware-chip-outline" size={24} color={Colors.primary} />
+                  <MaterialCommunityIcons name="fridge-industrial-outline" size={24} color={Colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.deviceName}>{item.name}</Text>
@@ -428,7 +428,7 @@ function CredentialsScreen({
       {/* Thiết bị đã chọn */}
       <View style={styles.deviceSelected}>
         <View style={styles.deviceIcon}>
-          <Ionicons name="hardware-chip" size={22} color={Colors.primary} />
+          <MaterialCommunityIcons name="fridge-industrial" size={22} color={Colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.deviceName}>{device.name}</Text>

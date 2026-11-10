@@ -343,7 +343,7 @@ export default function ShopScreen() {
             style={styles.iconBtn}
             onPress={() => router.push('/(tabs)/shop/inventory')}
           >
-            <Ionicons name="cube-outline" size={22} color={Colors.textSecondary} />
+            <Ionicons name="archive-outline" size={22} color={Colors.textSecondary} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -368,7 +368,7 @@ export default function ShopScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.iconBtn, styles.cartIconBtn]}
+            style={[styles.iconBtn, cartCount > 0 && styles.cartIconBtn]}
             onPress={() => router.push('/(tabs)/shop/cart')}
           >
             <Ionicons

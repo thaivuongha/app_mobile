@@ -79,7 +79,7 @@ export default function ShopInventoryScreen() {
             <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={Colors.primary} />
           }
         >
-          <Ionicons name="cube-outline" size={56} color={Colors.textMuted} />
+          <Ionicons name="archive-outline" size={56} color={Colors.textMuted} />
           <Text style={styles.emptyTitle}>Chưa có hàng trong kho</Text>
         </ScrollView>
       ) : (

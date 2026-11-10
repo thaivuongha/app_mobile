@@ -1,4 +1,4 @@
-﻿import { useRouter, useLocalSearchParams } from 'expo-router';
+﻿import { useRouter, useSegments } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   StyleSheet,
@@ -22,9 +22,8 @@ import { Colors } from '@/constants/Colors';
 export default function DeliveryAddressesScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { from } = useLocalSearchParams<{ from?: string }>();
-  // Nếu được mở từ account tab thì sub-navigation dùng account stack
-  const formPath = from === 'account'
+  // Màn này được dùng cả trong tab Đối tác. Form phải ở cùng stack để back không rơi vào Cài đặt.
+  const formPath = useSegments().includes('account')
     ? '/(tabs)/account/delivery-address-form'
     : '/(tabs)/settings/delivery-address-form';
 

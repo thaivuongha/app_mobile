@@ -12,6 +12,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from '@/components/KeyboardAwareScrollView';
 import { useCartStore } from '@/src/stores/cartStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
