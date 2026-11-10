@@ -19,20 +19,15 @@ import { Colors } from '@/constants/Colors';
 import { displayName } from '@/app/(tabs)/index';
 
 // ─── Status helpers ────────────────────────────────────────────────────────────
-function statusLabel(status: string) {
-  switch (status) {
-    case 'ACTIVE': return 'Online';
-    case 'MAINTENANCE': return 'Bảo trì';
-    case 'INACTIVE': return 'Không hoạt động';
-    default: return 'Offline';
-  }
+function statusLabel(device: Device) {
+  if (device.status === 'MAINTENANCE') return 'Bảo trì';
+  if (device.status === 'INACTIVE') return 'Không hoạt động';
+  return device.liveStatus?.isOnline ? 'Online' : 'Offline';
 }
-function statusColor(status: string) {
-  switch (status) {
-    case 'ACTIVE': return Colors.success;
-    case 'MAINTENANCE': return Colors.warning;
-    default: return Colors.textMuted;
-  }
+function statusColor(device: Device) {
+  if (device.status === 'MAINTENANCE') return Colors.warning;
+  if (device.status === 'INACTIVE') return Colors.textMuted;
+  return device.liveStatus?.isOnline ? Colors.success : Colors.textMuted;
 }
 
 // ─── Floor badge ───────────────────────────────────────────────────────────────
@@ -56,7 +51,7 @@ function DeviceRow({
   onRemove: (device: Device) => void;
   isRemoving: boolean;
 }) {
-  const color = statusColor(device.status);
+  const color = statusColor(device);
 
   return (
     <View style={styles.deviceRow}>
@@ -74,7 +69,7 @@ function DeviceRow({
         </Text>
         <View style={styles.deviceMeta}>
           <View style={[styles.statusDot, { backgroundColor: color }]} />
-          <Text style={[styles.statusLabel, { color }]}>{statusLabel(device.status)}</Text>
+          <Text style={[styles.statusLabel, { color }]}>{statusLabel(device)}</Text>
           <FloorBadge floor={device.floor} />
         </View>
       </View>
