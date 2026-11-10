@@ -119,7 +119,7 @@ function DeviceCard({
       </View>
 
       <View style={styles.deviceIconWrapper}>
-        <MaterialCommunityIcons name="fridge-industrial-outline" size={32} color={Colors.textMuted} />
+        <MaterialCommunityIcons name="fridge-industrial-outline" size={40} color={Colors.textMuted} />
       </View>
 
       <Text style={styles.cardName} numberOfLines={2}>{displayName(device)}</Text>
@@ -538,9 +538,9 @@ const styles = StyleSheet.create({
   deviceIconWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+    width: 64,
+    height: 64,
+    borderRadius: 16,
     backgroundColor: Colors.background,
     alignSelf: 'center',
     marginVertical: 10,
@@ -556,12 +556,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  slotDots: { alignItems: 'center', gap: 8, paddingHorizontal: 8, paddingBottom: 12 },
-  slotDotRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
-  slotDot: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  slotDots: { alignItems: 'center', gap: 6, paddingHorizontal: 8, paddingBottom: 12 },
+  slotDotRow: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  slotDot: { width: 15, height: 15, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   slotDotFilled: { backgroundColor: Colors.primary },
   slotDotEmpty: { backgroundColor: Colors.border },
-  slotDotText: { fontSize: 10, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  slotDotText: { fontSize: 8, fontWeight: '700', color: '#fff', textAlign: 'center' },
   slotDotTextEmpty: { color: Colors.textSecondary },
 
   centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40, gap: 10 },

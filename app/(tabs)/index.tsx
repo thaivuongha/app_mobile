@@ -75,7 +75,7 @@ function StatPill({
   accent?: boolean;
   family?: 'ionicons' | 'community';
 }) {
-  const tint = accent ? Colors.orange : 'rgba(255,255,255,0.8)';
+  const tint = accent ? '#fff' : 'rgba(255,255,255,0.8)';
   return (
     <View style={[styles.statPill, accent && styles.statPillAccent]}>
       {family === 'community' ? (
@@ -120,10 +120,7 @@ function DeviceCard({
   onPress: () => void;
 }) {
   const isOnline = device.liveStatus?.isOnline ?? false;
-  const hasIssue = device.status === 'MAINTENANCE' || device.status === 'INACTIVE';
-
-  const statusColor = isOnline ? Colors.success : hasIssue ? Colors.warning : Colors.textMuted;
-  const statusLabel = isOnline ? 'Online' : hasIssue ? 'Lỗi' : 'Offline';
+  const roomName = device.deviceName?.trim() || '';
   const lastSeenLabel = formatLastSeen(device.liveStatus?.lastSeenAt);
   const battery = device.liveStatus?.batteryLevel ?? null;
   const batteryTint = batteryColor(battery, isOnline);
@@ -135,9 +132,15 @@ function DeviceCard({
 
       <View style={styles.cardHeader}>
         <View style={styles.cardStatus}>
-          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-          <Text style={[styles.statusText, { color: statusColor }]} numberOfLines={1}>
-            {statusLabel}
+          <Text
+            style={[
+              styles.roomName,
+              !roomName && styles.roomNameEmpty,
+              isOnline && styles.roomNameOnline,
+            ]}
+            numberOfLines={2}
+          >
+            {roomName || 'Chưa đặt tên'}
           </Text>
         </View>
         <View style={styles.cardBattery}>
@@ -154,16 +157,20 @@ function DeviceCard({
 
       {/* Icon */}
       <View style={[styles.deviceIconWrapper, isOnline && styles.deviceIconWrapperActive]}>
-        <MaterialCommunityIcons
-          name={isOnline ? 'fridge-industrial' : 'fridge-industrial-outline'}
-          size={32}
-          color={isOnline ? Colors.primary : Colors.textMuted}
-        />
+        <View style={styles.deviceGlyph}>
+          <MaterialCommunityIcons
+            name="fridge-industrial"
+            size={48}
+            color="#fff"
+            style={styles.deviceGlyphFill}
+          />
+          <MaterialCommunityIcons
+            name="fridge-industrial-outline"
+            size={48}
+            color={isOnline ? Colors.success : Colors.textMuted}
+          />
+        </View>
       </View>
-
-      {/* Name */}
-      <Text style={styles.cardName} numberOfLines={2}>{displayName(device)}</Text>
-      <Text style={styles.cardSerial} numberOfLines={1}>{device.serialNumber}</Text>
 
       {/* Hoạt động lần cuối */}
       <View style={styles.cardLastSeen}>
@@ -313,14 +320,12 @@ function DevicePopup({
 
           {/* Title + meta */}
           <View style={styles.sheetTitleBlock}>
-            <Text style={styles.sheetTitle} numberOfLines={1}>{displayName(device)}</Text>
+            <Text style={styles.sheetTitle} numberOfLines={1}>
+              {device.deviceName?.trim() || 'Chưa đặt tên'}
+            </Text>
             <View style={styles.sheetMeta}>
-              <View style={[styles.onlineDot, { backgroundColor: isOnline ? Colors.success : Colors.textMuted }]} />
-              <Text style={[styles.onlineText, { color: isOnline ? Colors.success : Colors.textMuted }]}>
-                {isOnline ? 'Online' : 'Offline'}
-              </Text>
               <Text style={styles.lastSeenMeta} numberOfLines={1}>
-                · {formatLastSeen(status?.lastSeenAt)}
+                {formatLastSeen(status?.lastSeenAt)}
               </Text>
               {device.floor != null && (
                 <View style={styles.metaBadge}>
@@ -466,7 +471,7 @@ export default function HomeScreen() {
         {devices.length > 0 && (
           <View style={styles.statsRow}>
             <StatPill icon="fridge-industrial-outline" family="community" value={devices.length} label="máy" />
-            <StatPill icon="wifi-outline" value={onlineCount} label="online" accent />
+            <StatPill icon="wifi-outline" value={onlineCount} label="online" accent={onlineCount > 0} />
             <StatPill icon="layers-outline" value={sections.length} label="tầng" />
           </View>
         )}
@@ -618,8 +623,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.2)',
   },
   statPillAccent: {
-    backgroundColor: Colors.orange,
-    borderColor: Colors.orange,
+    backgroundColor: Colors.success,
+    borderColor: Colors.success,
   },
   statValue: { fontSize: 14, fontWeight: '700', color: '#fff' },
   statValueAccent: { color: '#fff' },
@@ -694,55 +699,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 12,
-    paddingTop: 10,
-    marginBottom: 4,
+    paddingTop: 8,
     gap: 6,
+    height: 48,
   },
   cardStatus: {
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 1,
   },
-  statusDot: { width: 7, height: 7, borderRadius: 3.5, marginRight: 5 },
-  statusText: { fontSize: 11, fontWeight: '600', flexShrink: 1 },
+  roomName: { fontSize: 12, fontWeight: '600', flexShrink: 1, lineHeight: 16, color: Colors.textPrimary },
+  roomNameEmpty: { color: Colors.textMuted, fontWeight: '500' },
+  roomNameOnline: { color: Colors.success },
 
   deviceIconWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+    width: 72,
+    height: 72,
+    borderRadius: 18,
     backgroundColor: Colors.background,
     alignSelf: 'center',
-    marginVertical: 8,
+    marginTop: 4,
+    marginBottom: 6,
   },
   deviceIconWrapperActive: {
     backgroundColor: Colors.primaryLight,
   },
+  deviceGlyph: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deviceGlyphFill: { position: 'absolute' },
 
-  cardName: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    paddingHorizontal: 10,
-    lineHeight: 18,
-  },
-  cardSerial: {
-    fontSize: 10,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    marginTop: 3,
-    marginBottom: 8,
-    paddingHorizontal: 8,
-    letterSpacing: 0.3,
-  },
   cardLastSeen: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 3,
-    marginBottom: 10,
+    marginBottom: 4,
     paddingHorizontal: 8,
   },
   cardLastSeenText: {
@@ -836,8 +833,6 @@ const styles = StyleSheet.create({
   sheetTitleBlock: { flex: 1 },
   sheetTitle: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary },
   sheetMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' },
-  onlineDot: { width: 7, height: 7, borderRadius: 3.5 },
-  onlineText: { fontSize: 12, fontWeight: '500' },
   lastSeenMeta: { fontSize: 12, color: Colors.textMuted, flexShrink: 1 },
   metaBadge: {
     flexDirection: 'row',
@@ -918,11 +913,11 @@ const styles = StyleSheet.create({
   slotEmptyLabel: { fontSize: 12, color: Colors.textMuted, fontStyle: 'italic' },
 
   // ── Slot dots (card) ──
-  slotDots: { alignItems: 'center', gap: 8, paddingHorizontal: 8, paddingBottom: 12 },
-  slotDotRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
-  slotDot: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  slotDots: { alignItems: 'center', gap: 6, paddingHorizontal: 8, paddingBottom: 14, marginTop: 'auto' },
+  slotDotRow: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  slotDot: { width: 15, height: 15, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   slotDotFilled: { backgroundColor: Colors.primary },
   slotDotEmpty: { backgroundColor: Colors.border },
-  slotDotText: { fontSize: 10, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  slotDotText: { fontSize: 8, fontWeight: '700', color: '#fff', textAlign: 'center' },
   slotDotTextEmpty: { color: Colors.textSecondary },
 });
