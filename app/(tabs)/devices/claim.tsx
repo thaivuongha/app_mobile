@@ -59,7 +59,40 @@ export default function ClaimDeviceScreen() {
       <KeyboardAwareScrollView
           contentContainerStyle={styles.container}
         >
-          {/* Section 1: Thông tin thiết bị */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="card-outline" size={18} color={Colors.primary} />
+              <Text style={styles.sectionTitle}>Nhập mã thiết bị</Text>
+            </View>
+
+            <Text style={styles.label}>
+              Serial Number <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={serialNumber}
+              onChangeText={setSerialNumber}
+              placeholder="K7M2Q9PX"
+              autoCapitalize="characters"
+              editable={!loading}
+              returnKeyType="next"
+            />
+
+            <Text style={styles.label}>
+              Owner Key <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={ownerKey}
+              onChangeText={setOwnerKey}
+              placeholder="Nhập Owner Key"
+              autoCapitalize="characters"
+              editable={!loading}
+              returnKeyType="done"
+              onSubmitEditing={handleClaim}
+            />
+          </View>
+
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="create-outline" size={18} color={Colors.primary} />
@@ -95,48 +128,6 @@ export default function ClaimDeviceScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
-
-          {/* Section 2: Thông tin thiết bị từ thẻ */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="card-outline" size={18} color={Colors.primary} />
-              <Text style={styles.sectionTitle}>Thông tin từ thẻ trong hộp</Text>
-            </View>
-
-            <View style={styles.hintBox}>
-              <Ionicons name="information-circle-outline" size={16} color={Colors.primary} />
-              <Text style={styles.hintText}>
-                Tìm thẻ nhỏ trong hộp. Serial Number và Owner Key in trên thẻ.
-              </Text>
-            </View>
-
-            <Text style={styles.label}>
-              Serial Number <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={serialNumber}
-              onChangeText={setSerialNumber}
-              placeholder="K7M2Q9PX"
-              autoCapitalize="characters"
-              editable={!loading}
-              returnKeyType="next"
-            />
-
-            <Text style={styles.label}>
-              Owner Key <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={ownerKey}
-              onChangeText={setOwnerKey}
-              placeholder="Nhập Owner Key"
-              autoCapitalize="characters"
-              editable={!loading}
-              returnKeyType="done"
-              onSubmitEditing={handleClaim}
-            />
           </View>
 
           {/* Submit button */}
@@ -209,17 +200,6 @@ const styles = StyleSheet.create({
   },
   floorChipText: { fontSize: 13, fontWeight: '500', color: Colors.textSecondary },
   floorChipTextActive: { color: Colors.primary },
-
-  hintBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 14,
-  },
-  hintText: { flex: 1, fontSize: 13, color: Colors.primary, lineHeight: 18 },
 
   button: {
     flexDirection: 'row',
