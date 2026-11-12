@@ -25,7 +25,7 @@ import { ApiClientError } from '@/src/api/client';
 import { Colors } from '@/constants/Colors';
 
 function formatCostPrice(price: number) {
-  return `Giá nhập: ${Number(price).toLocaleString('vi-VN')}đ`;
+  return `${Number(price).toLocaleString('vi-VN')}đ`;
 }
 
 export default function ShopInventoryScreen() {
@@ -92,10 +92,10 @@ export default function ShopInventoryScreen() {
             <Text style={[styles.headLabel, styles.productCell]} numberOfLines={1}>
               Sản phẩm
             </Text>
-            <Text style={[styles.headLabel, styles.numCell]} numberOfLines={1}>
+            <Text style={[styles.headLabel, styles.numHead]} numberOfLines={1}>
               Tồn kho
             </Text>
-            <Text style={[styles.headLabel, styles.numCell]} numberOfLines={1}>
+            <Text style={[styles.headLabel, styles.numHead]} numberOfLines={1}>
               Trên máy
             </Text>
           </View>
@@ -117,16 +117,10 @@ export default function ShopInventoryScreen() {
           />
           <View style={styles.totalRow}>
             <Text style={[styles.totalLabel, styles.productCell]}>Tổng</Text>
-            <Text
-              style={[
-                styles.totalValue,
-                styles.numCell,
-                warehouseTotal < 0 && styles.qtyNegative,
-              ]}
-            >
+            <Text style={[styles.totalValue, warehouseTotal < 0 && styles.qtyNegative]}>
               {warehouseTotal}
             </Text>
-            <Text style={[styles.totalValue, styles.numCell]}>{onMachineTotal}</Text>
+            <Text style={styles.totalValue}>{onMachineTotal}</Text>
           </View>
         </View>
       )}
@@ -167,12 +161,18 @@ function StockRow({ item, onEdit }: { item: PartnerStockItem; onEdit: () => void
         </View>
       </View>
       <View style={styles.qtyCell}>
-        <Ionicons name="create-outline" size={13} color={Colors.textMuted} style={styles.editHint} />
-        <Text style={[styles.qtyValue, item.warehouseQty < 0 && styles.qtyNegative]}>
-          {item.warehouseQty}
-        </Text>
+        <Ionicons name="create-outline" size={15} color={Colors.textSecondary} />
+        <View style={[styles.qtyChip, item.warehouseQty < 0 && styles.qtyChipNegative]}>
+          <Text style={[styles.qtyValue, item.warehouseQty < 0 && styles.qtyNegative]}>
+            {item.warehouseQty}
+          </Text>
+        </View>
       </View>
-      <Text style={[styles.qtyValue, styles.numCell]}>{item.onMachineQty}</Text>
+      <View style={styles.qtyCell}>
+        <View style={styles.qtyChip}>
+          <Text style={styles.qtyValue}>{item.onMachineQty}</Text>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -270,7 +270,7 @@ function CountModal({
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.surface },
 
   header: {
     flexDirection: 'row',
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { flex: 1, fontSize: 18, fontWeight: '600', color: Colors.textPrimary, marginLeft: 4 },
+  headerTitle: { flex: 1, fontSize: 22, fontWeight: '800', color: Colors.textPrimary, marginLeft: 4 },
 
   fill: { flex: 1 },
   centered: {
@@ -319,18 +319,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    paddingVertical: 13,
+    backgroundColor: Colors.primary,
   },
   headLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
+  numHead: { width: 92, textAlign: 'right' },
   dataRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -342,23 +339,31 @@ const styles = StyleSheet.create({
   productCell: { flex: 1 },
   productContent: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingRight: 8 },
   productText: { flex: 1 },
-  numCell: { width: 84, textAlign: 'right' },
   qtyCell: {
-    width: 84,
+    width: 92,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 3,
+    gap: 4,
   },
-  editHint: { opacity: 0.45 },
-  image: { width: 40, height: 40, borderRadius: 10, backgroundColor: Colors.surface },
+  qtyChip: {
+    minWidth: 44,
+    height: 36,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    backgroundColor: Colors.surfaceElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qtyChipNegative: { backgroundColor: Colors.dangerLight },
+  image: { width: 44, height: 44, borderRadius: 10, backgroundColor: Colors.surface },
   imagePlaceholder: { alignItems: 'center', justifyContent: 'center' },
-  productName: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, lineHeight: 18 },
-  brand: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
-  costPrice: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
+  productName: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary, lineHeight: 20 },
+  brand: { fontSize: 13, fontWeight: '500', color: Colors.textSecondary, marginTop: 2 },
+  costPrice: { fontSize: 13, fontWeight: '700', color: Colors.primaryDark, marginTop: 3 },
   qtyValue: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: Colors.textPrimary,
     fontVariant: ['tabular-nums'],
   },
@@ -367,14 +372,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 14,
-    backgroundColor: Colors.primaryLight,
+    paddingVertical: 16,
+    backgroundColor: Colors.card,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
-  totalLabel: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  totalLabel: { fontSize: 16, fontWeight: '800', color: Colors.primaryDark },
   totalValue: {
-    fontSize: 16,
+    width: 92,
+    textAlign: 'right',
+    fontSize: 22,
     fontWeight: '800',
-    color: Colors.primary,
+    color: Colors.primaryDark,
     fontVariant: ['tabular-nums'],
   },
 
@@ -398,8 +407,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sheetTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  sheetProduct: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
-  sheetCost: { fontSize: 13, color: Colors.textSecondary },
+  sheetProduct: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
+  sheetCost: { fontSize: 14, fontWeight: '700', color: Colors.primaryDark },
   sheetHint: { fontSize: 13, color: Colors.textSecondary },
   input: {
     borderWidth: 1,
