@@ -5,6 +5,8 @@ export interface PartnerStockItem {
   name: string;
   brandName: string;
   imageUrl: string | null;
+  /** Giá nhập của bản ghi sản phẩm */
+  price: number;
   warehouseQty: number;
   onMachineQty: number;
 }

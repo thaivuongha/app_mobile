@@ -24,6 +24,10 @@ import { getMyStock, setWarehouse, type PartnerStockItem } from '@/src/api/inven
 import { ApiClientError } from '@/src/api/client';
 import { Colors } from '@/constants/Colors';
 
+function formatCostPrice(price: number) {
+  return `Giá nhập: ${Number(price).toLocaleString('vi-VN')}đ`;
+}
+
 export default function ShopInventoryScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -157,6 +161,9 @@ function StockRow({ item, onEdit }: { item: PartnerStockItem; onEdit: () => void
           <Text style={styles.brand} numberOfLines={1}>
             {item.brandName}
           </Text>
+          <Text style={styles.costPrice} numberOfLines={1}>
+            {formatCostPrice(item.price)}
+          </Text>
         </View>
       </View>
       <View style={styles.qtyCell}>
@@ -223,6 +230,11 @@ function CountModal({
           <Text style={styles.sheetProduct} numberOfLines={2}>
             {item?.name}
           </Text>
+          {item ? (
+            <Text style={styles.sheetCost} numberOfLines={1}>
+              {formatCostPrice(item.price)}
+            </Text>
+          ) : null}
           <Text style={styles.sheetHint}>Nhập số chai đang còn trong kho. Số trên máy không đổi.</Text>
           <TextInput
             style={styles.input}
@@ -343,6 +355,7 @@ const styles = StyleSheet.create({
   imagePlaceholder: { alignItems: 'center', justifyContent: 'center' },
   productName: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, lineHeight: 18 },
   brand: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  costPrice: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
   qtyValue: {
     fontSize: 16,
     fontWeight: '700',
@@ -386,6 +399,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
   sheetProduct: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
+  sheetCost: { fontSize: 13, color: Colors.textSecondary },
   sheetHint: { fontSize: 13, color: Colors.textSecondary },
   input: {
     borderWidth: 1,
